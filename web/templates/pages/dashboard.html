@@ -1,0 +1,160 @@
+{{define "content"}}
+<!-- Dashboard Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+        <p class="text-slate-500 dark:text-slate-400">Welcome back! Here's what's happening today.</p>
+    </div>
+    <div class="flex gap-3">
+        <button class="btn btn-secondary">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Export
+        </button>
+        <button class="btn btn-primary">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Item
+        </button>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                <i data-lucide="users" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+            </div>
+            <span class="badge badge-success">+12%</span>
+        </div>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">2,543</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Total Users</p>
+    </div>
+
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                <i data-lucide="activity" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+            </div>
+            <span class="badge badge-success">+5%</span>
+        </div>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">89%</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Uptime</p>
+    </div>
+
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
+                <i data-lucide="zap" class="w-5 h-5 text-violet-600 dark:text-violet-400"></i>
+            </div>
+            <span class="badge badge-warning">-2%</span>
+        </div>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">1.2k</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Requests/min</p>
+    </div>
+
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                <i data-lucide="clock" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+            </div>
+            <span class="badge badge-success">-8ms</span>
+        </div>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">45ms</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Avg Response</p>
+    </div>
+</div>
+
+<!-- Content Grid -->
+<div class="grid lg:grid-cols-3 gap-6">
+    <!-- Recent Activity -->
+    <div class="lg:col-span-2 card">
+        <div class="card-header flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Recent Activity</h2>
+            <button class="btn btn-ghost text-sm">View All</button>
+        </div>
+        <div class="card-body p-0">
+            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                <div
+                    class="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium">
+                        JD</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">John Doe created a new account</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">2 minutes ago</p>
+                    </div>
+                    <span class="badge badge-success">New</span>
+                </div>
+
+                <div
+                    class="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-medium">
+                        AS</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">Alice Smith updated profile</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">15 minutes ago</p>
+                    </div>
+                    <span class="badge badge-primary">Update</span>
+                </div>
+
+                <div
+                    class="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white font-medium">
+                        BW</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">Bob Wilson logged in</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">1 hour ago</p>
+                    </div>
+                    <span class="badge badge-warning">Login</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Quick Actions</h2>
+        </div>
+        <div class="card-body space-y-3">
+            <a href="/users/create"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="user-plus" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-slate-900 dark:text-white">Add User</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Create new account</p>
+                </div>
+            </a>
+
+            <a href="#"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="file-text" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-slate-900 dark:text-white">Generate Report</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Export data</p>
+                </div>
+            </a>
+
+            <a href="#"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="settings" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-slate-900 dark:text-white">Settings</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Configure app</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{{end}}

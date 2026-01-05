@@ -1,0 +1,22 @@
+{{define "card"}}
+<div class="card {{.Class}}">
+    {{if .Header}}
+    <div class="card-header">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">{{.Header}}</h3>
+        {{if .HeaderAction}}
+        <div class="ml-auto">
+            {{.HeaderAction}}
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+    <div class="card-body">
+        {{.Content}}
+    </div>
+    {{if .Footer}}
+    <div class="card-footer">
+        {{.Footer}}
+    </div>
+    {{end}}
+</div>
+{{end}}

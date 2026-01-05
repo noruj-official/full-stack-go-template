@@ -1,0 +1,113 @@
+{{define "content"}}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Users</h1>
+        <p class="text-slate-500 dark:text-slate-400">Manage your application users</p>
+    </div>
+    <a href="/users/create" class="btn btn-primary">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        Add User
+    </a>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            <input type="search" placeholder="Search users..." class="input pl-10 w-full sm:w-64" hx-get="/users"
+                hx-trigger="input changed delay:300ms" hx-target="#users-table" hx-swap="innerHTML" name="search">
+        </div>
+        <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <span>Total:</span>
+            <span class="font-medium text-slate-900 dark:text-white">{{.Total}}</span>
+            <span>users</span>
+        </div>
+    </div>
+
+    <div id="users-table" class="overflow-x-auto">
+        {{if .Users}}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Created</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Users}}
+                <tr id="user-{{.ID}}" class="animate-fade-in">
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
+                                {{slice .Name 0 1}}
+                            </div>
+                            <span class="font-medium text-slate-900 dark:text-white">{{.Name}}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="text-slate-600 dark:text-slate-400">{{.Email}}</span>
+                    </td>
+                    <td>
+                        <span class="text-slate-500 dark:text-slate-400">{{.CreatedAt.Format "Jan 02, 2006"}}</span>
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="/users/{{.ID}}/edit" class="btn btn-ghost p-2" title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </a>
+                            <button hx-delete="/users/{{.ID}}" hx-confirm="Are you sure you want to delete this user?"
+                                hx-target="#user-{{.ID}}" hx-swap="outerHTML swap:0.3s"
+                                class="btn btn-ghost p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50"
+                                title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <div class="text-center py-12">
+            <div
+                class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="users" class="w-8 h-8 text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900 dark:text-white mb-2">No users yet</h3>
+            <p class="text-slate-500 dark:text-slate-400 mb-4">Get started by creating your first user.</p>
+            <a href="/users/create" class="btn btn-primary">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                Add User
+            </a>
+        </div>
+        {{end}}
+    </div>
+
+    {{if gt .TotalPages 1}}
+    <div class="card-footer flex items-center justify-between">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            Page {{.CurrentPage}} of {{.TotalPages}}
+        </p>
+        <div class="flex gap-2">
+            {{if gt .CurrentPage 1}}
+            <a href="/users?page={{subtract .CurrentPage 1}}" class="btn btn-secondary text-sm">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                Previous
+            </a>
+            {{end}}
+            {{if lt .CurrentPage .TotalPages}}
+            <a href="/users?page={{add .CurrentPage 1}}" class="btn btn-secondary text-sm">
+                Next
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+{{end}}

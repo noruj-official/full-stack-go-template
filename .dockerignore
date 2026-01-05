@@ -1,0 +1,17 @@
+# Ignore everything
+*
+
+# Include Go source files
+!cmd/
+!internal/
+!pkg/
+!go.mod
+!go.sum
+
+# Include web assets
+!web/templates/
+!web/static/css/output.css
+!web/static/js/
+
+# Ignore node_modules and source CSS
+web/static/css/tailwind.css

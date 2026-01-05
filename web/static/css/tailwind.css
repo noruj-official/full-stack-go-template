@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+/* Custom theme variables */
+@theme {
+  --color-primary-50: oklch(0.97 0.01 260);
+  --color-primary-100: oklch(0.93 0.03 260);
+  --color-primary-200: oklch(0.87 0.06 260);
+  --color-primary-300: oklch(0.78 0.09 260);
+  --color-primary-400: oklch(0.68 0.13 260);
+  --color-primary-500: oklch(0.55 0.18 260);
+  --color-primary-600: oklch(0.48 0.20 260);
+  --color-primary-700: oklch(0.42 0.18 260);
+  --color-primary-800: oklch(0.35 0.15 260);
+  --color-primary-900: oklch(0.28 0.12 260);
+  --color-primary-950: oklch(0.18 0.08 260);
+
+  --color-accent-500: oklch(0.75 0.15 180);
+  --color-accent-600: oklch(0.65 0.18 180);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Base styles */
+@layer base {
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900;
+    @apply dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-100;
+    font-family: var(--font-sans);
+  }
+}
+
+/* Component styles */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm;
+    @apply transition-all duration-200 ease-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white;
+    @apply hover:from-primary-600 hover:to-primary-700;
+    @apply focus:ring-primary-500;
+    @apply shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-white/80 text-slate-700 border border-slate-200;
+    @apply hover:bg-white hover:border-slate-300;
+    @apply focus:ring-slate-500;
+    @apply dark:bg-slate-800/80 dark:text-slate-200 dark:border-slate-700;
+    @apply dark:hover:bg-slate-800 dark:hover:border-slate-600;
+    @apply shadow-sm hover:shadow-md;
+    @apply backdrop-blur-sm;
+  }
+
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-500 to-red-600 text-white;
+    @apply hover:from-red-600 hover:to-red-700;
+    @apply focus:ring-red-500;
+    @apply shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+    @apply dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100;
+  }
+
+  .card {
+    @apply bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-200/50;
+    @apply border border-white/50;
+    @apply dark:bg-slate-900/70 dark:shadow-slate-900/50 dark:border-slate-800/50;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-2xl hover:shadow-slate-200/60;
+    @apply dark:hover:shadow-slate-900/60;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-slate-100/80 dark:border-slate-800/80;
+  }
+
+  .card-body {
+    @apply px-6 py-5;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-slate-100/80 dark:border-slate-800/80;
+    @apply bg-slate-50/50 dark:bg-slate-900/50 rounded-b-2xl;
+  }
+
+  .input {
+    @apply w-full px-4 py-2.5 rounded-xl text-sm;
+    @apply bg-white/80 border border-slate-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500;
+    @apply dark:bg-slate-800/80 dark:border-slate-700 dark:text-slate-100;
+    @apply dark:focus:ring-primary-500/30 dark:focus:border-primary-500;
+    @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
+    @apply backdrop-blur-sm;
+    @apply transition-all duration-200;
+  }
+
+  .input:hover {
+    @apply border-slate-300 dark:border-slate-600;
+  }
+
+  .input-error {
+    @apply border-red-500 focus:ring-red-500/50 focus:border-red-500;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5;
+  }
+
+  .form-group {
+    @apply space-y-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply transition-all duration-200;
+  }
+
+  .badge-primary {
+    @apply bg-primary-100 text-primary-700;
+    @apply dark:bg-primary-900/50 dark:text-primary-300;
+  }
+
+  .badge-success {
+    @apply bg-emerald-100 text-emerald-700;
+    @apply dark:bg-emerald-900/50 dark:text-emerald-300;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-700;
+    @apply dark:bg-amber-900/50 dark:text-amber-300;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-700;
+    @apply dark:bg-red-900/50 dark:text-red-300;
+  }
+
+  .table-container {
+    @apply overflow-hidden rounded-2xl border border-slate-200/80;
+    @apply dark:border-slate-800/80;
+  }
+
+  .table {
+    @apply w-full text-sm;
+  }
+
+  .table thead {
+    @apply bg-slate-50/80 dark:bg-slate-900/80;
+  }
+
+  .table th {
+    @apply px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider;
+    @apply dark:text-slate-400;
+  }
+
+  .table td {
+    @apply px-6 py-4 text-slate-700 dark:text-slate-300;
+    @apply border-t border-slate-100/80 dark:border-slate-800/80;
+  }
+
+  .table tbody tr {
+    @apply transition-colors duration-150;
+    @apply hover:bg-slate-50/50 dark:hover:bg-slate-800/50;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium;
+    @apply text-slate-600 hover:text-slate-900 hover:bg-slate-100;
+    @apply dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800;
+    @apply transition-all duration-200;
+  }
+
+  .nav-link.active {
+    @apply text-primary-600 bg-primary-50/80;
+    @apply dark:text-primary-400 dark:bg-primary-950/50;
+  }
+
+  /* HTMX loading indicator */
+  .htmx-indicator {
+    @apply opacity-0 transition-opacity duration-200;
+  }
+
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    @apply opacity-100;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply inline-block w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-white/60 backdrop-blur-xl border border-white/30;
+    @apply dark:bg-slate-900/60 dark:border-slate-800/30;
+  }
+}
+
+/* Utilities */
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}

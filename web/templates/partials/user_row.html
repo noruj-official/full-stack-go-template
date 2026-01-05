@@ -1,0 +1,30 @@
+<tr id="user-{{.ID}}" class="animate-fade-in">
+    <td>
+        <div class="flex items-center gap-3">
+            <div
+                class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
+                {{slice .Name 0 1}}
+            </div>
+            <span class="font-medium text-slate-900 dark:text-white">{{.Name}}</span>
+        </div>
+    </td>
+    <td>
+        <span class="text-slate-600 dark:text-slate-400">{{.Email}}</span>
+    </td>
+    <td>
+        <span class="text-slate-500 dark:text-slate-400">{{.CreatedAt.Format "Jan 02, 2006"}}</span>
+    </td>
+    <td>
+        <div class="flex items-center justify-end gap-2">
+            <a href="/users/{{.ID}}/edit" class="btn btn-ghost p-2" title="Edit">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+            </a>
+            <button hx-delete="/users/{{.ID}}" hx-confirm="Are you sure you want to delete this user?"
+                hx-target="#user-{{.ID}}" hx-swap="outerHTML swap:0.3s"
+                class="btn btn-ghost p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50"
+                title="Delete">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </td>
+</tr>

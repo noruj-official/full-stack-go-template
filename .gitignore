@@ -1,0 +1,70 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/server
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node modules (for Tailwind)
+node_modules/
+package-lock.json
+
+# Build output
+/bin/
+/dist/
+/build/
+web/static/vendor/
+
+# Temporary files
+/tmp/
+*.tmp
+*.log
+*.cache
+
+# Debug
+debug
+*.debug
+
+# Coverage
+coverage/
+*.cover
+*.coverage
+
+# Air (live reload)
+.air.toml
+tmp/
+
+# Docker
+.docker/
+
+# Misc
+*.bak
+*.backup

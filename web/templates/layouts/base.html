@@ -1,0 +1,101 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: false }"
+    :class="{ 'dark': darkMode }" x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{.Description}}">
+    <title>{{.Title}} | Go Starter</title>
+
+    <!-- Tailwind CSS Output -->
+    <link rel="stylesheet" href="/static/css/output.css">
+
+    <!-- Local Vendor JS -->
+    <script src="/static/vendor/htmx.min.js"></script>
+    <script defer src="/static/vendor/alpine.min.js"></script>
+    <script src="/static/vendor/lucide.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen" hx-boost="true">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        {{template "sidebar" .}}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-h-screen lg:pl-64">
+            <!-- Navbar -->
+            {{template "navbar" .}}
+
+            <!-- Page Content -->
+            <main class="flex-1 px-4 py-8 lg:px-8">
+                <div class="max-w-7xl mx-auto animate-fade-in">
+                    {{template "content" .}}
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="px-4 py-6 lg:px-8 border-t border-slate-200/80 dark:border-slate-800/80">
+                <div class="max-w-7xl mx-auto text-center text-sm text-slate-500 dark:text-slate-400">
+                    <p>&copy; 2026 Go Starter. Built with Go, HTMX, Alpine.js & Tailwind CSS v4.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Re-initialize icons after HTMX content swap
+        document.body.addEventListener('htmx:afterSwap', function () {
+            lucide.createIcons();
+        });
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-red-500' : 'bg-primary-500';
+
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg animate-slide-up flex items-center gap-2`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-2 hover:opacity-75">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Handle HTMX events for toasts
+        document.body.addEventListener('userCreated', () => showToast('User created successfully!'));
+        document.body.addEventListener('userUpdated', () => showToast('User updated successfully!'));
+        document.body.addEventListener('userDeleted', () => showToast('User deleted successfully!'));
+    </script>
+</body>
+
+</html>
+{{end}}

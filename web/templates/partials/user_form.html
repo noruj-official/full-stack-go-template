@@ -1,0 +1,42 @@
+{{if .Error}}
+<div
+    class="p-4 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 animate-scale-in mb-6">
+    <div class="flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        <span>{{.Error}}</span>
+    </div>
+</div>
+{{end}}
+
+<div class="form-group">
+    <label for="name" class="label">Full Name</label>
+    <input type="text" id="name" name="name" value="{{if .User}}{{.User.Name}}{{else if .Form}}{{.Form.Name}}{{end}}"
+        class="input {{if .Error}}input-error{{end}}" placeholder="Enter full name" required>
+</div>
+
+<div class="form-group">
+    <label for="email" class="label">Email Address</label>
+    <input type="email" id="email" name="email"
+        value="{{if .User}}{{.User.Email}}{{else if .Form}}{{.Form.Email}}{{end}}"
+        class="input {{if .Error}}input-error{{end}}" placeholder="Enter email address" required>
+</div>
+
+<div class="flex items-center gap-3 pt-4">
+    <button type="submit" class="btn btn-primary">
+        <span class="htmx-indicator">
+            <span class="spinner"></span>
+        </span>
+        {{if .User}}
+        <i data-lucide="save" class="w-4 h-4"></i>
+        Save Changes
+        {{else}}
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        Create User
+        {{end}}
+    </button>
+    <a href="/users" class="btn btn-secondary">Cancel</a>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>

@@ -1,0 +1,19 @@
+{
+  "name": "go-starter",
+  "version": "1.0.0",
+  "description": "Full-stack Go application with Tailwind CSS v4",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./web/static/css/tailwind.css -o ./web/static/css/output.css --minify && npm run copy-vendor",
+    "watch": "npx @tailwindcss/cli -i ./web/static/css/tailwind.css -o ./web/static/css/output.css --watch",
+    "copy-vendor": "node scripts/copy-vendor.js"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "dependencies": {
+    "htmx.org": "^2.0.4",
+    "alpinejs": "^3.14.8",
+    "lucide": "^0.468.0"
+  }
+}
