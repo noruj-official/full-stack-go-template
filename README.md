@@ -13,6 +13,9 @@ A production-ready, full-stack Go web application template with modern frontend 
 - **Clean Architecture** with handlers, services, and repositories
 - **Role-Based Access Control** (User, Admin, Super Admin)
 - **Session-based authentication** with secure cookie management
+- **Activity Logging** - Track user logins, profile updates with IP addresses
+- **Audit Trail** - Complete logging of administrative actions for compliance
+- **Analytics** - User growth tracking, role distribution, and system metrics
 - **Graceful shutdown** with configurable timeouts
 
 ### Frontend
@@ -36,8 +39,8 @@ A production-ready, full-stack Go web application template with modern frontend 
 │   └── server/          # Application entry point
 ├── internal/
 │   ├── config/          # Configuration loading
-│   ├── domain/          # Business entities (User, Role, Session)
-│   ├── handler/         # HTTP handlers
+│   ├── domain/          # Business entities (User, Role, Session, ActivityLog, AuditLog)
+│   ├── handler/         # HTTP handlers (Auth, User, Activity, Settings, Analytics, Audit)
 │   ├── middleware/      # Auth, CORS, Logging, Recovery
 │   ├── repository/      # Data access layer (PostgreSQL)
 │   └── service/         # Business logic layer
@@ -46,10 +49,10 @@ A production-ready, full-stack Go web application template with modern frontend 
 ├── web/
 │   ├── static/          # CSS, JS, vendor files
 │   └── templates/       # Go HTML templates
-│       ├── components/  # Reusable UI components
-│       ├── layouts/     # Base layouts
-│       ├── pages/       # Page templates
-│       └── partials/    # Template partials
+│       ├── components/  # Reusable UI components (navbar, sidebar, footer)
+│       ├── layouts/     # Base layouts (main, auth)
+│       ├── pages/       # Page templates (dashboards, users, activity, analytics)
+│       └── partials/    # Template partials (forms, rows)
 ├── Dockerfile           # Multi-stage production build
 ├── docker-compose.yml   # PostgreSQL service
 └── Makefile             # Build automation
@@ -131,13 +134,41 @@ npm run copy-vendor # Copy vendor files from node_modules
 
 ## 🔐 Authentication & Roles
 
-The application includes a complete authentication system with three roles:
+The application includes a comprehensive authentication system with three roles and role-specific features:
 
-| Role | Permissions |
-|------|-------------|
-| **User** | Access to user dashboard |
-| **Admin** | User management + admin dashboard |
-| **Super Admin** | Full system access, can manage admins |
+### Role Hierarchy
+
+| Role | Permissions | Features |
+|------|-------------|----------|
+| **User** | Access to personal dashboard and settings | Activity log, profile settings, personal dashboard |
+| **Admin** | User management + admin features | All user features + user management, analytics, system activity monitoring |
+| **Super Admin** | Full system access | All admin features + audit logs, system health monitoring, admin management |
+
+### User Features
+
+**Routes**: `/u/*`
+
+- **Personal Dashboard** (`/u/dashboard`) - Overview with profile card and quick links
+- **Activity Log** (`/u/activity`) - Timeline of login/logout events, profile updates with IP tracking
+- **Profile Settings** (`/u/settings`) - Update name, email, and account preferences
+
+### Admin Features  
+
+**Routes**: `/a/*`
+
+- **Admin Dashboard** (`/a/dashboard`) - User statistics and recent activity overview
+- **User Management** (`/a/users`) - Create, edit, and view all user accounts
+- **Analytics** (`/a/analytics`) - User growth charts, role distribution, and detailed statistics
+- **System Activity** (`/a/activity`) - Real-time feed of all user activities across the system
+
+### Super Admin Features
+
+**Routes**: `/s/*`
+
+- **Super Admin Dashboard** (`/s/dashboard`) - System-wide overview with advanced statistics
+- **Audit Logs** (`/s/audit`) - Complete trail of administrative actions for compliance
+- **System Health** (`/s/system`) - Database status, server health, and configuration monitoring
+- **Admin Management** - Promote/demote admin roles (accessible through user edit)
 
 ### Route Protection
 
@@ -190,6 +221,8 @@ docker run -p 3000:3000 \
 
 ## 🧪 API Endpoints
 
+### Public Routes
+
 | Method | Path | Description | Auth Required |
 |--------|------|-------------|---------------|
 | `GET` | `/` | Home page | No |
@@ -199,13 +232,44 @@ docker run -p 3000:3000 \
 | `GET` | `/signup` | Sign up page | No |
 | `POST` | `/signup` | Register user | No |
 | `POST` | `/logout` | Log out | Yes |
-| `GET` | `/dashboard` | Redirect to role dashboard | Yes |
-| `GET` | `/users` | List users | Admin |
-| `GET` | `/users/create` | Create user form | Admin |
-| `POST` | `/users/create` | Create user | Admin |
-| `GET` | `/users/{id}/edit` | Edit user form | Admin |
-| `POST` | `/users/{id}/edit` | Update user | Admin |
-| `DELETE` | `/users/{id}` | Delete user | Super Admin |
+
+### User Routes
+
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|---------------|
+| `GET` | `/u/dashboard` | User dashboard | User |
+| `GET` | `/u/activity` | Activity log | User |
+| `GET` | `/u/settings` | Profile settings | User |
+| `POST` | `/u/settings` | Update profile | User |
+
+### Admin Routes
+
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|---------------|
+| `GET` | `/a/dashboard` | Admin dashboard | Admin |
+| `GET` | `/a/users` | List users | Admin |
+| `GET` | `/a/users/create` | Create user form | Admin |
+| `POST` | `/a/users/create` | Create user | Admin |
+| `GET` | `/a/users/{id}/edit` | Edit user form | Admin |
+| `POST` | `/a/users/{id}/edit` | Update user | Admin |
+| `DELETE` | `/a/users/{id}` | Delete user | Super Admin |
+| `GET` | `/a/analytics` | User analytics & reports | Admin |
+| `GET` | `/a/activity` | System activity feed | Admin |
+
+### Super Admin Routes
+
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|---------------|
+| `GET` | `/s/dashboard` | Super admin dashboard | Super Admin |
+| `GET` | `/s/audit` | Audit logs | Super Admin |
+| `GET` | `/s/system` | System health monitoring | Super Admin |
+
+### Legacy Routes
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/dashboard` | Redirects to role-appropriate dashboard |
+| `GET` | `/login` | Redirects to `/signin` |
 
 ## 🛠️ Tech Stack
 

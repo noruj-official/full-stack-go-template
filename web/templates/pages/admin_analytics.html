@@ -1,0 +1,124 @@
+{{define "content"}}
+<!-- Analytics Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-base-content">Analytics & Reports</h1>
+        <p class="text-base-content/70">User statistics and growth insights</p>
+    </div>
+    <a href="/a/dashboard" class="btn btn-ghost">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to Dashboard
+    </a>
+</div>
+
+<!-- Stats Overview -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
+                <i data-lucide="users" class="w-6 h-6 text-info"></i>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-base-content">{{.TotalUsers}}</p>
+        <p class="text-sm text-base-content/70 mt-1">Total Users</p>
+    </div>
+
+    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                <i data-lucide="user-check" class="w-6 h-6 text-success"></i>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-base-content">{{.RecentUsers}}</p>
+        <p class="text-sm text-base-content/70 mt-1">New (30 Days)</p>
+    </div>
+
+    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                <i data-lucide="shield" class="w-6 h-6 text-warning"></i>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-base-content">{{.UserRoleStats.admin}}</p>
+        <p class="text-sm text-base-content/70 mt-1">Admins</p>
+    </div>
+
+    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <i data-lucide="user" class="w-6 h-6 text-primary"></i>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-base-content">{{.UserRoleStats.user}}</p>
+        <p class="text-sm text-base-content/70 mt-1">Regular Users</p>
+    </div>
+</div>
+
+<!-- Charts and Breakdown -->
+<div class="grid lg:grid-cols-2 gap-6">
+    <!-- User Growth Chart -->
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-header border-b border-base-200 p-4">
+            <h2 class="text-lg font-semibold text-base-content">User Growth (Last 7 Days)</h2>
+        </div>
+        <div class="card-body p-6">
+            <div class="flex items-end justify-between h-48 gap-2">
+                {{range .GrowthData}}
+                <div class="flex-1 flex flex-col items-center gap-2">
+                    <div class="w-full bg-primary rounded-t"
+                        style="height: {{if gt .count 0}}{{mul .count 20}}{{else}}5{{end}}px"></div>
+                    <span class="text-xs text-base-content/70">{{.date}}</span>
+                    <span class="text-xs font-medium text-base-content">{{.count}}</span>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Breakdown -->
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-header border-b border-base-200 p-4">
+            <h2 class="text-lg font-semibold text-base-content">User Roles Distribution</h2>
+        </div>
+        <div class="card-body p-6">
+            <div class="space-y-4">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-base-content">Regular Users</span>
+                        <span class="text-sm font-bold text-primary">{{.UserRoleStats.user}}</span>
+                    </div>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full"
+                            style="width: {{if gt .TotalUsers 0}}{{div (mul .UserRoleStats.user 100) .TotalUsers}}{{else}}0{{end}}%">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-base-content">Admins</span>
+                        <span class="text-sm font-bold text-warning">{{.UserRoleStats.admin}}</span>
+                    </div>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                        <div class="bg-warning h-2 rounded-full"
+                            style="width: {{if gt .TotalUsers 0}}{{div (mul .UserRoleStats.admin 100) .TotalUsers}}{{else}}0{{end}}%">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-base-content">Super Admins</span>
+                        <span class="text-sm font-bold text-error">{{.UserRoleStats.super_admin}}</span>
+                    </div>
+                    <div class="w-full bg-base-200 rounded-full h-2">
+                        <div class="bg-error h-2 rounded-full"
+                            style="width: {{if gt .TotalUsers 0}}{{div (mul .UserRoleStats.super_admin 100) .TotalUsers}}{{else}}0{{end}}%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -103,11 +103,19 @@ func (h *HomeHandler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 // SuperAdminDashboard renders the super admin dashboard page.
 func (h *HomeHandler) SuperAdminDashboard(w http.ResponseWriter, r *http.Request) {
 	userRepo := postgres.NewUserRepository(h.db)
+	sessionRepo := postgres.NewSessionRepository(h.db)
 
 	// Get total user count
 	userCount, err := userRepo.Count(r.Context())
 	if err != nil {
 		h.Error(w, r, http.StatusInternalServerError, "Failed to load user stats")
+		return
+	}
+
+	// Get active session count
+	activeSessions, err := sessionRepo.CountActive(r.Context())
+	if err != nil {
+		h.Error(w, r, http.StatusInternalServerError, "Failed to load session stats")
 		return
 	}
 
@@ -145,11 +153,12 @@ func (h *HomeHandler) SuperAdminDashboard(w http.ResponseWriter, r *http.Request
 	}
 
 	data := map[string]any{
-		"Title":       "Super Admin Dashboard",
-		"UserCount":   userCount,
-		"AdminCount":  adminCount,
-		"RecentUsers": recent,
-		"ShowSidebar": true,
+		"Title":          "Super Admin Dashboard",
+		"UserCount":      userCount,
+		"AdminCount":     adminCount,
+		"ActiveSessions": activeSessions,
+		"RecentUsers":    recent,
+		"ShowSidebar":    true,
 	}
 	h.RenderWithUser(w, r, "superadmin_dashboard.html", data)
 }

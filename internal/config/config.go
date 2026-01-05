@@ -29,7 +29,9 @@ type DatabaseConfig struct {
 
 // AppConfig contains general application settings.
 type AppConfig struct {
-	Env string
+	Env  string
+	Name string
+	Logo string
 }
 
 // Load reads configuration from environment variables.
@@ -52,7 +54,9 @@ func Load() (*Config, error) {
 			URL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/app_db?sslmode=disable"),
 		},
 		App: AppConfig{
-			Env: getEnv("APP_ENV", "development"),
+			Env:  getEnv("APP_ENV", "development"),
+			Name: getEnv("APP_NAME", "Full Stack Go Template"),
+			Logo: getEnv("APP_LOGO", "/static/img/logo.svg"),
 		},
 	}, nil
 }

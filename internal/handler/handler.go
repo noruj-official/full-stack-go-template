@@ -17,13 +17,17 @@ type Handler struct {
 	templates     map[string]*template.Template
 	templatesOnce sync.Once
 	templatesDir  string
+	appName       string
+	appLogo       string
 }
 
 // NewHandler creates a new base handler.
-func NewHandler(templatesDir string) *Handler {
+func NewHandler(templatesDir, appName, appLogo string) *Handler {
 	return &Handler{
 		templatesDir: templatesDir,
 		templates:    make(map[string]*template.Template),
+		appName:      appName,
+		appLogo:      appLogo,
 	}
 }
 
@@ -37,6 +41,14 @@ func (h *Handler) LoadTemplates() error {
 		funcMap := template.FuncMap{
 			"add":      func(a, b int) int { return a + b },
 			"subtract": func(a, b int) int { return a - b },
+			"sub":      func(a, b int) int { return a - b },
+			"mul":      func(a, b int) int { return a * b },
+			"div": func(a, b int) int {
+				if b == 0 {
+					return 0
+				}
+				return a / b
+			},
 			"slice": func(s string, start, end int) string {
 				// rune-aware slicing to handle multibyte characters safely
 				r := []rune(s)
@@ -119,6 +131,8 @@ func (h *Handler) RenderWithUser(w http.ResponseWriter, r *http.Request, name st
 	}
 	if m, ok := data.(map[string]any); ok {
 		m["User"] = middleware.GetUserFromContext(r.Context())
+		m["AppName"] = h.appName
+		m["AppLogo"] = h.appLogo
 		// Inject Theme from cookie (fallback to light; use client hint when dark)
 		theme := "light"
 		if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
@@ -150,6 +164,14 @@ func (h *Handler) RenderPartial(w http.ResponseWriter, name string, data any) {
 		funcMap := template.FuncMap{
 			"add":      func(a, b int) int { return a + b },
 			"subtract": func(a, b int) int { return a - b },
+			"sub":      func(a, b int) int { return a - b },
+			"mul":      func(a, b int) int { return a * b },
+			"div": func(a, b int) int {
+				if b == 0 {
+					return 0
+				}
+				return a / b
+			},
 			"slice": func(s string, start, end int) string {
 				// rune-aware slicing to handle multibyte characters safely
 				r := []rune(s)

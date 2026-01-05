@@ -83,3 +83,14 @@ func (r *SessionRepository) DeleteExpired(ctx context.Context) error {
 	_, err := r.db.Pool.Exec(ctx, query)
 	return err
 }
+
+// CountActive returns the number of active (non-expired) sessions.
+func (r *SessionRepository) CountActive(ctx context.Context) (int64, error) {
+	query := `SELECT COUNT(*) FROM sessions WHERE expires_at > NOW()`
+	var count int64
+	err := r.db.Pool.QueryRow(ctx, query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

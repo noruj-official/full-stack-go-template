@@ -1,0 +1,40 @@
+<div id="settings-form" class="space-y-6">
+    {{if .Error}}
+    <div class="alert alert-error">
+        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        <span>{{.Error}}</span>
+    </div>
+    {{end}}
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text font-medium">Name</span>
+        </label>
+        <input type="text" name="name" value="{{.User.Name}}" class="input input-bordered w-full" required />
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text font-medium">Email</span>
+        </label>
+        <input type="email" name="email" value="{{.User.Email}}" class="input input-bordered w-full" required />
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text font-medium">Role</span>
+        </label>
+        <input type="text" value="{{.User.Role}}" class="input input-bordered w-full bg-base-200" disabled readonly />
+        <label class="label">
+            <span class="label-text-alt text-base-content/60">Your role cannot be changed from settings</span>
+        </label>
+    </div>
+
+    <div class="flex justify-end gap-3">
+        <a href="/u/dashboard" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            Save Changes
+        </button>
+    </div>
+</div>

@@ -7,20 +7,23 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
 )
 
 // UserHandler handles user-related HTTP requests.
 type UserHandler struct {
 	*Handler
-	userService service.UserService
+	userService  service.UserService
+	auditService service.AuditService
 }
 
 // NewUserHandler creates a new user handler.
-func NewUserHandler(base *Handler, userService service.UserService) *UserHandler {
+func NewUserHandler(base *Handler, userService service.UserService, auditService service.AuditService) *UserHandler {
 	return &UserHandler{
-		Handler:     base,
-		userService: userService,
+		Handler:      base,
+		userService:  userService,
+		auditService: auditService,
 	}
 }
 
@@ -89,6 +92,15 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Log audit for user creation (admin context required)
+	if admin := middleware.GetUserFromContext(r.Context()); admin != nil {
+		ip := getIPAddress(r)
+		_ = h.auditService.LogAudit(r.Context(), admin.ID, domain.AuditUserCreate, "user", &user.ID, nil, map[string]interface{}{
+			"email": user.Email,
+			"name":  user.Name,
+		}, &ip)
+	}
+
 	// For HTMX requests, return the new row
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userCreated")
@@ -96,7 +108,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/users", http.StatusSeeOther)
+	http.Redirect(w, r, "/a/users", http.StatusSeeOther)
 }
 
 func (h *UserHandler) renderCreateForm(w http.ResponseWriter, r *http.Request, input *domain.CreateUserInput, errMsg string) {
@@ -170,13 +182,25 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Log audit for user update
+	if admin := middleware.GetUserFromContext(r.Context()); admin != nil {
+		ip := getIPAddress(r)
+		_ = h.auditService.LogAudit(r.Context(), admin.ID, domain.AuditUserUpdate, "user", &updatedUser.ID, map[string]interface{}{
+			"email": user.Email,
+			"name":  user.Name,
+		}, map[string]interface{}{
+			"email": updatedUser.Email,
+			"name":  updatedUser.Name,
+		}, &ip)
+	}
+
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userUpdated")
 		h.RenderPartialWithUser(w, r, "user_row.html", updatedUser)
 		return
 	}
 
-	http.Redirect(w, r, "/users", http.StatusSeeOther)
+	http.Redirect(w, r, "/a/users", http.StatusSeeOther)
 }
 
 func (h *UserHandler) renderEditForm(w http.ResponseWriter, r *http.Request, user *domain.User, errMsg string) {
@@ -212,11 +236,17 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Log audit for user deletion
+	if admin := middleware.GetUserFromContext(r.Context()); admin != nil {
+		ip := getIPAddress(r)
+		_ = h.auditService.LogAudit(r.Context(), admin.ID, domain.AuditUserDelete, "user", &id, nil, nil, &ip)
+	}
+
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userDeleted")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	http.Redirect(w, r, "/users", http.StatusSeeOther)
+	http.Redirect(w, r, "/a/users", http.StatusSeeOther)
 }

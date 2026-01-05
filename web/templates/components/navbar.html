@@ -2,21 +2,37 @@
 <header class="fixed top-0 left-0 right-0 z-50 bg-base-100/90 backdrop-blur-xl border-b border-base-200 shadow-sm">
     <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-            <!-- Mobile menu button -->
-            <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden btn btn-ghost p-2" title="Open Menu">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-            </button>
+            <!-- Left: sidebar toggle + brand title -->
+            <div class="flex items-center gap-3">
+                {{if .ShowSidebar}}
+                <!-- Mobile menu button -->
+                <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden btn btn-ghost p-2" title="Open Menu">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
 
-            <!-- Desktop sidebar toggle button -->
-            <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:inline-flex btn btn-ghost p-2"
-                title="Toggle Sidebar">
-                <i data-lucide="panel-left" class="w-5 h-5"></i>
-            </button>
+                <!-- Desktop sidebar toggle button -->
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:inline-flex btn btn-ghost p-2" title="Toggle Sidebar">
+                    <i data-lucide="panel-left" class="w-5 h-5"></i>
+                </button>
+                {{else}}
+                <!-- Disabled toggles on auth pages with tooltip -->
+                <div class="tooltip tooltip-right lg:tooltip-bottom z-50" data-tip="Sidebar is disabled on auth pages">
+                      <button class="lg:hidden btn btn-ghost p-2 opacity-50 cursor-not-allowed" title="Sidebar disabled" disabled>
+                          <i data-lucide="menu" class="w-5 h-5"></i>
+                      </button>
+                  </div>
+                  <div class="tooltip tooltip-right lg:tooltip-bottom z-50" data-tip="Sidebar is disabled on auth pages">
+                      <button class="hidden lg:inline-flex btn btn-ghost p-2 opacity-50 cursor-not-allowed" title="Sidebar disabled" disabled>
+                          <i data-lucide="panel-left" class="w-5 h-5"></i>
+                      </button>
+                  </div>
+                {{end}}
 
-            <!-- Brand Logo/Title -->
-            <a href="/" class="flex items-center gap-2 px-2">
-                <span class="text-xl font-bold text-base-content">Full Stack Go Template</span>
-            </a>
+                <!-- Brand Logo/Title moved next to toggle -->
+                <a href="/" class="flex items-center gap-2 px-2">
+                    <span class="text-xl font-bold text-base-content">Full Stack Go Template</span>
+                </a>
+            </div>
 
             <!-- Right side actions -->
             <div class="flex items-center gap-2">

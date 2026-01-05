@@ -73,6 +73,37 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)`,
+
+		// Create activity_logs table for user activities
+		`CREATE TABLE IF NOT EXISTS activity_logs (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			activity_type VARCHAR(50) NOT NULL,
+			description TEXT NOT NULL,
+			ip_address VARCHAR(45),
+			user_agent TEXT,
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_activity_logs_type ON activity_logs(activity_type)`,
+
+		// Create audit_logs table for admin actions
+		`CREATE TABLE IF NOT EXISTS audit_logs (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			admin_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			action VARCHAR(100) NOT NULL,
+			resource_type VARCHAR(50) NOT NULL,
+			resource_id UUID,
+			old_values JSONB,
+			new_values JSONB,
+			ip_address VARCHAR(45),
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_logs_admin_id ON audit_logs(admin_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action)`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource_type, resource_id)`,
 	}
 
 	for _, migration := range migrations {

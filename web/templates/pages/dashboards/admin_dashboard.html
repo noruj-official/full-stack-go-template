@@ -6,7 +6,7 @@
         <p class="text-base-content/70">Manage users and monitor activity</p>
     </div>
     <div class="flex gap-3">
-        <a href="/users/create" class="btn btn-primary">
+        <a href="/a/users/create" class="btn btn-primary">
             <i data-lucide="plus" class="w-4 h-4"></i>
             New User
         </a>
@@ -24,6 +24,16 @@
         <p class="text-2xl font-bold text-base-content">{{.UserCount}}</p>
         <p class="text-sm text-base-content/70">Total Users</p>
     </div>
+
+    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-5 h-5 text-success"></i>
+            </div>
+        </div>
+        <p class="text-2xl font-bold text-base-content">-</p>
+        <p class="text-sm text-base-content/70">Active Users</p>
+    </div>
 </div>
 
 <!-- Content Grid -->
@@ -32,7 +42,7 @@
     <div class="lg:col-span-2 card bg-base-100 shadow-sm border border-base-200">
         <div class="card-header flex items-center justify-between border-b border-base-200 p-4">
             <h2 class="text-lg font-semibold text-base-content">Recent Activity</h2>
-            <a href="/users" class="btn btn-ghost btn-sm text-sm">View All</a>
+            <a href="/a/users" class="btn btn-ghost btn-sm text-sm">View All</a>
         </div>
         <div class="card-body p-0">
             <div class="divide-y divide-base-200">
@@ -63,7 +73,7 @@
             <h2 class="text-lg font-semibold text-base-content">Quick Actions</h2>
         </div>
         <div class="card-body p-4 space-y-3">
-            <a href="/users/create"
+            <a href="/a/users/create"
                 class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
                 <div
                     class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -75,7 +85,7 @@
                 </div>
             </a>
 
-            <a href="/users" class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+            <a href="/a/users" class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
                 <div
                     class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i data-lucide="list" class="w-5 h-5 text-success"></i>
@@ -83,6 +93,30 @@
                 <div>
                     <p class="font-medium text-base-content">View Users</p>
                     <p class="text-xs text-base-content/70">Manage accounts</p>
+                </div>
+            </a>
+
+            <a href="/a/analytics"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5 text-info"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-base-content">Analytics</p>
+                    <p class="text-xs text-base-content/70">View detailed reports</p>
+                </div>
+            </a>
+
+            <a href="/a/activity"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="activity" class="w-5 h-5 text-warning"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-base-content">System Activity</p>
+                    <p class="text-xs text-base-content/70">Monitor all activities</p>
                 </div>
             </a>
         </div>

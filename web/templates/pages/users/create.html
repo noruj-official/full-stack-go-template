@@ -5,7 +5,7 @@
         <div class="max-w-7xl mx-auto animate-fade-in">
             <!-- Page Header -->
             <div class="mb-8">
-                <a href="/users"
+                <a href="/a/users"
                     class="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-4">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     Back to Users
@@ -17,7 +17,7 @@
             <!-- Create Form -->
             <div class="max-w-xl">
                 <div class="card">
-                    <form hx-post="/users/create" hx-target="#form-content" hx-swap="innerHTML"
+                    <form hx-post="/a/users/create" hx-target="#form-content" hx-swap="innerHTML"
                         class="card-body space-y-6" id="form-content">
 
                         {{if .Error}}
@@ -52,7 +52,7 @@
                                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                                 Create User
                             </button>
-                            <a href="/users" class="btn btn-neutral">Cancel</a>
+                            <a href="/a/users" class="btn btn-neutral">Cancel</a>
                         </div>
                     </form>
                 </div>

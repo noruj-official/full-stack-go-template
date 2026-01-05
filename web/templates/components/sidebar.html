@@ -19,6 +19,7 @@
 
         <!-- Navigation -->
         <ul class="menu flex-1 px-4 py-6 overflow-y-auto w-full">
+            <!-- Main Section (Everyone) -->
             <li class="menu-title text-base-content/60 uppercase tracking-wider">Main</li>
 
             <li>
@@ -36,44 +37,101 @@
                 </a>
             </li>
 
+            <!-- User Section (Authenticated Users) -->
+            {{if .User}}
+            <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Personal</li>
+
+            <li>
+                <a href="/u/activity" class="{{ if eq .Title " Activity Log" }}active{{ end }}">
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                    Activity Log
+                </a>
+            </li>
+
+            <li>
+                <a href="/u/settings" class="{{ if eq .Title " Settings" }}active{{ end }}">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    Settings
+                </a>
+            </li>
+            {{end}}
+
+            <!-- Admin Section (Admin + Super Admin) -->
             {{if and .User .User.IsAdmin}}
             <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Administration</li>
 
             <li>
-                <a href="/users" class="{{ if eq .Title " Users" }}active{{ end }}">
+                <a href="/a/users" class="{{ if eq .Title " Users" }}active{{ end }}">
                     <i data-lucide="users" class="w-5 h-5"></i>
-                    Users
+                    User Management
                 </a>
             </li>
 
-            {{if .User.IsSuperAdmin}}
+            <li>
+                <a href="/a/analytics" class="{{ if eq .Title " Analytics" }}active{{ end }}">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    Analytics & Reports
+                </a>
+            </li>
+
+            <li>
+                <a href="/a/activity" class="{{ if eq .Title " System Activity" }}active{{ end }}">
+                    <i data-lucide="activity" class="w-5 h-5"></i>
+                    System Activity
+                </a>
+            </li>
+            {{end}}
+
+            <!-- Super Admin Section (Super Admin Only) -->
+            {{if and .User .User.IsSuperAdmin}}
+            <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Super Admin</li>
+
+            <li>
+                <a href="/s/audit" class="{{ if eq .Title " Audit Logs" }}active{{ end }}">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    Audit Logs
+                </a>
+            </li>
+
+            <li>
+                <a href="/s/system" class="{{ if eq .Title " System Health" }}active{{ end }}">
+                    <i data-lucide="server" class="w-5 h-5"></i>
+                    System Health
+                </a>
+            </li>
+
             <li>
                 <a href="#" class="opacity-50 cursor-not-allowed">
                     <i data-lucide="shield" class="w-5 h-5"></i>
-                    Admin Settings
+                    Admin Management
                     <span class="badge badge-primary badge-xs ml-auto">Soon</span>
                 </a>
             </li>
             {{end}}
-            {{end}}
 
+            <!-- Coming Soon / Resources -->
+            {{if .User}}
+            <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">More</li>
+
+            <li>
+                <a href="#" class="opacity-50 cursor-not-allowed">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i>
+                    Help & Support
+                    <span class="badge badge-primary badge-xs ml-auto">Soon</span>
+                </a>
+            </li>
+            {{else}}
+            <!-- For non-authenticated users -->
             <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Resources</li>
 
             <li>
                 <a href="#" class="opacity-50 cursor-not-allowed">
                     <i data-lucide="file-text" class="w-5 h-5"></i>
-                    Documents
+                    Documentation
                     <span class="badge badge-primary badge-xs ml-auto">Soon</span>
                 </a>
             </li>
-
-            <li>
-                <a href="#" class="opacity-50 cursor-not-allowed">
-                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-                    Analytics
-                    <span class="badge badge-primary badge-xs ml-auto">Soon</span>
-                </a>
-            </li>
+            {{end}}
         </ul>
 
         <!-- Bottom section -->

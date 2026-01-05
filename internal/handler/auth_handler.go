@@ -13,14 +13,16 @@ import (
 // AuthHandler handles authentication-related HTTP requests.
 type AuthHandler struct {
 	*Handler
-	authService service.AuthService
+	authService     service.AuthService
+	activityService service.ActivityService
 }
 
 // NewAuthHandler creates a new auth handler.
-func NewAuthHandler(base *Handler, authService service.AuthService) *AuthHandler {
+func NewAuthHandler(base *Handler, authService service.AuthService, activityService service.ActivityService) *AuthHandler {
 	return &AuthHandler{
-		Handler:     base,
-		authService: authService,
+		Handler:         base,
+		authService:     authService,
+		activityService: activityService,
 	}
 }
 
@@ -87,6 +89,11 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		Secure:   r.TLS != nil,
 		SameSite: http.SameSiteLaxMode,
 	})
+
+	// Log login activity
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, "User signed in", &ip, &ua)
 
 	// Redirect based on role
 	redirectURL := getDashboardURLForRole(user)
@@ -166,6 +173,11 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
+	// Log signup as login activity
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, "User registered and signed in", &ip, &ua)
+
 	// Redirect based on role
 	redirectURL := getDashboardURLForRole(user)
 
@@ -195,6 +207,7 @@ func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, 
 
 // Logout handles user logout.
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
 	sessionID := middleware.GetSessionIDFromContext(r.Context())
 	if sessionID != "" {
 		_ = h.authService.Logout(r.Context(), sessionID)
@@ -209,6 +222,13 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   -1,
 		HttpOnly: true,
 	})
+
+	// Log logout activity when user context is present
+	if user != nil {
+		ip := getIPAddress(r)
+		ua := r.UserAgent()
+		_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogout, "User logged out", &ip, &ua)
+	}
 
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Redirect", "/")

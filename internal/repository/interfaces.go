@@ -48,4 +48,7 @@ type SessionRepository interface {
 
 	// DeleteExpired removes all expired sessions.
 	DeleteExpired(ctx context.Context) error
+
+	// CountActive returns the number of active (non-expired) sessions.
+	CountActive(ctx context.Context) (int64, error)
 }

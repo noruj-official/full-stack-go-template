@@ -1,4 +1,4 @@
-// Package main is the entry point for the Go Starter application.
+// Package main is the entry point for the Full Stack Go Template application.
 package main
 
 import (
@@ -55,20 +55,28 @@ func run() error {
 	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
 	sessionRepo := postgres.NewSessionRepository(db)
+	activityRepo := postgres.NewActivityLogRepository(db)
+	auditRepo := postgres.NewAuditLogRepository(db)
 
 	// Initialize services
 	userService := service.NewUserService(userRepo)
 	authService := service.NewAuthService(userRepo, sessionRepo)
+	activityService := service.NewActivityService(activityRepo)
+	auditService := service.NewAuditService(auditRepo)
 
 	// Initialize handlers
-	baseHandler := handler.NewHandler("web/templates")
+	baseHandler := handler.NewHandler("web/templates", cfg.App.Name, cfg.App.Logo)
 	if err := baseHandler.LoadTemplates(); err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	homeHandler := handler.NewHomeHandler(baseHandler, db)
-	userHandler := handler.NewUserHandler(baseHandler, userService)
-	authHandler := handler.NewAuthHandler(baseHandler, authService)
+	userHandler := handler.NewUserHandler(baseHandler, userService, auditService)
+	authHandler := handler.NewAuthHandler(baseHandler, authService, activityService)
+	activityHandler := handler.NewActivityHandler(baseHandler, activityService)
+	settingsHandler := handler.NewSettingsHandler(baseHandler, userService, activityService)
+	analyticsHandler := handler.NewAnalyticsHandler(baseHandler, db)
+	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db)
 
 	// Initialize auth middleware
 	authMiddleware := middleware.NewAuth(authService)
@@ -102,14 +110,29 @@ func run() error {
 	// Backwards compatible redirect from /dashboard to role-appropriate dashboard
 	mux.Handle("GET /dashboard", middleware.RequireAuth(http.HandlerFunc(homeHandler.DashboardRedirect)))
 
+	// User routes (authenticated users)
+	userOnly := middleware.RequireAuth
+	mux.Handle("GET /u/activity", userOnly(http.HandlerFunc(activityHandler.UserActivity)))
+	mux.Handle("GET /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
+	mux.Handle("POST /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
+
 	// Admin routes (require admin role)
 	adminOnly := middleware.RequireRole(domain.RoleAdmin, domain.RoleSuperAdmin)
-	mux.Handle("GET /users", adminOnly(http.HandlerFunc(userHandler.List)))
-	mux.Handle("GET /users/create", adminOnly(http.HandlerFunc(userHandler.Create)))
-	mux.Handle("POST /users/create", adminOnly(http.HandlerFunc(userHandler.Create)))
-	mux.Handle("GET /users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
-	mux.Handle("POST /users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
-	mux.Handle("DELETE /users/{id}", middleware.RequireRole(domain.RoleSuperAdmin)(http.HandlerFunc(userHandler.Delete)))
+	mux.Handle("GET /a/users", adminOnly(http.HandlerFunc(userHandler.List)))
+	mux.Handle("GET /a/users/create", adminOnly(http.HandlerFunc(userHandler.Create)))
+	mux.Handle("POST /a/users/create", adminOnly(http.HandlerFunc(userHandler.Create)))
+	mux.Handle("GET /a/users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
+	mux.Handle("POST /a/users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
+	mux.Handle("DELETE /a/users/{id}", middleware.RequireRole(domain.RoleSuperAdmin)(http.HandlerFunc(userHandler.Delete)))
+
+	// Admin analytics and activity routes
+	mux.Handle("GET /a/analytics", adminOnly(http.HandlerFunc(analyticsHandler.AdminAnalytics)))
+	mux.Handle("GET /a/activity", adminOnly(http.HandlerFunc(analyticsHandler.SystemActivity)))
+
+	// Super Admin routes (require super admin role)
+	superAdminOnly := middleware.RequireRole(domain.RoleSuperAdmin)
+	mux.Handle("GET /s/audit", superAdminOnly(http.HandlerFunc(auditHandler.AuditLogs)))
+	mux.Handle("GET /s/system", superAdminOnly(http.HandlerFunc(auditHandler.SystemHealth)))
 
 	// Catch-all for 404s (must be added last if using patterns that might overlap, but "/" is most general)
 	mux.HandleFunc("/", homeHandler.NotFound)
