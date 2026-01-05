@@ -24,24 +24,39 @@ func NewAuthHandler(base *Handler, authService service.AuthService) *AuthHandler
 	}
 }
 
-// LoginPage renders the login page.
-func (h *AuthHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
-	// If already logged in, redirect to dashboard
-	if middleware.GetUserFromContext(r.Context()) != nil {
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-		return
+// getDashboardURLForRole returns the appropriate dashboard URL based on user role.
+func getDashboardURLForRole(user *domain.User) string {
+	if user == nil {
+		return "/u/dashboard"
 	}
-
-	data := map[string]any{
-		"Title": "Login",
+	switch user.Role {
+	case domain.RoleSuperAdmin:
+		return "/s/dashboard"
+	case domain.RoleAdmin:
+		return "/a/dashboard"
+	default:
+		return "/u/dashboard"
 	}
-	h.Render(w, "login.html", data)
 }
 
-// Login handles user login.
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+// SignInPage renders the sign in page.
+func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
+    // If already logged in, redirect to appropriate dashboard
+    if user := middleware.GetUserFromContext(r.Context()); user != nil {
+        http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
+        return
+    }
+
+    data := map[string]any{
+        "Title": "Sign In",
+    }
+    h.RenderWithUser(w, r, "signin.html", data)
+}
+
+// SignIn handles user sign in.
+func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		h.renderLoginError(w, r, "", "Invalid form data")
+		h.renderSignInError(w, r, "", "Invalid form data")
 		return
 	}
 
@@ -58,7 +73,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		} else if domain.IsInvalidCredentialsError(err) {
 			errMsg = "Invalid email or password"
 		}
-		h.renderLoginError(w, r, input.Email, errMsg)
+		h.renderSignInError(w, r, input.Email, errMsg)
 		return
 	}
 
@@ -74,10 +89,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// Redirect based on role
-	redirectURL := "/dashboard"
-	if user.IsAdmin() {
-		redirectURL = "/dashboard"
-	}
+	redirectURL := getDashboardURLForRole(user)
 
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Redirect", redirectURL)
@@ -88,33 +100,33 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
-func (h *AuthHandler) renderLoginError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
-	data := map[string]any{
-		"Title": "Login",
-		"Email": email,
-		"Error": errMsg,
-	}
+func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
+    data := map[string]any{
+        "Title": "Sign In",
+        "Email": email,
+        "Error": errMsg,
+    }
 
-	if isHTMXRequest(r) {
-		h.RenderPartial(w, "login_form.html", data)
-		return
-	}
+    if isHTMXRequest(r) {
+        h.RenderPartial(w, "signin_form.html", data)
+        return
+    }
 
-	h.Render(w, "login.html", data)
+    h.RenderWithUser(w, r, "signin.html", data)
 }
 
 // SignupPage renders the signup page.
 func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
-	// If already logged in, redirect to dashboard
-	if middleware.GetUserFromContext(r.Context()) != nil {
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-		return
-	}
+    // If already logged in, redirect to appropriate dashboard
+    if user := middleware.GetUserFromContext(r.Context()); user != nil {
+        http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
+        return
+    }
 
-	data := map[string]any{
-		"Title": "Sign Up",
-	}
-	h.Render(w, "signup.html", data)
+    data := map[string]any{
+        "Title": "Sign Up",
+    }
+    h.RenderWithUser(w, r, "signup.html", data)
 }
 
 // Signup handles user registration.
@@ -155,10 +167,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// Redirect based on role
-	redirectURL := "/dashboard"
-	if user.IsSuperAdmin() {
-		redirectURL = "/dashboard"
-	}
+	redirectURL := getDashboardURLForRole(user)
 
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Redirect", redirectURL)
@@ -170,18 +179,18 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, input *domain.RegisterInput, errMsg string) {
-	data := map[string]any{
-		"Title": "Sign Up",
-		"Form":  input,
-		"Error": errMsg,
-	}
+    data := map[string]any{
+        "Title": "Sign Up",
+        "Form":  input,
+        "Error": errMsg,
+    }
 
-	if isHTMXRequest(r) {
-		h.RenderPartial(w, "signup_form.html", data)
-		return
-	}
+    if isHTMXRequest(r) {
+        h.RenderPartial(w, "signup_form.html", data)
+        return
+    }
 
-	h.Render(w, "signup.html", data)
+    h.RenderWithUser(w, r, "signup.html", data)
 }
 
 // Logout handles user logout.
@@ -208,4 +217,9 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// LoginRedirect redirects /login to /signin for backwards compatibility.
+func (h *AuthHandler) LoginRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/signin", http.StatusMovedPermanently)
 }

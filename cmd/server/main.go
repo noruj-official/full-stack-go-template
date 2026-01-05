@@ -85,14 +85,22 @@ func run() error {
 	mux.HandleFunc("GET /health", homeHandler.HealthCheck)
 
 	// Auth routes
-	mux.HandleFunc("GET /login", authHandler.LoginPage)
-	mux.HandleFunc("POST /login", authHandler.Login)
+	mux.HandleFunc("GET /signin", authHandler.SignInPage)
+	mux.HandleFunc("POST /signin", authHandler.SignIn)
 	mux.HandleFunc("GET /signup", authHandler.SignupPage)
 	mux.HandleFunc("POST /signup", authHandler.Signup)
 	mux.HandleFunc("POST /logout", authHandler.Logout)
 
-	// Protected routes (require authentication)
-	mux.Handle("GET /dashboard", middleware.RequireAuth(http.HandlerFunc(homeHandler.Dashboard)))
+	// Backwards compatible redirect from /login to /signin
+	mux.HandleFunc("GET /login", authHandler.LoginRedirect)
+
+	// Role-based dashboard routes
+	mux.Handle("GET /u/dashboard", middleware.RequireAuth(http.HandlerFunc(homeHandler.UserDashboard)))
+	mux.Handle("GET /a/dashboard", middleware.RequireRole(domain.RoleAdmin, domain.RoleSuperAdmin)(http.HandlerFunc(homeHandler.AdminDashboard)))
+	mux.Handle("GET /s/dashboard", middleware.RequireRole(domain.RoleSuperAdmin)(http.HandlerFunc(homeHandler.SuperAdminDashboard)))
+
+	// Backwards compatible redirect from /dashboard to role-appropriate dashboard
+	mux.Handle("GET /dashboard", middleware.RequireAuth(http.HandlerFunc(homeHandler.DashboardRedirect)))
 
 	// Admin routes (require admin role)
 	adminOnly := middleware.RequireRole(domain.RoleAdmin, domain.RoleSuperAdmin)

@@ -50,7 +50,7 @@ if %errorlevel% equ 0 (
 
 echo.
 echo [*] Checking dev server status ^(port 3000^)...
-netstat -ano | findstr LISTENING | findstr :3000 >nul 2>nul
+netstat -ano | findstr LISTENING | findstr :3000     >nul 2>nul
 if %errorlevel% equ 0 (
     echo [OK] Dev server already running on http://localhost:3000
     echo.

@@ -35,14 +35,20 @@ func (h *Handler) LoadTemplates() error {
 
 		// Add template functions
 		funcMap := template.FuncMap{
-			"add": func(a, b int) int { return a + b },
+			"add":      func(a, b int) int { return a + b },
 			"subtract": func(a, b int) int { return a - b },
 			"slice": func(s string, start, end int) string {
 				// rune-aware slicing to handle multibyte characters safely
 				r := []rune(s)
-				if start < 0 { start = 0 }
-				if end > len(r) { end = len(r) }
-				if start > end { return "" }
+				if start < 0 {
+					start = 0
+				}
+				if end > len(r) {
+					end = len(r)
+				}
+				if start > end {
+					return ""
+				}
 				return string(r[start:end])
 			},
 		}
@@ -53,7 +59,9 @@ func (h *Handler) LoadTemplates() error {
 		// Parse page templates
 		pageFiles, _ := filepath.Glob(filepath.Join(h.templatesDir, "pages", "*.html"))
 		userPageFiles, _ := filepath.Glob(filepath.Join(h.templatesDir, "pages", "users", "*.html"))
+		dashboardFiles, _ := filepath.Glob(filepath.Join(h.templatesDir, "pages", "dashboards", "*.html"))
 		pageFiles = append(pageFiles, userPageFiles...)
+		pageFiles = append(pageFiles, dashboardFiles...)
 
 		// Parse partial templates
 		partialFiles, _ := filepath.Glob(filepath.Join(h.templatesDir, "partials", "*.html"))
@@ -106,16 +114,31 @@ func (h *Handler) Render(w http.ResponseWriter, name string, data any) {
 
 // RenderWithUser merges the authenticated user from context into the data and renders.
 func (h *Handler) RenderWithUser(w http.ResponseWriter, r *http.Request, name string, data any) {
-	if data == nil {
-		data = map[string]any{}
-	}
-	if m, ok := data.(map[string]any); ok {
-		m["User"] = middleware.GetUserFromContext(r.Context())
-		h.Render(w, name, m)
-		return
-	}
-	// For non-map data (e.g., structs used in partials), render as-is
-	h.Render(w, name, data)
+    if data == nil {
+        data = map[string]any{}
+    }
+    if m, ok := data.(map[string]any); ok {
+        m["User"] = middleware.GetUserFromContext(r.Context())
+        // Inject Theme from cookie (fallback to corporate; use client hint when dark)
+        theme := "corporate"
+        if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
+            if c.Value == "night" {
+                theme = "night"
+            } else if c.Value == "corporate" {
+                theme = "corporate"
+            }
+        } else {
+            // Optional: use client hint if sent
+            if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
+                theme = "night"
+            }
+        }
+        m["Theme"] = theme
+        h.Render(w, name, m)
+        return
+    }
+    // For non-map data (e.g., structs used in partials), render as-is
+    h.Render(w, name, data)
 }
 
 // RenderPartial renders a partial template (for HTMX responses).
@@ -125,14 +148,20 @@ func (h *Handler) RenderPartial(w http.ResponseWriter, name string, data any) {
 		// Attempt on-demand parse of the partial if it was added after initial load
 		partialPath := filepath.Join(h.templatesDir, "partials", name)
 		funcMap := template.FuncMap{
-			"add": func(a, b int) int { return a + b },
+			"add":      func(a, b int) int { return a + b },
 			"subtract": func(a, b int) int { return a - b },
 			"slice": func(s string, start, end int) string {
 				// rune-aware slicing to handle multibyte characters safely
 				r := []rune(s)
-				if start < 0 { start = 0 }
-				if end > len(r) { end = len(r) }
-				if start > end { return "" }
+				if start < 0 {
+					start = 0
+				}
+				if end > len(r) {
+					end = len(r)
+				}
+				if start > end {
+					return ""
+				}
 				return string(r[start:end])
 			},
 		}

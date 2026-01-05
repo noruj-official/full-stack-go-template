@@ -1,13 +1,18 @@
 {{define "base"}}
 <!DOCTYPE html>
-<html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: false }"
-    :class="{ 'dark': darkMode }" :data-theme="darkMode ? 'dark' : 'light'"
-    x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
+<html lang="en"
+    class="{{if eq .Theme "night"}}dark{{end}}"
+    data-theme="{{.Theme}}"
+    x-data="{ darkMode: {{if eq .Theme "night"}}true{{else}}false{{end}}, sidebarOpen: false }"
+    :class="{ 'dark': darkMode }"
+    :data-theme="darkMode ? 'night' : 'corporate'"
+    x-init="(() => { const init = darkMode; document.documentElement.classList.toggle('dark', init); document.documentElement.setAttribute('data-theme', init ? 'night' : 'corporate'); $watch('darkMode', val => { document.documentElement.classList.toggle('dark', val); document.documentElement.setAttribute('data-theme', val ? 'night' : 'corporate'); localStorage.setItem('darkMode', val); document.cookie = 'theme=' + (val ? 'night' : 'corporate') + '; path=/; max-age=31536000'; }); })()">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{.Description}}">
+    <meta name="color-scheme" content="light dark">
     <title>{{.Title}} | Go Starter</title>
 
     <!-- Tailwind CSS Output -->
@@ -144,24 +149,23 @@
 
     <div id="modal-container" class="relative z-50"></div>
 
-    <!-- Toast Notifications -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
 
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
-
+    
         // Re-initialize icons after HTMX content swap
         document.body.addEventListener('htmx:afterSwap', function () {
             lucide.createIcons();
         });
-
+    
         // Show toast notification
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-red-500' : 'bg-primary-500';
-
+    
             toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg animate-slide-up flex items-center gap-2`;
             toast.innerHTML = `
                 <span>${message}</span>
@@ -169,10 +173,10 @@
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             `;
-
+    
             container.appendChild(toast);
             lucide.createIcons();
-
+    
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(10px)';
@@ -180,7 +184,7 @@
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
         }
-
+    
         // Handle HTMX events for toasts
         document.body.addEventListener('userCreated', () => showToast('User created successfully!'));
         document.body.addEventListener('userUpdated', () => showToast('User updated successfully!'));

@@ -73,11 +73,11 @@ func RequireAuth(next http.Handler) http.Handler {
 		if user == nil {
 			// Check if HTMX request
 			if r.Header.Get("HX-Request") == "true" {
-				w.Header().Set("HX-Redirect", "/login")
+				w.Header().Set("HX-Redirect", "/signin")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -91,11 +91,11 @@ func RequireRole(roles ...domain.Role) func(http.Handler) http.Handler {
 			user := GetUserFromContext(r.Context())
 			if user == nil {
 				if r.Header.Get("HX-Request") == "true" {
-					w.Header().Set("HX-Redirect", "/login")
+					w.Header().Set("HX-Redirect", "/signin")
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				http.Redirect(w, r, "/signin", http.StatusSeeOther)
 				return
 			}
 

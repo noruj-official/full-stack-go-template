@@ -1,146 +1,231 @@
 {{define "content"}}
-<div class="flex flex-col min-h-screen">
+<style>
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -30px) scale(1.05);
+        }
+
+        66% {
+            transform: translate(-20px, 20px) scale(0.95);
+        }
+    }
+
+    @keyframes float-reverse {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(-40px, 20px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(30px, -20px) scale(0.9);
+        }
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            opacity: 0.3;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .bg-blob-1 {
+        animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite;
+    }
+
+    .bg-blob-2 {
+        animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s;
+    }
+
+    .bg-blob-3 {
+        animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s;
+    }
+</style>
+
+<div class="min-h-screen relative">
+   
+
     {{template "navbar" .}}
-    <main class="flex-1 px-4 py-8 lg:px-8">
-        <div class="max-w-7xl mx-auto animate-fade-in">
-            <!-- Hero Section -->
-            <div class="relative overflow-hidden rounded-3xl bg-primary text-primary-content p-8 lg:p-12 mb-8">
-                <!-- Background decorations -->
-                <div class="absolute inset-0 overflow-hidden">
-                    <div class="absolute -top-1/2 -right-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-                    <div class="absolute -bottom-1/2 -left-1/4 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl"></div>
+    <!-- Main Content -->
+    <main class="relative z-10 pt-16">
+        <!-- Hero Section -->
+        <section class="px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+            <div class="max-w-4xl mx-auto text-center">
+
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-base-content mb-6 leading-tight">
+                    Build faster with
+                    <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        Go Starter
+                    </span>
+                </h1>
+
+                <p class="text-lg sm:text-xl text-base-content/70 mb-10 max-w-2xl mx-auto">
+                    A professional full-stack Go application with clean architecture, HTMX for dynamic interactions,
+                    Alpine.js for reactivity, and Tailwind CSS with DaisyUI for modern styling.
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="/signup"
+                        class="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all">
+                        <i data-lucide="rocket" class="w-5 h-5"></i>
+                        Get Started Free
+                    </a>
+                    <a href="/dashboard" class="btn btn-outline btn-lg gap-2">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        View Dashboard
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="px-4 sm:px-6 lg:px-8 py-16">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-base-content mb-4">Everything you need</h2>
+                    <p class="text-base-content/60 max-w-xl mx-auto">Built with best practices and production-ready
+                        features out of the box.</p>
                 </div>
 
-                <div class="relative z-10">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="badge badge-lg bg-white/20 border-0 text-white">v1.0</span>
-                        <span class="text-primary-content/80 text-sm">Professional Go Stack</span>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div
+                        class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5 hover:border-primary/20 transition-colors group">
+                        <div class="card-body">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center mb-4 text-info group-hover:scale-110 transition-transform">
+                                <i data-lucide="layers" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="card-title text-base-content">Clean Architecture</h3>
+                            <p class="text-base-content/60">Separated layers for domain, repository, service, and
+                                handler - easily testable and maintainable.</p>
+                        </div>
                     </div>
 
-                    <h1 class="text-3xl lg:text-4xl font-bold mb-4">
-                        Welcome to Go Starter
-                    </h1>
+                    <div
+                        class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5 hover:border-primary/20 transition-colors group">
+                        <div class="card-body">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mb-4 text-warning group-hover:scale-110 transition-transform">
+                                <i data-lucide="zap" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="card-title text-base-content">HTMX Powered</h3>
+                            <p class="text-base-content/60">Dynamic updates without full page reloads. Partial rendering
+                                for lightning-fast interactions.</p>
+                        </div>
+                    </div>
 
-                    <p class="text-lg text-primary-content/90 mb-8 max-w-2xl">
-                        A professional full-stack Go application with clean architecture, HTMX for dynamic interactions,
-                        Alpine.js for reactivity, and Tailwind CSS v4 for modern styling.
-                    </p>
+                    <div
+                        class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5 hover:border-primary/20 transition-colors group">
+                        <div class="card-body">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-4 text-secondary group-hover:scale-110 transition-transform">
+                                <i data-lucide="mountain" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="card-title text-base-content">Alpine.js Reactive</h3>
+                            <p class="text-base-content/60">Lightweight reactivity for dropdowns, modals, and
+                                interactive UI without heavy frameworks.</p>
+                        </div>
+                    </div>
 
-                    <div class="flex flex-wrap gap-3">
-                        <a href="/dashboard"
-                            class="btn bg-base-100 text-base-content hover:bg-base-200 border-0 shadow-lg">
-                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                            Go to Dashboard
-                        </a>
-                        <a href="/users" class="btn btn-ghost text-primary-content hover:bg-white/20">
-                            <i data-lucide="users" class="w-4 h-4"></i>
-                            Manage Users
-                        </a>
+                    <div
+                        class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5 hover:border-primary/20 transition-colors group">
+                        <div class="card-body">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-error/10 flex items-center justify-center mb-4 text-error group-hover:scale-110 transition-transform">
+                                <i data-lucide="palette" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="card-title text-base-content">DaisyUI + Tailwind</h3>
+                            <p class="text-base-content/60">Modern component library with custom theme, dark mode, and
+                                beautiful animations.</p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5 hover:border-primary/20 transition-colors group">
+                        <div class="card-body">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 text-accent group-hover:scale-110 transition-transform">
+                                <i data-lucide="database" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="card-title text-base-content">PostgreSQL Ready</h3>
+                            <p class="text-base-content/60">Configured with pgx driver, connection pooling, and
+                                automatic migrations.</p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5 hover:border-primary/20 transition-colors group">
+                        <div class="card-body">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-4 text-success group-hover:scale-110 transition-transform">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="card-title text-base-content">Production Ready</h3>
+                            <p class="text-base-content/60">Graceful shutdown, middleware stack, health checks, and
+                                Docker support included.</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Features Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <div class="card bg-base-100 shadow-xl p-6 group hover:scale-[1.02] transition-transform duration-300">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-info/20 flex items-center justify-center mb-4 text-info group-hover:scale-110 transition-transform">
-                        <i data-lucide="layers" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Clean Architecture</h3>
-                    <p class="text-base-content/70">
-                        Separated layers for domain, repository, service, and handler - easily testable and
-                        maintainable.
-                    </p>
-                </div>
-
-                <div class="card bg-base-100 shadow-xl p-6 group hover:scale-[1.02] transition-transform duration-300">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center mb-4 text-warning group-hover:scale-110 transition-transform">
-                        <i data-lucide="zap" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">HTMX Powered</h3>
-                    <p class="text-base-content/70">
-                        Dynamic updates without full page reloads. Partial rendering for lightning-fast interactions.
-                    </p>
-                </div>
-
-                <div class="card bg-base-100 shadow-xl p-6 group hover:scale-[1.02] transition-transform duration-300">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center mb-4 text-secondary group-hover:scale-110 transition-transform">
-                        <i data-lucide="mountain" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Alpine.js Reactive</h3>
-                    <p class="text-base-content/70">
-                        Lightweight reactivity for dropdowns, modals, and interactive UI without heavy frameworks.
-                    </p>
-                </div>
-
-                <div class="card bg-base-100 shadow-xl p-6 group hover:scale-[1.02] transition-transform duration-300">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-error/20 flex items-center justify-center mb-4 text-error group-hover:scale-110 transition-transform">
-                        <i data-lucide="palette" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Tailwind CSS v4</h3>
-                    <p class="text-base-content/70">
-                        Modern CSS-first configuration with custom theme, dark mode, and beautiful animations.
-                    </p>
-                </div>
-
-                <div class="card bg-base-100 shadow-xl p-6 group hover:scale-[1.02] transition-transform duration-300">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center mb-4 text-warning group-hover:scale-110 transition-transform">
-                        <i data-lucide="database" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">PostgreSQL Ready</h3>
-                    <p class="text-base-content/70">
-                        Configured with pgx driver, connection pooling, and automatic migrations.
-                    </p>
-                </div>
-
-                <div class="card bg-base-100 shadow-xl p-6 group hover:scale-[1.02] transition-transform duration-300">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center mb-4 text-success group-hover:scale-110 transition-transform">
-                        <i data-lucide="shield-check" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-base-content mb-2">Production Ready</h3>
-                    <p class="text-base-content/70">
-                        Graceful shutdown, middleware stack, health checks, and Docker support included.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="card bg-base-100 shadow-xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-base-content">Quick Stats</h2>
-                    <button class="btn btn-ghost btn-sm text-base-content/70">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        Refresh
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="text-center p-4 rounded-xl bg-base-200">
-                        <p class="text-3xl font-bold text-primary">4</p>
-                        <p class="text-sm text-base-content/70">Architecture Layers</p>
-                    </div>
-                    <div class="text-center p-4 rounded-xl bg-base-200">
-                        <p class="text-3xl font-bold text-primary">3</p>
-                        <p class="text-sm text-base-content/70">Middlewares</p>
-                    </div>
-                    <div class="text-center p-4 rounded-xl bg-base-200">
-                        <p class="text-3xl font-bold text-primary">5+</p>
-                        <p class="text-sm text-base-content/70">Templates</p>
-                    </div>
-                    <div class="text-center p-4 rounded-xl bg-base-200">
-                        <p class="text-3xl font-bold text-primary">100%</p>
-                        <p class="text-sm text-base-content/70">Go Powered</p>
+        <!-- Stats Section -->
+        <section class="px-4 sm:px-6 lg:px-8 py-16">
+            <div class="max-w-4xl mx-auto">
+                <div class="card bg-base-100/80 backdrop-blur-sm border border-base-content/5">
+                    <div class="card-body">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                            <div>
+                                <p
+                                    class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    4</p>
+                                <p class="text-sm text-base-content/60 mt-1">Architecture Layers</p>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    3</p>
+                                <p class="text-sm text-base-content/60 mt-1">Middlewares</p>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    5+</p>
+                                <p class="text-sm text-base-content/60 mt-1">Templates</p>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    100%</p>
+                                <p class="text-sm text-base-content/60 mt-1">Go Powered</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="px-4 sm:px-6 lg:px-8 py-8 border-t border-base-content/5">
+            <div class="max-w-6xl mx-auto text-center text-base-content/50 text-sm">
+                <p>&copy; 2024 Go Starter. Built with ❤️ using Go, HTMX, Alpine.js, and Tailwind CSS.</p>
+            </div>
+        </footer>
     </main>
-    {{template "footer" .}}
 </div>
 {{end}}

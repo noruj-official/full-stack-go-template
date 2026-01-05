@@ -1,8 +1,7 @@
 {{define "navbar"}}
-<header class="sticky top-0 z-40 bg-base-100/80 backdrop-blur-xl border-b border-base-200">
-    <div class="px-4 lg:px-8">
+<header class="fixed top-0 left-0 right-0 z-50 bg-base-100/80 backdrop-blur-xl border-b border-base-200">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-            <!-- Mobile menu button -->
             <!-- Mobile menu button -->
             <label for="my-drawer-4" class="lg:hidden btn btn-ghost p-2 drawer-button">
                 <i data-lucide="menu" class="w-5 h-5"></i>
@@ -12,15 +11,6 @@
             <a href="/" class="flex items-center gap-2 px-2">
                 <span class="text-xl font-bold text-base-content">Go Starter</span>
             </a>
-
-            <!-- Search (optional) -->
-            <div class="hidden sm:flex flex-1 max-w-md mx-4">
-                <div class="relative w-full">
-                    <i data-lucide="search"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
-                    <input type="search" placeholder="Search..." class="input pl-10">
-                </div>
-            </div>
 
             <!-- Right side actions -->
             <div class="flex items-center gap-2">
@@ -32,9 +22,6 @@
                 </button>
 
                 {{if .User}}
-                <!-- Notifications (authenticated) -->
-
-
                 <!-- User menu (authenticated) -->
                 <div class="dropdown dropdown-end" x-data="{ open: false }" :class="{ 'dropdown-open': open }">
                     <button @click="open = !open" @click.away="open = false"
@@ -89,7 +76,7 @@
                 </div>
                 {{else}}
                 <!-- Auth buttons (not authenticated) -->
-                <a href="/login" class="btn btn-ghost text-sm">
+                <a href="/signin" class="btn btn-ghost text-sm">
                     Sign in
                 </a>
                 <a href="/signup" class="btn btn-primary text-sm">

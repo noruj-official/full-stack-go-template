@@ -1,9 +1,9 @@
 {{define "content"}}
-<!-- Dashboard Header -->
+<!-- Super Admin Dashboard Header -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Dashboard</h1>
-        <p class="text-base-content/70">Welcome back! Here's what's happening today.</p>
+        <h1 class="text-2xl font-bold text-base-content">Super Admin Dashboard</h1>
+        <p class="text-base-content/70">Full system overview and management</p>
     </div>
     <div class="flex gap-3">
         <a href="/users/create" class="btn btn-primary">
@@ -24,6 +24,16 @@
         <p class="text-2xl font-bold text-base-content">{{.UserCount}}</p>
         <p class="text-sm text-base-content/70">Total Users</p>
     </div>
+
+    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                <i data-lucide="shield" class="w-5 h-5 text-warning"></i>
+            </div>
+        </div>
+        <p class="text-2xl font-bold text-base-content">{{.AdminCount}}</p>
+        <p class="text-sm text-base-content/70">Administrators</p>
+    </div>
 </div>
 
 <!-- Content Grid -->
@@ -31,7 +41,7 @@
     <!-- Recent Activity -->
     <div class="lg:col-span-2 card bg-base-100 shadow-sm border border-base-200">
         <div class="card-header flex items-center justify-between border-b border-base-200 p-4">
-            <h2 class="text-lg font-semibold text-base-content">Recent Activity</h2>
+            <h2 class="text-lg font-semibold text-base-content">Recent Users</h2>
             <a href="/users" class="btn btn-ghost btn-sm text-sm">View All</a>
         </div>
         <div class="card-body p-0">
@@ -44,14 +54,14 @@
                         {{slice .Name 0 1}}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-base-content">{{.Name}} signed up</p>
-                        <p class="text-xs text-base-content/70">{{.CreatedAgo}}</p>
+                        <p class="text-sm font-medium text-base-content">{{.Name}}</p>
+                        <p class="text-xs text-base-content/70">{{.Email}} • {{.CreatedAgo}}</p>
                     </div>
-                    <span class="badge badge-success badge-sm">New</span>
+                    <span class="badge badge-outline badge-sm">{{.Role}}</span>
                 </div>
                 {{end}}
                 {{else}}
-                <div class="p-4 text-sm text-base-content/70">No recent activity yet.</div>
+                <div class="p-4 text-sm text-base-content/70">No users yet.</div>
                 {{end}}
             </div>
         </div>
@@ -82,7 +92,19 @@
                 </div>
                 <div>
                     <p class="font-medium text-base-content">View Users</p>
-                    <p class="text-xs text-base-content/70">Manage accounts</p>
+                    <p class="text-xs text-base-content/70">Manage all accounts</p>
+                </div>
+            </a>
+
+            <a href="/a/dashboard"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                <div
+                    class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="shield" class="w-5 h-5 text-warning"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-base-content">Admin View</p>
+                    <p class="text-xs text-base-content/70">See admin dashboard</p>
                 </div>
             </a>
         </div>

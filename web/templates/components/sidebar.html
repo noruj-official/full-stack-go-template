@@ -36,7 +36,8 @@
             </li>
 
             <li>
-                <a href="/dashboard" class="{{ if eq .Title " Dashboard" }}active{{ end }}">
+                <a href="/dashboard" class="{{ if or (eq .Title " Dashboard") (eq .Title "Admin Dashboard" ) (eq
+                    .Title "Super Admin Dashboard" ) }}active{{ end }}">
                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                     Dashboard
                 </a>
