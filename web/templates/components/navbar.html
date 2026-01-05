@@ -1,5 +1,5 @@
 {{define "navbar"}}
-<header class="fixed top-0 left-0 right-0 z-50 bg-base-100/80 backdrop-blur-xl border-b border-base-200">
+<header class="fixed top-0 left-0 right-0 z-50 bg-base-100/90 backdrop-blur-xl border-b border-base-200 shadow-sm">
     <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Mobile menu button -->
@@ -33,7 +33,7 @@
                     <button @click="open = !open" @click.away="open = false"
                         class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-base-200 transition-colors">
                         <div
-                            class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
+                            class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium">
                             {{slice .User.Name 0 1}}
                         </div>
                         <span class="hidden sm:block text-sm font-medium text-base-content">{{.User.Name}}</span>
