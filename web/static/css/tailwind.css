@@ -1,11 +1,9 @@
 @import "tailwindcss";
 
-@plugin "daisyui" {
-  themes: corporate, night;
-}
+@plugin "daisyui" {  themes: corporate, night, light, dark; }
 
 @plugin "daisyui/theme" {
-  name: "night";
+  name: "dark";
   default: false;
   prefersdark: false;
   color-scheme: "dark";
@@ -42,9 +40,7 @@
 @custom-variant dark (&:where(.dark,
     .dark *,
     [data-theme="dark"],
-    [data-theme="dark"] *,
-    [data-theme="night"],
-    [data-theme="night"] *));
+    [data-theme="dark"] *));
 
 /* Base styles */
 @layer base {
@@ -145,3 +141,4 @@
     @apply opacity-100;
   }
 }
+

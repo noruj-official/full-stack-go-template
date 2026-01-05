@@ -59,7 +59,7 @@ coverage/
 *.coverage
 
 # Air (live reload)
-.air.toml
+
 tmp/
 
 # Docker

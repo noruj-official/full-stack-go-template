@@ -119,18 +119,18 @@ func (h *Handler) RenderWithUser(w http.ResponseWriter, r *http.Request, name st
 	}
 	if m, ok := data.(map[string]any); ok {
 		m["User"] = middleware.GetUserFromContext(r.Context())
-		// Inject Theme from cookie (fallback to corporate; use client hint when dark)
-		theme := "corporate"
+		// Inject Theme from cookie (fallback to light; use client hint when dark)
+		theme := "light"
 		if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
-			if c.Value == "night" {
-				theme = "night"
-			} else if c.Value == "corporate" {
-				theme = "corporate"
+			if c.Value == "dark" {
+				theme = "dark"
+			} else if c.Value == "light" {
+				theme = "light"
 			}
 		} else {
 			// Optional: use client hint if sent
 			if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
-				theme = "night"
+				theme = "dark"
 			}
 		}
 		m["Theme"] = theme
