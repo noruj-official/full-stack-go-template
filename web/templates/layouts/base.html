@@ -26,16 +26,16 @@
 </head>
 
 <body class="min-h-screen" hx-boost="true">
-    {{if .ShowSidebar}}
-    <div class="drawer lg:drawer-open font-sans">
+    <div class="drawer {{if .ShowSidebar}}lg:drawer-open{{end}} font-sans">
         <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col h-screen overflow-hidden bg-base-200">
+            {{if .ShowSidebar}}
             <!-- App Navbar -->
             <nav class="navbar w-full bg-base-100 border-b border-base-200 z-10 sticky top-0">
                 <div class="flex-none">
                     <label for="my-drawer-4" aria-label="open sidebar"
                         class="btn btn-square btn-ghost text-base-content/70">
-                        <i data-lucide="menu" class="w-5 h-5 my-1.5 inline-block"></i>
+                        <i data-lucide="menu" class="w-5 h-5"></i>
                     </label>
                 </div>
                 <div class="flex-1 px-4">
@@ -50,43 +50,46 @@
 
                     <!-- User Dropdown -->
                     {{if .User}}
-                    <div x-data="{ open: false }" class="relative z-50">
-                        <button @click="open = !open" class="btn btn-ghost btn-circle avatar">
+                    <div class="dropdown dropdown-end" x-data="{ open: false }" :class="{ 'dropdown-open': open }">
+                        <button @click="open = !open" @click.away="open = false"
+                            class="btn btn-ghost btn-circle avatar">
                             <div
                                 class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
                                 {{slice .User.Name 0 1}}
                             </div>
                         </button>
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                        <ul x-show="open" x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                            @click.away="open = false"
-                            class="absolute right-0 mt-2 w-56 bg-base-100 border border-base-200 shadow-xl rounded-box z-50"
-                            x-cloak>
+                            class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
 
-                            <div class="px-4 py-2 border-b border-base-200">
-                                <p class="text-sm font-medium text-base-content">{{.User.Name}}</p>
-                                <p class="text-xs text-base-content/70">{{.User.Email}}</p>
-                            </div>
-                            <ul class="menu menu-sm">
-                                <li><a href="#"><i data-lucide="user" class="w-4 h-4"></i> Profile</a></li>
-                                <li><a href="#"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a></li>
-                                <div class="divider my-1"></div>
-                                <li>
-                                    <form action="/logout" method="POST" class="w-full">
-                                        <button type="submit"
-                                            class="flex items-center gap-2 text-error hover:text-error/80 w-full px-2">
-                                            <i data-lucide="log-out" class="w-4 h-4"></i> Logout
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
+                            <li class="menu-title px-4 py-2 border-b border-base-200 mb-2">
+                                <span class="text-base-content block text-sm font-medium">{{.User.Name}}</span>
+                                <span class="text-base-content/70 block text-xs font-normal">{{.User.Email}}</span>
+                            </li>
+
+                            <li><a href="#"><i data-lucide="user" class="w-4 h-4"></i> Profile</a></li>
+                            <li><a href="#"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a></li>
+
+                            <div class="divider my-1"></div>
+
+                            <li>
+                                <form action="/logout" method="POST" class="w-full">
+                                    <button type="submit"
+                                        class="flex items-center gap-2 text-error hover:bg-error/10 w-full">
+                                        <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                     {{end}}
                 </div>
             </nav>
+            {{else}}
+            <!-- Placeholder for pages that invoke navbar component -->
+            {{end}}
 
             <!-- Main Content Area -->
             <main class="flex-1 overflow-y-auto p-4 lg:p-8">
@@ -97,7 +100,7 @@
         </div>
 
         <!-- Sidebar Drawer -->
-        <div class="drawer-side z-20 is-drawer-close:overflow-visible">
+        <div class="drawer-side z-50 is-drawer-close:overflow-visible">
             <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
             <div
                 class="flex min-h-full flex-col items-start bg-base-200 border-r border-base-300 is-drawer-close:w-14 is-drawer-open:w-64 transition-all duration-300">
@@ -105,7 +108,7 @@
                     <!-- Home Link (Added explicitly so users can go back to landing) -->
                     <li>
                         <a href="/" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Home">
-                            <i data-lucide="home" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <i data-lucide="home" class="w-5 h-5"></i>
                             <span class="is-drawer-close:hidden font-medium">Home</span>
                         </a>
                     </li>
@@ -114,7 +117,7 @@
                     <li>
                         <a href="/dashboard" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                             data-tip="Dashboard">
-                            <i data-lucide="layout-dashboard" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                             <span class="is-drawer-close:hidden font-medium">Dashboard</span>
                         </a>
                     </li>
@@ -122,7 +125,7 @@
                     <!-- Users -->
                     <li>
                         <a href="/users" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Users">
-                            <i data-lucide="users" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <i data-lucide="users" class="w-5 h-5"></i>
                             <span class="is-drawer-close:hidden font-medium">Users</span>
                         </a>
                     </li>
@@ -130,7 +133,7 @@
                     <!-- Settings -->
                     <li>
                         <a href="#" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Settings">
-                            <i data-lucide="settings" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <i data-lucide="settings" class="w-5 h-5"></i>
                             <span class="is-drawer-close:hidden font-medium">Settings</span>
                         </a>
                     </li>
@@ -138,10 +141,6 @@
             </div>
         </div>
     </div>
-    {{else}}
-    <!-- Default Layout (No Sidebar) -->
-    {{template "content" .}}
-    {{end}}
 
     <div id="modal-container" class="relative z-50"></div>
 
