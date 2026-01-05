@@ -3,9 +3,15 @@
     <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Mobile menu button -->
-            <label for="my-drawer-4" class="lg:hidden btn btn-ghost p-2 drawer-button">
+            <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden btn btn-ghost p-2" title="Open Menu">
                 <i data-lucide="menu" class="w-5 h-5"></i>
-            </label>
+            </button>
+
+            <!-- Desktop sidebar toggle button -->
+            <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:inline-flex btn btn-ghost p-2"
+                title="Toggle Sidebar">
+                <i data-lucide="panel-left" class="w-5 h-5"></i>
+            </button>
 
             <!-- Brand Logo/Title -->
             <a href="/" class="flex items-center gap-2 px-2">

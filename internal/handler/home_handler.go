@@ -30,6 +30,7 @@ func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"Title":       "Full Stack Go Template",
 		"Description": "A professional full-stack Go application",
+		"ShowSidebar": true,
 	}
 	h.RenderWithUser(w, r, "home.html", data)
 }
@@ -187,4 +188,14 @@ func formatUnit(value int, unit string) string {
 		return "1" + unit + " ago"
 	}
 	return fmt.Sprintf("%d%s ago", value, unit)
+}
+
+// NotFound renders the custom 404 page.
+func (h *HomeHandler) NotFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	data := map[string]any{
+		"Title":       "Page Not Found",
+		"Description": "The page you requested was not found.",
+	}
+	h.RenderWithUser(w, r, "404.html", data)
 }

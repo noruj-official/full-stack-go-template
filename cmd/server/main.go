@@ -81,7 +81,7 @@ func run() error {
 	mux.Handle("GET /static/", http.StripPrefix("/static/", fileServer))
 
 	// Public routes (no auth required)
-	mux.HandleFunc("GET /", homeHandler.Index)
+	mux.HandleFunc("GET /{$}", homeHandler.Index)
 	mux.HandleFunc("GET /health", homeHandler.HealthCheck)
 
 	// Auth routes
@@ -110,6 +110,9 @@ func run() error {
 	mux.Handle("GET /users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
 	mux.Handle("POST /users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
 	mux.Handle("DELETE /users/{id}", middleware.RequireRole(domain.RoleSuperAdmin)(http.HandlerFunc(userHandler.Delete)))
+
+	// Catch-all for 404s (must be added last if using patterns that might overlap, but "/" is most general)
+	mux.HandleFunc("/", homeHandler.NotFound)
 
 	// Apply middleware stack
 	var h http.Handler = mux
