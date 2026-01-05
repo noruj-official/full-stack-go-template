@@ -1,48 +1,53 @@
-{{if .Error}}
-<div
-    class="p-4 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 animate-scale-in mb-6">
-    <div class="flex items-center gap-2">
-        <i data-lucide="alert-circle" class="w-5 h-5"></i>
-        <span>{{.Error}}</span>
+<form hx-post="/login" hx-target="#login-content" hx-swap="innerHTML" class="space-y-6">
+    {{if .Error}}
+    <div
+        class="p-4 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 animate-scale-in mb-6">
+        <div class="flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <span>{{.Error}}</span>
+        </div>
     </div>
-</div>
-{{end}}
+    {{end}}
 
-<div class="form-group">
-    <label for="email" class="label">Email address</label>
-    <div class="relative">
-        <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-        <input type="email" id="email" name="email" value="{{.Email}}" class="input pl-11" placeholder="you@example.com"
-            required autocomplete="email">
+    <div class="form-control w-full">
+        <label for="email" class="label">
+            <span class="label-text">Email address</span>
+        </label>
+        <div class="relative">
+            <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+            <input type="email" id="email" name="email" value="{{.Email}}" class="input input-bordered pl-11 w-full"
+                placeholder="you@example.com" required autocomplete="email">
+        </div>
     </div>
-</div>
 
-<div class="form-group">
-    <div class="flex items-center justify-between">
-        <label for="password" class="label">Password</label>
-        <a href="#" class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400">
-            Forgot password?
-        </a>
+    <div class="form-control w-full">
+        <div class="flex items-center justify-between">
+            <label for="password" class="label">
+                <span class="label-text">Password</span>
+            </label>
+            <a href="#" class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400">
+                Forgot password?
+            </a>
+        </div>
+        <div class="relative" x-data="{ showPassword: false }">
+            <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+            <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
+                class="input input-bordered pl-11 pr-11 w-full" placeholder="Enter your password" required
+                autocomplete="current-password">
+            <button type="button" @click="showPassword = !showPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <i x-show="!showPassword" data-lucide="eye" class="w-5 h-5"></i>
+                <i x-show="showPassword" data-lucide="eye-off" class="w-5 h-5" x-cloak></i>
+            </button>
+        </div>
     </div>
-    <div class="relative" x-data="{ showPassword: false }">
-        <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-        <input :type="showPassword ? 'text' : 'password'" id="password" name="password" class="input pl-11 pr-11"
-            placeholder="Enter your password" required autocomplete="current-password">
-        <button type="button" @click="showPassword = !showPassword"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-            <i x-show="!showPassword" data-lucide="eye" class="w-5 h-5"></i>
-            <i x-show="showPassword" data-lucide="eye-off" class="w-5 h-5" x-cloak></i>
-        </button>
-    </div>
-</div>
 
-<button type="submit" class="btn btn-primary w-full py-3 mt-6">
-    <span class="htmx-indicator">
-        <span class="spinner mr-2"></span>
-    </span>
-    Sign in
-</button>
+    <button type="submit" class="btn btn-primary w-full py-3 mt-6">
+        <span class="htmx-indicator loading loading-spinner loading-xs mr-2"></span>
+        Sign in
+    </button>
 
-<script>
-    lucide.createIcons();
-</script>
+    <script>
+        lucide.createIcons();
+    </script>
+</form>

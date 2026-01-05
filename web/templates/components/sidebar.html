@@ -25,50 +25,62 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <p class="px-4 mb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</p>
+        <ul class="menu flex-1 px-4 py-6 overflow-y-auto w-full">
+            <li class="menu-title text-slate-400 uppercase tracking-wider">Main</li>
 
-            <a href="/" class="nav-link {{ if eq .Title " Go Starter" }}active{{ end }}">
-                <i data-lucide="home" class="w-5 h-5"></i>
-                Home
-            </a>
+            <li>
+                <a href="/" class="{{ if eq .Title " Go Starter" }}active{{ end }}">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    Home
+                </a>
+            </li>
 
-            <a href="/dashboard" class="nav-link {{ if eq .Title " Dashboard" }}active{{ end }}">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                Dashboard
-            </a>
+            <li>
+                <a href="/dashboard" class="{{ if eq .Title " Dashboard" }}active{{ end }}">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Dashboard
+                </a>
+            </li>
 
             {{if and .User .User.IsAdmin}}
-            <p class="px-4 mt-6 mb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Administration</p>
+            <li class="menu-title mt-6 text-slate-400 uppercase tracking-wider">Administration</li>
 
-            <a href="/users" class="nav-link {{ if eq .Title " Users" }}active{{ end }}">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                Users
-            </a>
+            <li>
+                <a href="/users" class="{{ if eq .Title " Users" }}active{{ end }}">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Users
+                </a>
+            </li>
 
             {{if .User.IsSuperAdmin}}
-            <a href="#" class="nav-link opacity-50 cursor-not-allowed">
-                <i data-lucide="shield" class="w-5 h-5"></i>
-                Admin Settings
-                <span class="ml-auto badge badge-primary text-xs">Soon</span>
-            </a>
+            <li>
+                <a href="#" class="opacity-50 cursor-not-allowed">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                    Admin Settings
+                    <span class="badge badge-primary badge-xs ml-auto">Soon</span>
+                </a>
+            </li>
             {{end}}
             {{end}}
 
-            <p class="px-4 mt-6 mb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Resources</p>
+            <li class="menu-title mt-6 text-slate-400 uppercase tracking-wider">Resources</li>
 
-            <a href="#" class="nav-link opacity-50 cursor-not-allowed">
-                <i data-lucide="file-text" class="w-5 h-5"></i>
-                Documents
-                <span class="ml-auto badge badge-primary text-xs">Soon</span>
-            </a>
+            <li>
+                <a href="#" class="opacity-50 cursor-not-allowed">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    Documents
+                    <span class="badge badge-primary badge-xs ml-auto">Soon</span>
+                </a>
+            </li>
 
-            <a href="#" class="nav-link opacity-50 cursor-not-allowed">
-                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-                Analytics
-                <span class="ml-auto badge badge-primary text-xs">Soon</span>
-            </a>
-        </nav>
+            <li>
+                <a href="#" class="opacity-50 cursor-not-allowed">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    Analytics
+                    <span class="badge badge-primary badge-xs ml-auto">Soon</span>
+                </a>
+            </li>
+        </ul>
 
         <!-- Bottom section -->
         {{if .User}}

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"sync"
+
+	"github.com/go-starter/internal/middleware"
 )
 
 // Handler is the base handler with shared utilities.
@@ -102,13 +104,46 @@ func (h *Handler) Render(w http.ResponseWriter, name string, data any) {
 	}
 }
 
+// RenderWithUser merges the authenticated user from context into the data and renders.
+func (h *Handler) RenderWithUser(w http.ResponseWriter, r *http.Request, name string, data any) {
+	if data == nil {
+		data = map[string]any{}
+	}
+	if m, ok := data.(map[string]any); ok {
+		m["User"] = middleware.GetUserFromContext(r.Context())
+		h.Render(w, name, m)
+		return
+	}
+	// For non-map data (e.g., structs used in partials), render as-is
+	h.Render(w, name, data)
+}
+
 // RenderPartial renders a partial template (for HTMX responses).
 func (h *Handler) RenderPartial(w http.ResponseWriter, name string, data any) {
 	tmpl, ok := h.templates["partial:"+name]
 	if !ok {
-		log.Printf("Partial template %s not found", name)
-		http.Error(w, "Partial template not found", http.StatusInternalServerError)
-		return
+		// Attempt on-demand parse of the partial if it was added after initial load
+		partialPath := filepath.Join(h.templatesDir, "partials", name)
+		funcMap := template.FuncMap{
+			"add": func(a, b int) int { return a + b },
+			"subtract": func(a, b int) int { return a - b },
+			"slice": func(s string, start, end int) string {
+				// rune-aware slicing to handle multibyte characters safely
+				r := []rune(s)
+				if start < 0 { start = 0 }
+				if end > len(r) { end = len(r) }
+				if start > end { return "" }
+				return string(r[start:end])
+			},
+		}
+		parsed, err := template.New(name).Funcs(funcMap).ParseFiles(partialPath)
+		if err != nil {
+			log.Printf("Partial template %s not found", name)
+			http.Error(w, "Partial template not found", http.StatusInternalServerError)
+			return
+		}
+		h.templates["partial:"+name] = parsed
+		tmpl = parsed
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -116,6 +151,20 @@ func (h *Handler) RenderPartial(w http.ResponseWriter, name string, data any) {
 		log.Printf("Error rendering partial %s: %v", name, err)
 		http.Error(w, "Error rendering partial", http.StatusInternalServerError)
 	}
+}
+
+// RenderPartialWithUser merges the authenticated user into data and renders a partial.
+func (h *Handler) RenderPartialWithUser(w http.ResponseWriter, r *http.Request, name string, data any) {
+	if data == nil {
+		data = map[string]any{}
+	}
+	if m, ok := data.(map[string]any); ok {
+		m["User"] = middleware.GetUserFromContext(r.Context())
+		h.RenderPartial(w, name, m)
+		return
+	}
+	// For non-map data (e.g., structs used in row partials), render as-is
+	h.RenderPartial(w, name, data)
 }
 
 // JSON sends a JSON response.
@@ -142,4 +191,8 @@ func (h *Handler) Error(w http.ResponseWriter, r *http.Request, status int, mess
 // isHTMXRequest checks if the request is from HTMX.
 func isHTMXRequest(r *http.Request) bool {
 	return r.Header.Get("HX-Request") == "true"
+}
+
+func isHTMXBoosted(r *http.Request) bool {
+	return r.Header.Get("HX-Boosted") == "true"
 }

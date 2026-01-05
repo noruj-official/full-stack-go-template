@@ -1,6 +1,5 @@
 {{define "navbar"}}
-<header
-    class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80">
+<header class="sticky top-0 z-40 bg-base-100/80 backdrop-blur-xl border-b border-base-200">
     <div class="px-4 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Mobile menu button -->
@@ -11,7 +10,8 @@
             <!-- Search (optional) -->
             <div class="hidden sm:flex flex-1 max-w-md mx-4">
                 <div class="relative w-full">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <i data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
                     <input type="search" placeholder="Search..." class="input pl-10">
                 </div>
             </div>
@@ -35,49 +35,48 @@
                 <!-- User menu (authenticated) -->
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open"
-                        class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-base-200 transition-colors">
                         <div
                             class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
                             {{slice .User.Name 0 1}}
                         </div>
-                        <span
-                            class="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300">{{.User.Name}}</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 hidden sm:block"></i>
+                        <span class="hidden sm:block text-sm font-medium text-base-content">{{.User.Name}}</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-base-content/50 hidden sm:block"></i>
                     </button>
 
                     <div x-show="open" x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                         x-transition:leave="transition ease-in duration-150"
                         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                        @click.away="open = false" class="absolute right-0 mt-2 w-56 card py-2" x-cloak>
+                        @click.away="open = false"
+                        class="absolute right-0 mt-2 w-56 bg-base-100 border border-base-200 shadow-xl rounded-box z-50"
+                        x-cloak>
 
                         <!-- User info header -->
-                        <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                            <p class="text-sm font-medium text-slate-900 dark:text-white">{{.User.Name}}</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">{{.User.Email}}</p>
+                        <div class="px-4 py-2 border-b border-base-200">
+                            <p class="text-sm font-medium text-base-content">{{.User.Name}}</p>
+                            <p class="text-xs text-base-content/70">{{.User.Email}}</p>
                             <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium 
-                                {{if eq .User.Role.String " super_admin"}}bg-purple-100 text-purple-700
-                                dark:bg-purple-900/50 dark:text-purple-300 {{else if eq .User.Role.String "admin"
-                                }}bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 {{else}}bg-slate-100
-                                text-slate-700 dark:bg-slate-800 dark:text-slate-300{{end}}">
+                                {{if eq .User.Role.String " super_admin"}}badge badge-primary{{else if eq
+                                .User.Role.String "admin" }}badge badge-secondary{{else}}badge badge-ghost{{end}}">
                                 {{.User.Role}}
                             </span>
                         </div>
 
                         <a href="#"
-                            class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-base-content hover:bg-base-200">
                             <i data-lucide="user" class="w-4 h-4"></i>
                             Profile
                         </a>
                         <a href="#"
-                            class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-base-content hover:bg-base-200">
                             <i data-lucide="settings" class="w-4 h-4"></i>
                             Settings
                         </a>
-                        <hr class="my-2 border-slate-200 dark:border-slate-800">
+                        <hr class="my-2 border-base-200">
                         <form action="/logout" method="POST">
                             <button type="submit"
-                                class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50">
+                                class="w-full flex items-center gap-3 px-4 py-2 text-sm text-error hover:bg-error/10">
                                 <i data-lucide="log-out" class="w-4 h-4"></i>
                                 Logout
                             </button>

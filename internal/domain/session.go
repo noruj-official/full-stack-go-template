@@ -35,5 +35,5 @@ func NewSession(userID uuid.UUID) *Session {
 
 // generateSessionID creates a cryptographically secure session ID.
 func generateSessionID() string {
-	return uuid.New().String() + uuid.New().String()
+	return uuid.New().String()
 }

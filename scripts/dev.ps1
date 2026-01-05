@@ -59,14 +59,16 @@ try {
 
 if ($serverListening) {
     Write-Host "[OK] Dev server already running on http://localhost:3000" -ForegroundColor Green
+    $resp = Read-Host "[?] Open preview in browser now? (Y/N)"
+    if ($resp -match '^(?i)y(es)?$') {
+        Start-Process "http://localhost:3000/"
+    }
 } else {
-    Write-Host "[*] Starting Go server on http://localhost:3000" -ForegroundColor Cyan
-    # Start the server without blocking this script
-    Start-Process -FilePath "go" -ArgumentList "run","./cmd/server" | Out-Null
-    Start-Sleep -Seconds 2
-}
-
-$resp = Read-Host "[?] Open preview in browser now? (Y/N)"
-if ($resp -match '^(?i)y(es)?$') {
-    Start-Process "http://localhost:3000/"
+    $startResp = Read-Host "[?] Dev server not running. Start it here to stream logs? (Y/N)"
+    if ($startResp -match '^(?i)y(es)?$') {
+        Write-Host "[*] Starting Go server (logs will stream here)..." -ForegroundColor Cyan
+        go run ./cmd/server
+    } else {
+        Write-Host "[!] Skipping server start. Run 'go run ./cmd/server' to start." -ForegroundColor Yellow
+    }
 }

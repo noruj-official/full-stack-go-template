@@ -49,20 +49,22 @@ if %errorlevel% equ 0 (
 )
 
 echo.
-echo [*] Checking dev server status (port 3000)...
+echo [*] Checking dev server status ^(port 3000^)...
 netstat -ano | findstr LISTENING | findstr :3000 >nul 2>nul
 if %errorlevel% equ 0 (
     echo [OK] Dev server already running on http://localhost:3000
+    echo.
+    set /p START_PREVIEW=[?] Open preview in browser now? Y/N 
+    if /I "!START_PREVIEW!"=="Y" (
+        start "" http://localhost:3000/
+    )
 ) else (
-    echo [*] Starting Go server on http://localhost:3000
-    REM Start server in a new window so this script can continue
-    start "Go Starter Server" go run ./cmd/server
-    REM Give the server a moment to initialize
-    timeout /t 2 /nobreak >nul
-)
-
-echo.
-set /p START_PREVIEW=[?] Open preview in browser now? (Y/N): 
-if /I "%START_PREVIEW%"=="Y" (
-    start "" http://localhost:3000/
+    echo [!] Dev server not running.
+    set /p START_SERVER=[?] Start it here to stream logs? Y/N 
+    if /I "!START_SERVER!"=="Y" (
+        echo [*] Starting Go server ^(logs will stream here^)...
+        call go run ./cmd/server
+    ) else (
+        echo [!] Skipping server start. Run "go run ./cmd/server" to start.
+    )
 )

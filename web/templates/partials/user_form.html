@@ -8,24 +8,26 @@
 </div>
 {{end}}
 
-<div class="form-group">
-    <label for="name" class="label">Full Name</label>
+<div class="form-control w-full">
+    <label for="name" class="label">
+        <span class="label-text">Full Name</span>
+    </label>
     <input type="text" id="name" name="name" value="{{if .User}}{{.User.Name}}{{else if .Form}}{{.Form.Name}}{{end}}"
-        class="input {{if .Error}}input-error{{end}}" placeholder="Enter full name" required>
+        class="input input-bordered {{if .Error}}input-error{{end}} w-full" placeholder="Enter full name" required>
 </div>
 
-<div class="form-group">
-    <label for="email" class="label">Email Address</label>
+<div class="form-control w-full">
+    <label for="email" class="label">
+        <span class="label-text">Email Address</span>
+    </label>
     <input type="email" id="email" name="email"
         value="{{if .User}}{{.User.Email}}{{else if .Form}}{{.Form.Email}}{{end}}"
-        class="input {{if .Error}}input-error{{end}}" placeholder="Enter email address" required>
+        class="input input-bordered {{if .Error}}input-error{{end}} w-full" placeholder="Enter email address" required>
 </div>
 
 <div class="flex items-center gap-3 pt-4">
     <button type="submit" class="btn btn-primary">
-        <span class="htmx-indicator">
-            <span class="spinner"></span>
-        </span>
+        <span class="htmx-indicator loading loading-spinner loading-xs"></span>
         {{if .User}}
         <i data-lucide="save" class="w-4 h-4"></i>
         Save Changes
@@ -34,7 +36,7 @@
         Create User
         {{end}}
     </button>
-    <a href="/users" class="btn btn-secondary">Cancel</a>
+    <a href="/users" class="btn btn-neutral">Cancel</a>
 </div>
 
 <script>

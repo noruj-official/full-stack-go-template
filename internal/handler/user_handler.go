@@ -43,21 +43,23 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		"Total":       total,
 		"CurrentPage": page,
 		"TotalPages":  (total + 9) / 10,
+		"ShowSidebar": true,
 	}
 
-	if isHTMXRequest(r) {
-		h.RenderPartial(w, "user_list.html", data)
+	if isHTMXRequest(r) && !isHTMXBoosted(r) {
+		h.RenderPartialWithUser(w, r, "user_list.html", data)
 		return
 	}
 
-	h.Render(w, "list.html", data)
+	h.RenderWithUser(w, r, "list.html", data)
 }
 
 // Create handles user creation form display and submission.
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		h.Render(w, "create.html", map[string]any{
-			"Title": "Create User",
+		h.RenderWithUser(w, r, "create.html", map[string]any{
+			"Title":       "Create User",
+			"ShowSidebar": true,
 		})
 		return
 	}
@@ -90,7 +92,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// For HTMX requests, return the new row
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userCreated")
-		h.RenderPartial(w, "user_row.html", user)
+		h.RenderPartialWithUser(w, r, "user_row.html", user)
 		return
 	}
 
@@ -105,11 +107,11 @@ func (h *UserHandler) renderCreateForm(w http.ResponseWriter, r *http.Request, i
 	}
 
 	if isHTMXRequest(r) {
-		h.RenderPartial(w, "user_form.html", data)
+		h.RenderPartialWithUser(w, r, "user_form.html", data)
 		return
 	}
 
-	h.Render(w, "create.html", data)
+	h.RenderWithUser(w, r, "create.html", data)
 }
 
 // Edit handles user edit form display and submission.
@@ -132,9 +134,10 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodGet {
-		h.Render(w, "edit.html", map[string]any{
-			"Title": "Edit User",
-			"User":  user,
+		h.RenderWithUser(w, r, "edit.html", map[string]any{
+			"Title":       "Edit User",
+			"User":        user,
+			"ShowSidebar": true,
 		})
 		return
 	}
@@ -169,7 +172,7 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userUpdated")
-		h.RenderPartial(w, "user_row.html", updatedUser)
+		h.RenderPartialWithUser(w, r, "user_row.html", updatedUser)
 		return
 	}
 
@@ -184,11 +187,11 @@ func (h *UserHandler) renderEditForm(w http.ResponseWriter, r *http.Request, use
 	}
 
 	if isHTMXRequest(r) {
-		h.RenderPartial(w, "user_form.html", data)
+		h.RenderPartialWithUser(w, r, "user_form.html", data)
 		return
 	}
 
-	h.Render(w, "edit.html", data)
+	h.RenderWithUser(w, r, "edit.html", data)
 }
 
 // Delete handles user deletion.

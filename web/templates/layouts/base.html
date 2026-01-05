@@ -1,7 +1,8 @@
 {{define "base"}}
 <!DOCTYPE html>
 <html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: false }"
-    :class="{ 'dark': darkMode }" x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
+    :class="{ 'dark': darkMode }" :data-theme="darkMode ? 'dark' : 'light'"
+    x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
 
 <head>
     <meta charset="UTF-8">
@@ -25,33 +26,124 @@
 </head>
 
 <body class="min-h-screen" hx-boost="true">
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        {{template "sidebar" .}}
+    {{if .ShowSidebar}}
+    <div class="drawer lg:drawer-open font-sans">
+        <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content flex flex-col h-screen overflow-hidden bg-base-200">
+            <!-- App Navbar -->
+            <nav class="navbar w-full bg-base-100 border-b border-base-200 z-10 sticky top-0">
+                <div class="flex-none">
+                    <label for="my-drawer-4" aria-label="open sidebar"
+                        class="btn btn-square btn-ghost text-base-content/70">
+                        <i data-lucide="menu" class="w-5 h-5 my-1.5 inline-block"></i>
+                    </label>
+                </div>
+                <div class="flex-1 px-4">
+                    <span class="text-xl font-bold text-base-content">Go Starter</span>
+                </div>
+                <div class="flex-none flex items-center gap-2">
+                    <!-- Dark mode toggle -->
+                    <button @click="darkMode = !darkMode" class="btn btn-ghost btn-circle text-base-content/70">
+                        <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
+                        <i x-show="darkMode" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+                    </button>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-h-screen lg:pl-64">
-            <!-- Navbar -->
-            {{template "navbar" .}}
+                    <!-- User Dropdown -->
+                    {{if .User}}
+                    <div x-data="{ open: false }" class="relative z-50">
+                        <button @click="open = !open" class="btn btn-ghost btn-circle avatar">
+                            <div
+                                class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
+                                {{slice .User.Name 0 1}}
+                            </div>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                            @click.away="open = false"
+                            class="absolute right-0 mt-2 w-56 bg-base-100 border border-base-200 shadow-xl rounded-box z-50"
+                            x-cloak>
 
-            <!-- Page Content -->
-            <main class="flex-1 px-4 py-8 lg:px-8">
+                            <div class="px-4 py-2 border-b border-base-200">
+                                <p class="text-sm font-medium text-base-content">{{.User.Name}}</p>
+                                <p class="text-xs text-base-content/70">{{.User.Email}}</p>
+                            </div>
+                            <ul class="menu menu-sm">
+                                <li><a href="#"><i data-lucide="user" class="w-4 h-4"></i> Profile</a></li>
+                                <li><a href="#"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a></li>
+                                <div class="divider my-1"></div>
+                                <li>
+                                    <form action="/logout" method="POST" class="w-full">
+                                        <button type="submit"
+                                            class="flex items-center gap-2 text-error hover:text-error/80 w-full px-2">
+                                            <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-4 lg:p-8">
                 <div class="max-w-7xl mx-auto animate-fade-in">
                     {{template "content" .}}
                 </div>
             </main>
+        </div>
 
-            <!-- Footer -->
-            <footer class="px-4 py-6 lg:px-8 border-t border-slate-200/80 dark:border-slate-800/80">
-                <div class="max-w-7xl mx-auto text-center text-sm text-slate-500 dark:text-slate-400">
-                    <p>&copy; 2026 Go Starter. Built with Go, HTMX, Alpine.js & Tailwind CSS v4.</p>
-                </div>
-            </footer>
+        <!-- Sidebar Drawer -->
+        <div class="drawer-side z-20 is-drawer-close:overflow-visible">
+            <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
+            <div
+                class="flex min-h-full flex-col items-start bg-base-200 border-r border-base-300 is-drawer-close:w-14 is-drawer-open:w-64 transition-all duration-300">
+                <ul class="menu w-full grow gap-2 p-2">
+                    <!-- Home Link (Added explicitly so users can go back to landing) -->
+                    <li>
+                        <a href="/" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Home">
+                            <i data-lucide="home" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <span class="is-drawer-close:hidden font-medium">Home</span>
+                        </a>
+                    </li>
+
+                    <!-- Dashboard -->
+                    <li>
+                        <a href="/dashboard" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                            data-tip="Dashboard">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <span class="is-drawer-close:hidden font-medium">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <!-- Users -->
+                    <li>
+                        <a href="/users" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Users">
+                            <i data-lucide="users" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <span class="is-drawer-close:hidden font-medium">Users</span>
+                        </a>
+                    </li>
+
+                    <!-- Settings -->
+                    <li>
+                        <a href="#" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Settings">
+                            <i data-lucide="settings" class="w-5 h-5 my-1.5 inline-block"></i>
+                            <span class="is-drawer-close:hidden font-medium">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
+    {{else}}
+    <!-- Default Layout (No Sidebar) -->
+    {{template "content" .}}
+    {{end}}
 
-    <!-- Modal Container -->
-    <div id="modal-container"></div>
+    <div id="modal-container" class="relative z-50"></div>
 
     <!-- Toast Notifications -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
