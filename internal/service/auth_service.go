@@ -4,8 +4,8 @@ package service
 import (
 	"context"
 
-	"github.com/go-starter/internal/domain"
-	"github.com/go-starter/internal/repository"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 

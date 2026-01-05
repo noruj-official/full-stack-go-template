@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/go-starter/internal/middleware"
+	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 )
 
 // Handler is the base handler with shared utilities.
@@ -114,31 +114,31 @@ func (h *Handler) Render(w http.ResponseWriter, name string, data any) {
 
 // RenderWithUser merges the authenticated user from context into the data and renders.
 func (h *Handler) RenderWithUser(w http.ResponseWriter, r *http.Request, name string, data any) {
-    if data == nil {
-        data = map[string]any{}
-    }
-    if m, ok := data.(map[string]any); ok {
-        m["User"] = middleware.GetUserFromContext(r.Context())
-        // Inject Theme from cookie (fallback to corporate; use client hint when dark)
-        theme := "corporate"
-        if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
-            if c.Value == "night" {
-                theme = "night"
-            } else if c.Value == "corporate" {
-                theme = "corporate"
-            }
-        } else {
-            // Optional: use client hint if sent
-            if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
-                theme = "night"
-            }
-        }
-        m["Theme"] = theme
-        h.Render(w, name, m)
-        return
-    }
-    // For non-map data (e.g., structs used in partials), render as-is
-    h.Render(w, name, data)
+	if data == nil {
+		data = map[string]any{}
+	}
+	if m, ok := data.(map[string]any); ok {
+		m["User"] = middleware.GetUserFromContext(r.Context())
+		// Inject Theme from cookie (fallback to corporate; use client hint when dark)
+		theme := "corporate"
+		if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
+			if c.Value == "night" {
+				theme = "night"
+			} else if c.Value == "corporate" {
+				theme = "corporate"
+			}
+		} else {
+			// Optional: use client hint if sent
+			if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
+				theme = "night"
+			}
+		}
+		m["Theme"] = theme
+		h.Render(w, name, m)
+		return
+	}
+	// For non-map data (e.g., structs used in partials), render as-is
+	h.Render(w, name, data)
 }
 
 // RenderPartial renders a partial template (for HTMX responses).

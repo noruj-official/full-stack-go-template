@@ -11,7 +11,7 @@ cd /d "%SCRIPT_DIR%.."
 
 echo.
 echo  ======================================
-echo   Go Starter Development Server
+echo   Full Stack Go Template Development Server
 echo  ======================================
 echo.
 echo  Project Root: %CD%

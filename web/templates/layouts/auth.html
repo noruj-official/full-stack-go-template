@@ -1,10 +1,7 @@
 {{define "base"}}
 <!DOCTYPE html>
-<html lang="en"
-    class="{{if eq .Theme "night"}}dark{{end}}"
-    data-theme="{{.Theme}}"
-    x-data="{ darkMode: {{if eq .Theme "night"}}true{{else}}false{{end}} }"
-    :class="{ 'dark': darkMode }"
+<html lang="en" class="{{if eq .Theme " night"}}dark{{end}}" data-theme="{{.Theme}}"
+    x-data="{ darkMode: {{if eq .Theme " night"}}true{{else}}false{{end}} }" :class="{ 'dark': darkMode }"
     :data-theme="darkMode ? 'night' : 'corporate'"
     x-init="(() => { const init = darkMode; document.documentElement.classList.toggle('dark', init); document.documentElement.setAttribute('data-theme', init ? 'night' : 'corporate'); $watch('darkMode', val => { document.documentElement.classList.toggle('dark', val); document.documentElement.setAttribute('data-theme', val ? 'night' : 'corporate'); localStorage.setItem('darkMode', val); document.cookie = 'theme=' + (val ? 'night' : 'corporate') + '; path=/; max-age=31536000'; }); })()">
 
@@ -13,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{.Description}}">
     <meta name="color-scheme" content="light dark">
-    <title>{{.Title}} | Go Starter</title>
+    <title>{{.Title}} | Full Stack Go Template</title>
 
     <!-- Tailwind CSS Output -->
     <link rel="stylesheet" href="/static/css/output.css">

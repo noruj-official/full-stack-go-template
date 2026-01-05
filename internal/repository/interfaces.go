@@ -4,8 +4,8 @@ package repository
 import (
 	"context"
 
-	"github.com/go-starter/internal/domain"
 	"github.com/google/uuid"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 )
 
 // UserRepository defines the interface for user data access operations.

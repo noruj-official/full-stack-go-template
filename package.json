@@ -1,5 +1,5 @@
 {
-  "name": "go-starter",
+  "name": "full-stack-go-template",
   "version": "1.0.0",
   "description": "Full-stack Go application with Tailwind CSS v4",
   "scripts": {

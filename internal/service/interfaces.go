@@ -4,8 +4,8 @@ package service
 import (
 	"context"
 
-	"github.com/go-starter/internal/domain"
 	"github.com/google/uuid"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 )
 
 // UserService defines the interface for user business operations.

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-starter/internal/domain"
-	"github.com/go-starter/internal/middleware"
-	"github.com/go-starter/internal/repository/postgres"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
+	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
 )
 
 // HomeHandler handles home page requests.
@@ -28,7 +28,7 @@ func NewHomeHandler(base *Handler, db *postgres.DB) *HomeHandler {
 // Index renders the home page.
 func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
-		"Title":       "Go Starter",
+		"Title":       "Full Stack Go Template",
 		"Description": "A professional full-stack Go application",
 	}
 	h.RenderWithUser(w, r, "home.html", data)

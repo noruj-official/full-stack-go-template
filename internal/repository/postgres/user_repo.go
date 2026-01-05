@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-starter/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 )
 
 // UserRepository implements the repository.UserRepository interface for PostgreSQL.

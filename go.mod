@@ -1,4 +1,4 @@
-module github.com/go-starter
+module github.com/shaik-noor/full-stack-go-template
 
 go 1.23
 

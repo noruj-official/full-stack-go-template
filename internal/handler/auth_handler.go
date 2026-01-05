@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-starter/internal/domain"
-	"github.com/go-starter/internal/middleware"
-	"github.com/go-starter/internal/service"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
+	"github.com/shaik-noor/full-stack-go-template/internal/service"
 )
 
 // AuthHandler handles authentication-related HTTP requests.
@@ -41,16 +41,16 @@ func getDashboardURLForRole(user *domain.User) string {
 
 // SignInPage renders the sign in page.
 func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
-    // If already logged in, redirect to appropriate dashboard
-    if user := middleware.GetUserFromContext(r.Context()); user != nil {
-        http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
-        return
-    }
+	// If already logged in, redirect to appropriate dashboard
+	if user := middleware.GetUserFromContext(r.Context()); user != nil {
+		http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
+		return
+	}
 
-    data := map[string]any{
-        "Title": "Sign In",
-    }
-    h.RenderWithUser(w, r, "signin.html", data)
+	data := map[string]any{
+		"Title": "Sign In",
+	}
+	h.RenderWithUser(w, r, "signin.html", data)
 }
 
 // SignIn handles user sign in.
@@ -101,32 +101,32 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
-    data := map[string]any{
-        "Title": "Sign In",
-        "Email": email,
-        "Error": errMsg,
-    }
+	data := map[string]any{
+		"Title": "Sign In",
+		"Email": email,
+		"Error": errMsg,
+	}
 
-    if isHTMXRequest(r) {
-        h.RenderPartial(w, "signin_form.html", data)
-        return
-    }
+	if isHTMXRequest(r) {
+		h.RenderPartial(w, "signin_form.html", data)
+		return
+	}
 
-    h.RenderWithUser(w, r, "signin.html", data)
+	h.RenderWithUser(w, r, "signin.html", data)
 }
 
 // SignupPage renders the signup page.
 func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
-    // If already logged in, redirect to appropriate dashboard
-    if user := middleware.GetUserFromContext(r.Context()); user != nil {
-        http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
-        return
-    }
+	// If already logged in, redirect to appropriate dashboard
+	if user := middleware.GetUserFromContext(r.Context()); user != nil {
+		http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
+		return
+	}
 
-    data := map[string]any{
-        "Title": "Sign Up",
-    }
-    h.RenderWithUser(w, r, "signup.html", data)
+	data := map[string]any{
+		"Title": "Sign Up",
+	}
+	h.RenderWithUser(w, r, "signup.html", data)
 }
 
 // Signup handles user registration.
@@ -179,18 +179,18 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, input *domain.RegisterInput, errMsg string) {
-    data := map[string]any{
-        "Title": "Sign Up",
-        "Form":  input,
-        "Error": errMsg,
-    }
+	data := map[string]any{
+		"Title": "Sign Up",
+		"Form":  input,
+		"Error": errMsg,
+	}
 
-    if isHTMXRequest(r) {
-        h.RenderPartial(w, "signup_form.html", data)
-        return
-    }
+	if isHTMXRequest(r) {
+		h.RenderPartial(w, "signup_form.html", data)
+		return
+	}
 
-    h.RenderWithUser(w, r, "signup.html", data)
+	h.RenderWithUser(w, r, "signup.html", data)
 }
 
 // Logout handles user logout.

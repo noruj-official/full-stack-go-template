@@ -11,12 +11,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-starter/internal/config"
-	"github.com/go-starter/internal/domain"
-	"github.com/go-starter/internal/handler"
-	"github.com/go-starter/internal/middleware"
-	"github.com/go-starter/internal/repository/postgres"
-	"github.com/go-starter/internal/service"
+	"github.com/shaik-noor/full-stack-go-template/internal/config"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/internal/handler"
+	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
+	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
+	"github.com/shaik-noor/full-stack-go-template/internal/service"
 )
 
 func main() {

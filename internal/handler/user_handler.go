@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-starter/internal/domain"
-	"github.com/go-starter/internal/service"
 	"github.com/google/uuid"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/internal/service"
 )
 
 // UserHandler handles user-related HTTP requests.

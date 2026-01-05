@@ -9,7 +9,7 @@ Set-Location (Join-Path $ScriptDir "..")
 
 Write-Host ""
 Write-Host "  ======================================" -ForegroundColor Cyan
-Write-Host "   Go Starter Development Server" -ForegroundColor Cyan
+Write-Host "   Full Stack Go Template Development Server" -ForegroundColor Cyan
 Write-Host "  ======================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Project Root: $(Get-Location)" -ForegroundColor Gray

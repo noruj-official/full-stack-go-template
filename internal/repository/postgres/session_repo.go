@@ -5,9 +5,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-starter/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 )
 
 // SessionRepository implements the repository.SessionRepository interface for PostgreSQL.
