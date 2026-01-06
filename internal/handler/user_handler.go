@@ -9,6 +9,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	usersPage "github.com/shaik-noor/full-stack-go-template/web/templ/pages/users"
 )
 
 // UserHandler handles user-related HTTP requests.
@@ -40,30 +41,19 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
-		"Title":       "Users",
-		"Users":       users,
-		"Total":       total,
-		"CurrentPage": page,
-		"TotalPages":  (total + 9) / 10,
-		"ShowSidebar": true,
-	}
+	user := middleware.GetUserFromContext(r.Context())
+	theme := getTheme(r)
+	showSidebar := true
 
-	if isHTMXRequest(r) && !isHTMXBoosted(r) {
-		h.RenderPartialWithUser(w, r, "user_list.html", data)
-		return
-	}
-
-	h.RenderWithUser(w, r, "list.html", data)
+	h.RenderTempl(w, r, usersPage.List("Users", "Manage your application users", user, showSidebar, theme, users, total, page, int((total+9)/10)))
 }
 
 // Create handles user creation form display and submission.
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		h.RenderWithUser(w, r, "create.html", map[string]any{
-			"Title":       "Create User",
-			"ShowSidebar": true,
-		})
+		user := middleware.GetUserFromContext(r.Context())
+		theme := getTheme(r)
+		h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, nil, ""))
 		return
 	}
 
@@ -104,7 +94,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// For HTMX requests, return the new row
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userCreated")
-		h.RenderPartialWithUser(w, r, "user_row.html", user)
+		h.RenderTempl(w, r, usersPage.UserRow(user))
 		return
 	}
 
@@ -112,18 +102,16 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) renderCreateForm(w http.ResponseWriter, r *http.Request, input *domain.CreateUserInput, errMsg string) {
-	data := map[string]any{
-		"Title": "Create User",
-		"Form":  input,
-		"Error": errMsg,
-	}
-
+	// If HTMX, render just the form content (UserForm)
 	if isHTMXRequest(r) {
-		h.RenderPartialWithUser(w, r, "user_form.html", data)
+		h.RenderTempl(w, r, usersPage.UserForm(nil, input, errMsg))
 		return
 	}
 
-	h.RenderWithUser(w, r, "create.html", data)
+	// Otherwise render the full create page
+	user := middleware.GetUserFromContext(r.Context())
+	theme := getTheme(r)
+	h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, input, errMsg))
 }
 
 // Edit handles user edit form display and submission.
@@ -146,11 +134,9 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodGet {
-		h.RenderWithUser(w, r, "edit.html", map[string]any{
-			"Title":       "Edit User",
-			"User":        user,
-			"ShowSidebar": true,
-		})
+		currentUser := middleware.GetUserFromContext(r.Context())
+		theme := getTheme(r)
+		h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, user, ""))
 		return
 	}
 
@@ -196,26 +182,24 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userUpdated")
-		h.RenderPartialWithUser(w, r, "user_row.html", updatedUser)
+		h.RenderTempl(w, r, usersPage.UserRow(updatedUser))
 		return
 	}
 
 	http.Redirect(w, r, "/a/users", http.StatusSeeOther)
 }
 
-func (h *UserHandler) renderEditForm(w http.ResponseWriter, r *http.Request, user *domain.User, errMsg string) {
-	data := map[string]any{
-		"Title": "Edit User",
-		"User":  user,
-		"Error": errMsg,
-	}
-
+func (h *UserHandler) renderEditForm(w http.ResponseWriter, r *http.Request, targetUser *domain.User, errMsg string) {
 	if isHTMXRequest(r) {
-		h.RenderPartialWithUser(w, r, "user_form.html", data)
+		// Render just the form content (UserForm)
+		// Note: We need to pass targetUser here essentially as the 'user' for UserForm
+		h.RenderTempl(w, r, usersPage.UserForm(targetUser, nil, errMsg))
 		return
 	}
 
-	h.RenderWithUser(w, r, "edit.html", data)
+	currentUser := middleware.GetUserFromContext(r.Context())
+	theme := getTheme(r)
+	h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, targetUser, errMsg))
 }
 
 // Delete handles user deletion.

@@ -1,0 +1,87 @@
+package users
+
+import (
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+)
+
+templ UserForm(user *domain.User, formData *domain.CreateUserInput, err string) {
+	if err != "" {
+		<div class="p-4 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 animate-scale-in mb-6">
+			<div class="flex items-center gap-2">
+				<i data-lucide="alert-circle" class="w-5 h-5"></i>
+				<span>{ err }</span>
+			</div>
+		</div>
+	}
+	
+	<div class="form-control w-full">
+		<label for="name" class="label">
+			<span class="label-text">Full Name</span>
+		</label>
+		<input 
+			type="text" 
+			id="name" 
+			name="name" 
+			if user != nil {
+				value={ user.Name }
+			} else if formData != nil {
+				value={ formData.Name }
+			}
+			class={ "input input-bordered w-full", templ.KV("input-error", err != "") } 
+			placeholder="Enter full name" 
+			required
+		/>
+	</div>
+
+	<div class="form-control w-full">
+		<label for="email" class="label">
+			<span class="label-text">Email Address</span>
+		</label>
+		<input 
+			type="email" 
+			id="email" 
+			name="email" 
+			if user != nil {
+				value={ user.Email }
+			} else if formData != nil {
+				value={ formData.Email }
+			}
+			class={ "input input-bordered w-full", templ.KV("input-error", err != "") }
+			placeholder="Enter email address" 
+			required
+		/>
+	</div>
+
+	if user != nil {
+		<div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-sm text-slate-500 dark:text-slate-400">
+			<div class="flex items-center gap-6">
+				<div>
+					<span class="text-slate-400 dark:text-slate-500">Created:</span>
+					<span class="ml-1 text-slate-700 dark:text-slate-300">{ user.CreatedAt.Format("Jan 02, 2006 at 3:04 PM") }</span>
+				</div>
+				<div>
+					<span class="text-slate-400 dark:text-slate-500">Updated:</span>
+					<span class="ml-1 text-slate-700 dark:text-slate-300">{ user.UpdatedAt.Format("Jan 02, 2006 at 3:04 PM") }</span>
+				</div>
+			</div>
+		</div>
+	}
+
+	<div class="flex items-center gap-3 pt-4">
+		<button type="submit" class="btn btn-primary">
+			<span class="htmx-indicator loading loading-spinner loading-xs"></span>
+			if user != nil {
+				<i data-lucide="save" class="w-4 h-4"></i>
+				Save Changes
+			} else {
+				<i data-lucide="user-plus" class="w-4 h-4"></i>
+				Create User
+			}
+		</button>
+		<a href="/a/users" class="btn btn-neutral">Cancel</a>
+	</div>
+
+	<script>
+		lucide.createIcons();
+	</script>
+}
