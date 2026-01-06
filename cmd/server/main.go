@@ -17,6 +17,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	"github.com/shaik-noor/full-stack-go-template/internal/storage"
 )
 
 func main() {
@@ -64,6 +65,12 @@ func run() error {
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
 
+	// Initialize storage service
+	storageService, err := storage.NewService(cfg, db.Pool)
+	if err != nil {
+		return fmt.Errorf("failed to initialize storage service: %w", err)
+	}
+
 	// Initialize handlers
 	baseHandler := handler.NewHandler("web/templates", cfg.App.Name, cfg.App.Logo)
 	if err := baseHandler.LoadTemplates(); err != nil {
@@ -74,6 +81,7 @@ func run() error {
 	userHandler := handler.NewUserHandler(baseHandler, userService, auditService)
 	authHandler := handler.NewAuthHandler(baseHandler, authService, activityService)
 	activityHandler := handler.NewActivityHandler(baseHandler, activityService)
+	profileHandler := handler.NewProfileHandler(baseHandler, userService, activityService, storageService)
 	settingsHandler := handler.NewSettingsHandler(baseHandler, userService, activityService)
 	analyticsHandler := handler.NewAnalyticsHandler(baseHandler, db)
 	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db)
@@ -113,8 +121,15 @@ func run() error {
 	// User routes (authenticated users)
 	userOnly := middleware.RequireAuth
 	mux.Handle("GET /u/activity", userOnly(http.HandlerFunc(activityHandler.UserActivity)))
+	mux.Handle("GET /u/profile", userOnly(http.HandlerFunc(profileHandler.ProfilePage)))
+	mux.Handle("POST /u/profile", userOnly(http.HandlerFunc(profileHandler.UpdateProfile)))
+	mux.Handle("POST /u/profile/image", userOnly(http.HandlerFunc(profileHandler.UploadProfileImage)))
+	mux.Handle("GET /u/profile/image", userOnly(http.HandlerFunc(profileHandler.GetMyProfileImage)))
 	mux.Handle("GET /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
 	mux.Handle("POST /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
+
+	// API routes for retrieving user profile images (accessible to authenticated users)
+	mux.Handle("GET /api/users/{id}/image", userOnly(http.HandlerFunc(profileHandler.GetUserProfileImage)))
 
 	// Admin routes (require admin role)
 	adminOnly := middleware.RequireRole(domain.RoleAdmin, domain.RoleSuperAdmin)

@@ -50,9 +50,45 @@ if command -v docker &> /dev/null; then
 fi
 
 echo ""
-echo -e "${GREEN}▶️  Starting Go server...${NC}"
-echo "   http://localhost:3000"
-echo ""
 
-# Run the Go server
-go run ./cmd/server
+# Check if dev server is already running on port 3000
+SERVER_LISTENING=false
+if command -v ss >/dev/null 2>&1; then
+  if ss -ltn | grep -q ':3000 '; then SERVER_LISTENING=true; fi
+elif command -v lsof >/dev/null 2>&1; then
+  if lsof -iTCP:3000 -sTCP:LISTENING >/dev/null 2>&1; then SERVER_LISTENING=true; fi
+else
+  if netstat -an 2>/dev/null | grep -q 'LISTENING'; then
+    if netstat -an 2>/dev/null | grep -q ':3000'; then SERVER_LISTENING=true; fi
+  fi
+fi
+
+if [ "$SERVER_LISTENING" = true ]; then
+  echo "✅ Dev server already running on http://localhost:3000"
+  read -p "[?] Open preview in browser now? (y/N) " OPEN_PREVIEW
+  case "$OPEN_PREVIEW" in
+    [yY]|[yY][eE][sS])
+      if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "http://localhost:3000/"
+      elif command -v open >/dev/null 2>&1; then
+        open "http://localhost:3000/"
+      else
+        echo "Open http://localhost:3000/ in your browser"
+      fi
+      ;;
+    *)
+      echo "Skipping preview open."
+      ;;
+  esac
+else
+  read -p "[?] Dev server not running. Start it here to stream logs? (y/N) " START_SERVER
+  case "$START_SERVER" in
+    [yY]|[yY][eE][sS])
+      echo -e "${GREEN}▶️  Starting Go server (logs will stream here)...${NC}"
+      go run ./cmd/server
+      ;;
+    *)
+      echo "Run 'go run ./cmd/server' to start the server."
+      ;;
+  esac
+fi

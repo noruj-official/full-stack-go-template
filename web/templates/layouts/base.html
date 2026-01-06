@@ -1,7 +1,6 @@
 {{define "base"}}
 <!DOCTYPE html>
-<html lang="en" class="{{if eq .Theme "dark"}}dark{{end}}" data-theme="{{if eq .Theme "dark"}}dark{{else}}light{{end}}" x-data="{ darkMode: {{if eq .Theme "dark"}}true{{else}}false{{end}}, sidebarOpen: false }" :class="{ 'dark': darkMode }" :data-theme="darkMode ? 'dark' : 'light'" x-on:keydown.escape.window="sidebarOpen = false"
-    x-init="(() => { const init = darkMode; document.documentElement.classList.toggle('dark', init); document.documentElement.setAttribute('data-theme', init ? 'dark' : 'light'); const savedSidebar = localStorage.getItem('sidebarOpen'); if (savedSidebar !== null) { sidebarOpen = savedSidebar === 'true'; } $watch('darkMode', val => { document.documentElement.classList.toggle('dark', val); document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light'); localStorage.setItem('darkMode', val); document.cookie = 'theme=' + (val ? 'dark' : 'light') + '; path=/; max-age=31536000'; }); $watch('sidebarOpen', val => { localStorage.setItem('sidebarOpen', val); }); })()">
+<html lang="en" class="{{if eq .Theme "dark"}}dark{{end}}" data-theme="{{if eq .Theme "dark"}}dark{{else}}light{{end}}" x-data="{ darkMode: {{if eq .Theme "dark"}}true{{else}}false{{end}}, sidebarOpen: false }" :class="{ 'dark': darkMode }" :data-theme="darkMode ? 'dark' : 'light'" x-on:keydown.escape.window="sidebarOpen = false" x-init="(() => { const init = darkMode; document.documentElement.classList.toggle('dark', init); document.documentElement.setAttribute('data-theme', init ? 'dark' : 'light'); const savedSidebar = localStorage.getItem('sidebarOpen'); if (savedSidebar !== null) { sidebarOpen = savedSidebar === 'true'; } $watch('darkMode', val => { document.documentElement.classList.toggle('dark', val); document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light'); localStorage.setItem('darkMode', val); document.cookie = 'theme=' + (val ? 'dark' : 'light') + '; path=/; max-age=31536000'; }); $watch('sidebarOpen', val => { localStorage.setItem('sidebarOpen', val); }); })()">
 
 <head>
     <meta charset="UTF-8">
@@ -25,7 +24,7 @@
     {{if .ShowSidebar}}
     {{template "sidebar" .}}
     {{end}}
-    <main class="flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-24" {{if
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-24 transition-all duration-300" {{if
         .ShowSidebar}}:class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'" {{end}}>
         <div class="max-w-7xl mx-auto animate-fade-in">
             {{template "content" .}}

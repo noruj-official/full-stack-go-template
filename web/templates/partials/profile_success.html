@@ -1,0 +1,19 @@
+{{define "profile_success"}}
+<div class="alert alert-success">
+    <i data-lucide="check-circle" class="w-5 h-5"></i>
+    <span>{{.Message}}</span>
+</div>
+<script>
+    // Reload icons after HTMX swap
+    lucide.createIcons();
+    // Auto-hide after 3 seconds
+    setTimeout(function () {
+        const alert = document.querySelector('.alert-success');
+        if (alert) {
+            alert.style.transition = 'opacity 0.3s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }
+    }, 3000);
+</script>
+{{end}}

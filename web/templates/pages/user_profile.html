@@ -1,0 +1,182 @@
+{{define "content"}}
+<!-- Profile Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-base-content">Profile</h1>
+        <p class="text-base-content/70">Manage your profile information and photo</p>
+    </div>
+</div>
+
+<!-- Profile Content -->
+<div class="max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Profile Image Card -->
+        <div class="lg:col-span-1">
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-header border-b border-base-200 p-4">
+                    <h2 class="text-lg font-semibold text-base-content">Profile Photo</h2>
+                </div>
+                <div class="card-body p-6 flex flex-col items-center">
+                    <!-- Profile Image Preview -->
+                    <div class="avatar mb-4">
+                        <div class="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center text-primary text-4xl font-medium overflow-hidden"
+                            id="profile-image-container">
+                            <img id="profile-image-preview" src="/u/profile/image" alt="{{.User.Name}}"
+                                class="w-full h-full object-cover hidden" onerror="this.style.display='none'"
+                                onload="this.style.display='block'; this.nextElementSibling.style.display='none'" />
+                            <span id="profile-initials">{{slice .User.Name 0 1}}</span>
+                        </div>
+                    </div>
+
+                    <!-- Upload Form -->
+                    <form id="upload-form" enctype="multipart/form-data" method="POST" action="/u/profile/image"
+                        hx-post="/u/profile/image" hx-encoding="multipart/form-data" hx-target="#upload-status"
+                        class="w-full">
+                        <input type="file" id="profile-image-input" name="profile_image" accept="image/*"
+                            class="file-input file-input-bordered w-full mb-3" onchange="previewImage(this)" />
+
+                        <div id="upload-status" class="mb-3"></div>
+
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Upload Photo
+                        </button>
+                    </form>
+
+                    <p class="text-xs text-base-content/60 mt-3 text-center">
+                        JPG, PNG, GIF or WebP. Max size 2MB
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Information Card -->
+        <div class="lg:col-span-2">
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-header border-b border-base-200 p-4">
+                    <h2 class="text-lg font-semibold text-base-content">Profile Information</h2>
+                </div>
+                <div class="card-body p-6">
+                    {{if .Error}}
+                    <div class="alert alert-error mb-6">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <span>{{.Error}}</span>
+                    </div>
+                    {{end}}
+
+                    <form method="POST" action="/u/profile" hx-post="/u/profile" hx-target="#profile-form"
+                        hx-swap="innerHTML">
+                        <div id="profile-form" class="space-y-6">
+                            {{template "profile_form_fields" .}}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Information Card -->
+            <div class="card bg-base-100 shadow-sm border border-base-200 mt-6">
+                <div class="card-header border-b border-base-200 p-4">
+                    <h2 class="text-lg font-semibold text-base-content">Account Information</h2>
+                </div>
+                <div class="card-body p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-base-content/70">Role</span>
+                        <span class="badge {{if eq .User.Role.String " super_admin"}}badge-primary{{else if eq
+                            .User.Role.String "admin" }}badge-secondary{{else}}badge-ghost{{end}}">
+                            {{.User.Role}}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-base-content/70">Member Since</span>
+                        <span class="text-base-content">{{.User.CreatedAt.Format "Jan 02, 2006"}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(input) {
+        const file = input.files[0];
+        const statusDiv = document.getElementById('upload-status');
+
+        // Clear previous status
+        statusDiv.innerHTML = '';
+
+        if (file) {
+            // Validate file size (2MB = 2097152 bytes)
+            if (file.size > 2097152) {
+                statusDiv.innerHTML = '<div class="alert alert-error"><i data-lucide="alert-circle" class="w-4 h-4"></i><span>Image size must be less than 2MB</span></div>';
+                input.value = '';
+                lucide.createIcons();
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                statusDiv.innerHTML = '<div class="alert alert-error"><i data-lucide="alert-circle" class="w-4 h-4"></i><span>Invalid image type. Use JPEG, PNG, GIF, or WebP</span></div>';
+                input.value = '';
+                lucide.createIcons();
+                return;
+            }
+
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('profile-image-preview');
+                const initials = document.getElementById('profile-initials');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                initials.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Listen for successful image upload
+    document.body.addEventListener('profileImageUpdated', function () {
+        // Reload the profile image on the page
+        const preview = document.getElementById('profile-image-preview');
+        const timestamp = new Date().getTime();
+        preview.src = '/u/profile/image?' + timestamp;
+
+        // Reload navbar avatar
+        const navbarAvatar = document.querySelector('.dropdown .avatar img');
+        if (navbarAvatar) {
+            navbarAvatar.src = '/u/profile/image?' + timestamp;
+        }
+
+        // Reload sidebar avatar
+        const sidebarAvatar = document.querySelector('aside .avatar img');
+        if (sidebarAvatar) {
+            sidebarAvatar.src = '/u/profile/image?' + timestamp;
+        }
+    });
+</script>
+{{end}}
+
+{{define "profile_form_fields"}}
+<div class="form-control">
+    <label class="label">
+        <span class="label-text font-medium">Name</span>
+    </label>
+    <input type="text" name="name" value="{{.User.Name}}" class="input input-bordered w-full" required />
+</div>
+
+<div class="form-control">
+    <label class="label">
+        <span class="label-text font-medium">Email</span>
+    </label>
+    <input type="email" name="email" value="{{.User.Email}}" class="input input-bordered w-full" required />
+</div>
+
+<div class="flex justify-end gap-3">
+    <a href="/u/dashboard" class="btn btn-ghost">Cancel</a>
+    <button type="submit" class="btn btn-primary">
+        <i data-lucide="save" class="w-4 h-4"></i>
+        Save Changes
+    </button>
+</div>
+{{end}}

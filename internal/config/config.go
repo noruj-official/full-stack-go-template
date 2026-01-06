@@ -14,6 +14,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	App      AppConfig
+	Storage  StorageConfig
 }
 
 // ServerConfig contains HTTP server settings.
@@ -32,6 +33,16 @@ type AppConfig struct {
 	Env  string
 	Name string
 	Logo string
+}
+
+// StorageConfig contains file/image storage settings.
+type StorageConfig struct {
+	// Type determines where profile images are stored: "database" or "s3"
+	Type string
+	// S3Bucket is the S3 bucket name (only used when Type is "s3")
+	S3Bucket string
+	// S3Region is the AWS region (only used when Type is "s3")
+	S3Region string
 }
 
 // Load reads configuration from environment variables.
@@ -57,6 +68,11 @@ func Load() (*Config, error) {
 			Env:  getEnv("APP_ENV", "development"),
 			Name: getEnv("APP_NAME", "Full Stack Go Template"),
 			Logo: getEnv("APP_LOGO", "/static/img/logo.svg"),
+		},
+		Storage: StorageConfig{
+			Type:     getEnv("PROFILE_IMAGE_STORAGE", "database"),
+			S3Bucket: getEnv("S3_BUCKET", ""),
+			S3Region: getEnv("S3_REGION", "us-east-1"),
 		},
 	}, nil
 }

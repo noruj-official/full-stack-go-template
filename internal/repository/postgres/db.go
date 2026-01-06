@@ -64,6 +64,11 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`,
 
+		// Add profile image columns to users table
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image BYTEA`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_type VARCHAR(50)`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_size INTEGER DEFAULT 0`,
+
 		// Create sessions table
 		`CREATE TABLE IF NOT EXISTS sessions (
 			id VARCHAR(64) PRIMARY KEY,

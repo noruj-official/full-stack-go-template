@@ -11,21 +11,24 @@
                 </button>
 
                 <!-- Desktop sidebar toggle button -->
-                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:inline-flex btn btn-ghost p-2" title="Toggle Sidebar">
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:inline-flex btn btn-ghost p-2"
+                    title="Toggle Sidebar">
                     <i data-lucide="panel-left" class="w-5 h-5"></i>
                 </button>
                 {{else}}
                 <!-- Disabled toggles on auth pages with tooltip -->
                 <div class="tooltip tooltip-right lg:tooltip-bottom z-50" data-tip="Sidebar is disabled on auth pages">
-                      <button class="lg:hidden btn btn-ghost p-2 opacity-50 cursor-not-allowed" title="Sidebar disabled" disabled>
-                          <i data-lucide="menu" class="w-5 h-5"></i>
-                      </button>
-                  </div>
-                  <div class="tooltip tooltip-right lg:tooltip-bottom z-50" data-tip="Sidebar is disabled on auth pages">
-                      <button class="hidden lg:inline-flex btn btn-ghost p-2 opacity-50 cursor-not-allowed" title="Sidebar disabled" disabled>
-                          <i data-lucide="panel-left" class="w-5 h-5"></i>
-                      </button>
-                  </div>
+                    <button class="lg:hidden btn btn-ghost p-2 opacity-50 cursor-not-allowed" title="Sidebar disabled"
+                        disabled>
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="tooltip tooltip-right lg:tooltip-bottom z-50" data-tip="Sidebar is disabled on auth pages">
+                    <button class="hidden lg:inline-flex btn btn-ghost p-2 opacity-50 cursor-not-allowed"
+                        title="Sidebar disabled" disabled>
+                        <i data-lucide="panel-left" class="w-5 h-5"></i>
+                    </button>
+                </div>
                 {{end}}
 
                 <!-- Brand Logo/Title moved next to toggle -->
@@ -48,9 +51,15 @@
                 <div class="dropdown dropdown-end" x-data="{ open: false }" :class="{ 'dropdown-open': open }">
                     <button @click="open = !open" @click.away="open = false"
                         class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-base-200 transition-colors">
-                        <div
-                            class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium">
-                            {{slice .User.Name 0 1}}
+                        <div class="avatar">
+                            <div
+                                class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium overflow-hidden">
+                                <img class="w-full h-full object-cover" src="/u/profile/image" alt="{{.User.Name}}"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                    onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
+                                <span class="w-full h-full flex items-center justify-center">{{slice .User.Name 0
+                                    1}}</span>
+                            </div>
                         </div>
                         <span class="hidden sm:block text-sm font-medium text-base-content">{{.User.Name}}</span>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-base-content/50 hidden sm:block"></i>
@@ -73,13 +82,13 @@
                         </li>
 
                         <li>
-                            <a href="#">
+                            <a href="/u/profile">
                                 <i data-lucide="user" class="w-4 h-4"></i>
                                 Profile
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="/u/settings">
                                 <i data-lucide="settings" class="w-4 h-4"></i>
                                 Settings
                             </a>

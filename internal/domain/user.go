@@ -10,13 +10,16 @@ import (
 
 // User represents a user entity in the system.
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	Email        string    `json:"email"`
-	Name         string    `json:"name"`
-	PasswordHash string    `json:"-"` // Never expose in JSON
-	Role         Role      `json:"role"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID               uuid.UUID `json:"id"`
+	Email            string    `json:"email"`
+	Name             string    `json:"name"`
+	PasswordHash     string    `json:"-"` // Never expose in JSON
+	Role             Role      `json:"role"`
+	ProfileImage     []byte    `json:"-"`                  // Binary image data (never expose in JSON)
+	ProfileImageType string    `json:"profile_image_type"` // MIME type (e.g., "image/jpeg")
+	ProfileImageSize int       `json:"profile_image_size"` // Size in bytes
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 // NewUser creates a new User with a generated UUID and timestamps.
@@ -140,4 +143,39 @@ type UpdateUserInput struct {
 	Email *string `json:"email,omitempty"`
 	Name  *string `json:"name,omitempty"`
 	Role  *Role   `json:"role,omitempty"`
+}
+
+// UpdateProfileImageInput represents the input for updating a user's profile image.
+type UpdateProfileImageInput struct {
+	ImageData   []byte
+	ContentType string
+	Size        int
+}
+
+// Validate checks if the profile image input is valid.
+func (i *UpdateProfileImageInput) Validate() error {
+	const maxSize = 2 * 1024 * 1024 // 2MB in bytes
+
+	if len(i.ImageData) == 0 {
+		return ErrValidation{Field: "image", Message: "image data is required"}
+	}
+
+	if i.Size > maxSize {
+		return ErrValidation{Field: "image", Message: "image size must be less than 2MB"}
+	}
+
+	// Validate content type
+	validTypes := map[string]bool{
+		"image/jpeg": true,
+		"image/jpg":  true,
+		"image/png":  true,
+		"image/gif":  true,
+		"image/webp": true,
+	}
+
+	if !validTypes[i.ContentType] {
+		return ErrValidation{Field: "image", Message: "invalid image type. Allowed: JPEG, PNG, GIF, WebP"}
+	}
+
+	return nil
 }
