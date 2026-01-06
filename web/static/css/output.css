@@ -4189,6 +4189,39 @@
   }
 }
 @layer base {
+  :where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme="light"] {
+    color-scheme: light;
+    --color-base-100: oklch(100% 0 0);
+    --color-base-200: oklch(98% 0 0);
+    --color-base-300: oklch(95% 0 0);
+    --color-base-content: oklch(14% 0.004 49.25);
+    --color-primary: oklch(25% 0.005 56.366);
+    --color-primary-content: oklch(98% 0.003 247.858);
+    --color-secondary: oklch(55% 0.111 230.318);
+    --color-secondary-content: oklch(98% 0.003 247.858);
+    --color-accent: oklch(0% 0 0);
+    --color-accent-content: oklch(100% 0 0);
+    --color-neutral: oklch(20% 0.011 73.639);
+    --color-neutral-content: oklch(98% 0.001 106.423);
+    --color-info: oklch(65% 0.154 211.53);
+    --color-info-content: oklch(98% 0 0);
+    --color-success: oklch(65% 0.209 151.711);
+    --color-success-content: oklch(98% 0 0);
+    --color-warning: oklch(75% 0.189 84.429);
+    --color-warning-content: oklch(20% 0.077 45.635);
+    --color-error: oklch(65% 0.202 349.761);
+    --color-error-content: oklch(98% 0 0);
+    --radius-selector: 0rem;
+    --radius-field: 2rem;
+    --radius-box: 0rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 1;
+  }
+}
+@layer base {
   :root:has(input.theme-controller[value=dark]:checked),[data-theme="dark"] {
     color-scheme: dark;
     --color-base-100: oklch(14% 0.004 49.25);

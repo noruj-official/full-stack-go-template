@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 
 REM Get the directory where this script is located
 set "SCRIPT_DIR=%~dp0"
-cd /d "%SCRIPT_DIR%"
+cd /d "%SCRIPT_DIR%.."
 
 echo.
 echo  ======================================

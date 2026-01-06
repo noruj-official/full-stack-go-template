@@ -10,6 +10,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
 	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/dashboards"
 )
 
 // HomeHandler handles home page requests.
@@ -29,14 +30,7 @@ func NewHomeHandler(base *Handler, db *postgres.DB) *HomeHandler {
 // Index renders the home page.
 func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	theme := "light"
-	if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
-		if c.Value == "dark" {
-			theme = "dark"
-		}
-	} else if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
-		theme = "dark"
-	}
+	theme := getTheme(r)
 
 	h.RenderTempl(w, r, pages.Home("Full Stack Go Template", "A professional full-stack Go application", user, theme))
 }
@@ -69,13 +63,8 @@ func (h *HomeHandler) DashboardRedirect(w http.ResponseWriter, r *http.Request) 
 // UserDashboard renders the user dashboard page.
 func (h *HomeHandler) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-
-	data := map[string]any{
-		"Title":       "Dashboard",
-		"ShowSidebar": true,
-		"User":        user,
-	}
-	h.RenderWithUser(w, r, "user_dashboard.html", data)
+	theme := getTheme(r)
+	h.RenderTempl(w, r, dashboards.UserDashboard("Dashboard", user, theme))
 }
 
 // AdminDashboard renders the admin dashboard page.
@@ -107,13 +96,9 @@ func (h *HomeHandler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	data := map[string]any{
-		"Title":       "Admin Dashboard",
-		"UserCount":   userCount,
-		"RecentUsers": recent,
-		"ShowSidebar": true,
-	}
-	h.RenderWithUser(w, r, "admin_dashboard.html", data)
+	user := middleware.GetUserFromContext(r.Context())
+	theme := getTheme(r)
+	h.RenderTempl(w, r, dashboards.AdminDashboard("Admin Dashboard", userCount, recent, user, theme))
 }
 
 // SuperAdminDashboard renders the super admin dashboard page.
@@ -168,15 +153,9 @@ func (h *HomeHandler) SuperAdminDashboard(w http.ResponseWriter, r *http.Request
 		})
 	}
 
-	data := map[string]any{
-		"Title":          "Super Admin Dashboard",
-		"UserCount":      userCount,
-		"AdminCount":     adminCount,
-		"ActiveSessions": activeSessions,
-		"RecentUsers":    recent,
-		"ShowSidebar":    true,
-	}
-	h.RenderWithUser(w, r, "superadmin_dashboard.html", data)
+	user := middleware.GetUserFromContext(r.Context())
+	theme := getTheme(r)
+	h.RenderTempl(w, r, dashboards.SuperAdminDashboard("Super Admin Dashboard", userCount, adminCount, activeSessions, recent, user, theme))
 }
 
 // HealthCheck returns the health status of the application.
@@ -223,4 +202,18 @@ func (h *HomeHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 		"Description": "The page you requested was not found.",
 	}
 	h.RenderWithUser(w, r, "404.html", data)
+}
+
+func getTheme(r *http.Request) string {
+	theme := "light"
+	if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
+		if c.Value == "dark" {
+			theme = "dark"
+		} else if c.Value == "light" {
+			theme = "light"
+		}
+	} else if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
+		theme = "dark"
+	}
+	return theme
 }

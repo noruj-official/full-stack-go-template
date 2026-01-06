@@ -1,0 +1,86 @@
+package dashboards
+
+import (
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
+)
+
+templ UserDashboard(title string, user *domain.User, theme string) {
+	@layouts.Base(title, "User Dashboard", user, true, theme) {
+		<!-- User Dashboard Header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+			<div>
+				<h1 class="text-2xl font-bold text-base-content">Welcome, { user.Name }!</h1>
+				<p class="text-base-content/70">Your personal dashboard</p>
+			</div>
+		</div>
+
+		<!-- Profile Card -->
+		<div class="grid lg:grid-cols-3 gap-6">
+			<div class="lg:col-span-2 card bg-base-100 shadow-sm border border-base-200">
+				<div class="card-header border-b border-base-200 p-4">
+					<h2 class="text-lg font-semibold text-base-content">Your Profile</h2>
+				</div>
+				<div class="card-body p-6">
+					<div class="flex items-center gap-6">
+						<div
+							class="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center text-primary text-2xl font-bold">
+							{ string(user.Name[0]) }
+						</div>
+						<div class="space-y-2">
+							<h3 class="text-xl font-semibold text-base-content">{ user.Name }</h3>
+							<p class="text-base-content/70 flex items-center gap-2">
+								<i data-lucide="mail" class="w-4 h-4"></i>
+								{ user.Email }
+							</p>
+							<span class="badge badge-primary">{ string(user.Role) }</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Quick Links -->
+			<div class="card bg-base-100 shadow-sm border border-base-200">
+				<div class="card-header border-b border-base-200 p-4">
+					<h2 class="text-lg font-semibold text-base-content">Quick Links</h2>
+				</div>
+				<div class="card-body p-4 space-y-3">
+					<a href="/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+						<div
+							class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+							<i data-lucide="home" class="w-5 h-5 text-primary"></i>
+						</div>
+						<div>
+							<p class="font-medium text-base-content">Home</p>
+							<p class="text-xs text-base-content/70">Return to homepage</p>
+						</div>
+					</a>
+
+					<a href="/u/activity"
+						class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+						<div
+							class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+							<i data-lucide="activity" class="w-5 h-5 text-info"></i>
+						</div>
+						<div>
+							<p class="font-medium text-base-content">Activity Log</p>
+							<p class="text-xs text-base-content/70">View your recent activities</p>
+						</div>
+					</a>
+
+					<a href="/u/settings"
+						class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+						<div
+							class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+							<i data-lucide="settings" class="w-5 h-5 text-success"></i>
+						</div>
+						<div>
+							<p class="font-medium text-base-content">Settings</p>
+							<p class="text-xs text-base-content/70">Account preferences</p>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	}
+}
