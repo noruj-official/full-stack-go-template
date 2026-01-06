@@ -1,144 +1,198 @@
 @import "tailwindcss";
 
-@plugin "daisyui" {  themes: corporate, night, light, dark; }
-
-@plugin "daisyui/theme" {
-  name: "dark";
-  default: false;
-  prefersdark: false;
-  color-scheme: "dark";
-  --color-base-100: oklch(14% 0.004 49.25);
-  --color-base-200: oklch(21% 0.006 56.043);
-  --color-base-300: oklch(26% 0.007 34.298);
-  --color-base-content: oklch(97% 0.001 106.424);
-  --color-primary: oklch(86% 0.005 56.366);
-  --color-primary-content: oklch(14% 0.004 49.25);
-  --color-secondary: oklch(82% 0.111 230.318);
-  --color-secondary-content: oklch(29% 0.066 243.157);
-  --color-accent: oklch(0% 0 0);
-  --color-accent-content: oklch(100% 0 0);
-  --color-neutral: oklch(44% 0.011 73.639);
-  --color-neutral-content: oklch(98% 0.001 106.423);
-  --color-info: oklch(78% 0.154 211.53);
-  --color-info-content: oklch(30% 0.056 229.695);
-  --color-success: oklch(79% 0.209 151.711);
-  --color-success-content: oklch(26% 0.065 152.934);
-  --color-warning: oklch(82% 0.189 84.429);
-  --color-warning-content: oklch(27% 0.077 45.635);
-  --color-error: oklch(71% 0.202 349.761);
-  --color-error-content: oklch(28% 0.109 3.907);
-  --radius-selector: 0rem;
-  --radius-field: 2rem;
-  --radius-box: 0rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
+@plugin "daisyui" {
+    themes: corporate, night, light, dark;
 }
 
-@custom-variant dark (&:where(.dark,
-    .dark *,
-    [data-theme="dark"],
-    [data-theme="dark"] *));
+@plugin "daisyui/theme" {
+    name: "dark";
+    default: false;
+    prefersdark: false;
+    color-scheme: "dark";
+    --color-base-100: oklch(14% 0.004 49.25);
+    --color-base-200: oklch(21% 0.006 56.043);
+    --color-base-300: oklch(26% 0.007 34.298);
+    --color-base-content: oklch(97% 0.001 106.424);
+    --color-primary: oklch(86% 0.005 56.366);
+    --color-primary-content: oklch(14% 0.004 49.25);
+    --color-secondary: oklch(82% 0.111 230.318);
+    --color-secondary-content: oklch(29% 0.066 243.157);
+    --color-accent: oklch(0% 0 0);
+    --color-accent-content: oklch(100% 0 0);
+    --color-neutral: oklch(44% 0.011 73.639);
+    --color-neutral-content: oklch(98% 0.001 106.423);
+    --color-info: oklch(78% 0.154 211.53);
+    --color-info-content: oklch(30% 0.056 229.695);
+    --color-success: oklch(79% 0.209 151.711);
+    --color-success-content: oklch(26% 0.065 152.934);
+    --color-warning: oklch(82% 0.189 84.429);
+    --color-warning-content: oklch(27% 0.077 45.635);
+    --color-error: oklch(71% 0.202 349.761);
+    --color-error-content: oklch(28% 0.109 3.907);
+    --radius-selector: 0rem;
+    --radius-field: 2rem;
+    --radius-box: 0rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 1;
+}
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 /* Base styles */
 @layer base {
-  html {
-    @apply scroll-smooth antialiased;
-  }
+    html {
+        @apply scroll-smooth antialiased;
+    }
 }
 
 /* Utilities */
 @layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
+    .text-gradient {
+        @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
     }
 
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
     }
 
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
+    .animate-slide-up {
+        animation: slideUp 0.4s ease-out;
     }
 
-    to {
-      opacity: 1;
-      transform: scale(1);
+    .animate-scale-in {
+        animation: scaleIn 0.2s ease-out;
     }
-  }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Custom Home Animations */
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -30px) scale(1.05);
+        }
+
+        66% {
+            transform: translate(-20px, 20px) scale(0.95);
+        }
+    }
+
+    @keyframes float-reverse {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(-40px, 20px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(30px, -20px) scale(0.9);
+        }
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            opacity: 0.3;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .bg-blob-1 {
+        animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite;
+    }
+
+    .bg-blob-2 {
+        animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s;
+    }
+
+    .bg-blob-3 {
+        animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s;
+    }
 }
 
 @layer components {
 
-  /* Sidebar toggle logic matching snippet */
-  .drawer-toggle:checked~.drawer-side .is-drawer-open\:w-64 {
-    width: 16rem;
-  }
+    /* Sidebar toggle logic */
+    .drawer-toggle:checked~.drawer-side .is-drawer-open\:w-64 {
+        width: 16rem;
+    }
 
-  .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:w-14 {
-    width: 3.5rem;
-  }
+    .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:w-14 {
+        width: 3.5rem;
+    }
 
-  .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:hidden {
-    display: none;
-  }
+    .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:hidden {
+        display: none;
+    }
 
-  .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:block {
-    display: block;
-  }
+    .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:block {
+        display: block;
+    }
 
-  .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:overflow-visible {
-    overflow: visible;
-  }
+    .drawer-toggle:not(:checked)~.drawer-side .is-drawer-close\:overflow-visible {
+        overflow: visible;
+    }
 
-  /* Disable tooltip when open (checked) */
-  .drawer-toggle:checked~.drawer-side .is-drawer-close\:tooltip::before,
-  .drawer-toggle:checked~.drawer-side .is-drawer-close\:tooltip::after {
-    display: none !important;
-  }
+    .drawer-toggle:checked~.drawer-side .is-drawer-close\:tooltip::before,
+    .drawer-toggle:checked~.drawer-side .is-drawer-close\:tooltip::after {
+        display: none !important;
+    }
 
-  /* HTMX loading indicator */
-  .htmx-indicator {
-    @apply opacity-0 transition-opacity duration-200;
-  }
+    /* HTMX loading indicator */
+    .htmx-indicator {
+        @apply opacity-0 transition-opacity duration-200;
+    }
 
-  .htmx-request .htmx-indicator,
-  .htmx-request.htmx-indicator {
-    @apply opacity-100;
-  }
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+        @apply opacity-100;
+    }
 }
-

@@ -2,7 +2,12 @@
 
 # Development server with file watching
 dev:
+	go run github.com/a-h/templ/cmd/templ generate
 	go run ./cmd/server
+
+# Generate templ files
+templ:
+	go run github.com/a-h/templ/cmd/templ generate
 
 # Build production binary
 build:

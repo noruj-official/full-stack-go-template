@@ -1,0 +1,181 @@
+package components
+
+import "github.com/shaik-noor/full-stack-go-template/internal/domain"
+
+templ Sidebar(user *domain.User, title string) {
+	<!-- Mobile sidebar overlay -->
+	<div
+		x-show="sidebarOpen"
+		x-transition:enter="transition ease-out duration-300"
+		x-transition:enter-start="opacity-0"
+		x-transition:enter-end="opacity-100"
+		x-transition:leave="transition ease-in duration-200"
+		x-transition:leave-start="opacity-100"
+		x-transition:leave-end="opacity-0"
+		@click="sidebarOpen = false"
+		class="fixed inset-0 z-30 bg-base-content/50 backdrop-blur-sm lg:hidden"
+		x-cloak
+	></div>
+	<!-- Sidebar -->
+	<aside
+		:class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+		class="fixed inset-y-0 left-0 z-40 w-64 bg-base-100/90 backdrop-blur-xl border-r border-base-200/80 transform transition-transform duration-300 ease-out"
+	>
+		<div class="flex flex-col h-full">
+			<!-- Close button (mobile + desktop) -->
+			<div class="flex items-center justify-end px-4 py-3 border-b border-base-200/80">
+				<button @click="sidebarOpen = false" class="btn btn-ghost p-1.5" title="Close Sidebar">
+					<i data-lucide="x" class="w-5 h-5"></i>
+				</button>
+			</div>
+			<!-- Navigation -->
+			<ul class="menu flex-1 px-4 py-6 overflow-y-auto w-full">
+				<!-- Main Section (Everyone) -->
+				<li class="menu-title text-base-content/60 uppercase tracking-wider">Main</li>
+				<li>
+					<a href="/" class={ templ.KV("active", title == "Full Stack Go Template") }>
+						<i data-lucide="home" class="w-5 h-5"></i>
+						Home
+					</a>
+				</li>
+				<li>
+					<a href="/dashboard" class={ templ.KV("active", title == "Dashboard" || title == "Admin Dashboard" || title == "Super Admin Dashboard") }>
+						<i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+						Dashboard
+					</a>
+				</li>
+				<!-- User Section (Authenticated Users) -->
+				if user != nil {
+					<li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Personal</li>
+					<li>
+						<a href="/u/activity" class={ templ.KV("active", title == "Activity Log") }>
+							<i data-lucide="history" class="w-5 h-5"></i>
+							Activity Log
+						</a>
+					</li>
+					<li>
+						<a href="/u/settings" class={ templ.KV("active", title == "Settings") }>
+							<i data-lucide="settings" class="w-5 h-5"></i>
+							Settings
+						</a>
+					</li>
+				}
+				<!-- Admin Section (Admin + Super Admin) -->
+				if user != nil && user.IsAdmin() {
+					<li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Administration</li>
+					<li>
+						<a href="/a/users" class={ templ.KV("active", title == "Users") }>
+							<i data-lucide="users" class="w-5 h-5"></i>
+							User Management
+						</a>
+					</li>
+					<li>
+						<a href="/a/analytics" class={ templ.KV("active", title == "Analytics") }>
+							<i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+							Analytics & Reports
+						</a>
+					</li>
+					<li>
+						<a href="/a/activity" class={ templ.KV("active", title == "System Activity") }>
+							<i data-lucide="activity" class="w-5 h-5"></i>
+							System Activity
+						</a>
+					</li>
+				}
+				<!-- Super Admin Section (Super Admin Only) -->
+				if user != nil && user.IsSuperAdmin() {
+					<li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Super Admin</li>
+					<li>
+						<a href="/s/audit" class={ templ.KV("active", title == "Audit Logs") }>
+							<i data-lucide="file-text" class="w-5 h-5"></i>
+							Audit Logs
+						</a>
+					</li>
+					<li>
+						<a href="/s/system" class={ templ.KV("active", title == "System Health") }>
+							<i data-lucide="server" class="w-5 h-5"></i>
+							System Health
+						</a>
+					</li>
+					<li>
+						<a href="#" class="opacity-50 cursor-not-allowed">
+							<i data-lucide="shield" class="w-5 h-5"></i>
+							Admin Management
+							<span class="badge badge-primary badge-xs ml-auto">Soon</span>
+						</a>
+					</li>
+				}
+				<!-- Coming Soon / Resources -->
+				if user != nil {
+					<li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">More</li>
+					<li>
+						<a href="#" class="opacity-50 cursor-not-allowed">
+							<i data-lucide="help-circle" class="w-5 h-5"></i>
+							Help & Support
+							<span class="badge badge-primary badge-xs ml-auto">Soon</span>
+						</a>
+					</li>
+				} else {
+					<!-- For non-authenticated users -->
+					<li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Resources</li>
+					<li>
+						<a href="#" class="opacity-50 cursor-not-allowed">
+							<i data-lucide="file-text" class="w-5 h-5"></i>
+							Documentation
+							<span class="badge badge-primary badge-xs ml-auto">Soon</span>
+						</a>
+					</li>
+				}
+			</ul>
+			<!-- Bottom section -->
+			if user != nil {
+				<div class="p-4 border-t border-base-200/80">
+					<div class="flex items-center gap-3 p-3 rounded-xl bg-base-200/50">
+						<div class="avatar">
+							<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium overflow-hidden">
+								<img
+									class="w-full h-full object-cover"
+									src="/u/profile/image"
+									alt={ user.Name }
+									onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+									onload="this.style.display='block'; this.nextElementSibling.style.display='none';"
+								/>
+								<span class="w-full h-full flex items-center justify-center">
+									if len(user.Name) > 0 {
+										{ string([]rune(user.Name)[0]) }
+									}
+								</span>
+							</div>
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-medium text-base-content truncate">{ user.Name }</p>
+							<p class="text-xs text-base-content/70 truncate">{ user.Email }</p>
+						</div>
+						<form action="/logout" method="POST">
+							<button type="submit" class="btn btn-ghost p-2 text-base-content/60 hover:text-error" title="Logout">
+								<i data-lucide="log-out" class="w-4 h-4"></i>
+							</button>
+						</form>
+					</div>
+				</div>
+			} else {
+				<div class="p-4 border-t border-base-200/80">
+					<div class="card p-4 bg-gradient-to-br from-primary-500/10 to-accent-500/10 border-primary-200/50 dark:border-primary-800/50">
+						<div class="flex items-center gap-3 mb-3">
+							<div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center">
+								<i data-lucide="user-plus" class="w-5 h-5 text-primary-600 dark:text-primary-400"></i>
+							</div>
+							<div>
+								<p class="text-sm font-semibold text-base-content">Get Started</p>
+								<p class="text-xs text-base-content/70">Create an account</p>
+							</div>
+						</div>
+						<a href="/signup" class="btn btn-primary w-full text-sm">
+							Sign Up Free
+						</a>
+					</div>
+				</div>
+			}
+		</div>
+	</aside>
+}

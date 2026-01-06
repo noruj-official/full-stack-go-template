@@ -9,6 +9,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
 )
 
 // HomeHandler handles home page requests.
@@ -27,6 +28,21 @@ func NewHomeHandler(base *Handler, db *postgres.DB) *HomeHandler {
 
 // Index renders the home page.
 func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	theme := "light"
+	if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
+		if c.Value == "dark" {
+			theme = "dark"
+		}
+	} else if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
+		theme = "dark"
+	}
+
+	h.RenderTempl(w, r, pages.Home("Full Stack Go Template", "A professional full-stack Go application", user, theme))
+}
+
+// OldIndex renders the home page using html/template (kept for reference)
+func (h *HomeHandler) OldIndex(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"Title":       "Full Stack Go Template",
 		"Description": "A professional full-stack Go application",

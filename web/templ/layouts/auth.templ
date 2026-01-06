@@ -1,0 +1,48 @@
+package layouts
+
+import "fmt"
+
+templ Auth(title string, description string, theme string) {
+	<!DOCTYPE html>
+	<html
+		lang="en"
+		class={ templ.KV("dark", theme == "dark") }
+		data-theme={ theme }
+		x-data={ fmt.Sprintf("{ darkMode: %t }", theme == "dark") }
+		x-init="() => {
+            const init = document.documentElement.classList.contains('dark');
+            darkMode = init;
+            $watch('darkMode', val => {
+                document.documentElement.classList.toggle('dark', val);
+                document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light');
+                localStorage.setItem('darkMode', val);
+                document.cookie = 'theme=' + (val ? 'dark' : 'light') + '; path=/; max-age=31536000';
+            });
+        }"
+		:class="{ 'dark': darkMode }"
+		:data-theme="darkMode ? 'dark' : 'light'"
+	>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="description" content={ description }/>
+			<meta name="color-scheme" content="light dark"/>
+			<title>{ title } | Full Stack Go Template</title>
+			<link rel="stylesheet" href="/static/css/output.css"/>
+			<script src="/static/vendor/htmx.min.js"></script>
+			<script defer src="/static/vendor/alpine.min.js"></script>
+			<script src="/static/vendor/lucide.min.js"></script>
+			<style>
+				[x-cloak] {
+					display: none !important;
+				}
+			</style>
+		</head>
+		<body class="min-h-screen" hx-boost="true">
+			{ children... }
+			<script>
+				lucide.createIcons();
+			</script>
+		</body>
+	</html>
+}

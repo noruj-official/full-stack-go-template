@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/a-h/templ"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 )
 
@@ -246,4 +247,13 @@ func isHTMXRequest(r *http.Request) bool {
 
 func isHTMXBoosted(r *http.Request) bool {
 	return r.Header.Get("HX-Boosted") == "true"
+}
+
+// RenderTempl renders a templ component.
+func (h *Handler) RenderTempl(w http.ResponseWriter, r *http.Request, component templ.Component) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := component.Render(r.Context(), w); err != nil {
+		log.Printf("Error rendering templ component: %v", err)
+		h.Error(w, r, http.StatusInternalServerError, "Error rendering template")
+	}
 }
