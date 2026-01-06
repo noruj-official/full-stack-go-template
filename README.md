@@ -2,8 +2,19 @@
 
 A production-ready, full-stack Go web application template with modern frontend tooling, role-based authentication, and clean architecture.
 
-![Light Mode](screenshots/light.png)
-![Dark Mode](screenshots/dark.png)
+## Screenshots
+
+**Home**
+
+![Home](screenshots/home.png)
+
+**Admin Analytics**
+
+![Admin Analytics](screenshots/admin-analytics.png)
+
+**Super Admin Dashboard**
+
+![Super Admin Dashboard](screenshots/super-admin-dashboard.png)
 
 ## ✨ Features
 
