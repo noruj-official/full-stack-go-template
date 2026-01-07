@@ -10,16 +10,19 @@ import (
 
 // User represents a user entity in the system.
 type User struct {
-	ID               uuid.UUID `json:"id"`
-	Email            string    `json:"email"`
-	Name             string    `json:"name"`
-	PasswordHash     string    `json:"-"` // Never expose in JSON
-	Role             Role      `json:"role"`
-	ProfileImage     []byte    `json:"-"`                  // Binary image data (never expose in JSON)
-	ProfileImageType string    `json:"profile_image_type"` // MIME type (e.g., "image/jpeg")
-	ProfileImageSize int       `json:"profile_image_size"` // Size in bytes
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	ID                         uuid.UUID  `json:"id"`
+	Email                      string     `json:"email"`
+	Name                       string     `json:"name"`
+	PasswordHash               string     `json:"-"` // Never expose in JSON
+	Role                       Role       `json:"role"`
+	ProfileImage               []byte     `json:"-"`                  // Binary image data (never expose in JSON)
+	ProfileImageType           string     `json:"profile_image_type"` // MIME type (e.g., "image/jpeg")
+	ProfileImageSize           int        `json:"profile_image_size"` // Size in bytes
+	EmailVerified              bool       `json:"email_verified"`
+	VerificationToken          *string    `json:"-"`
+	VerificationTokenExpiresAt *time.Time `json:"-"`
+	CreatedAt                  time.Time  `json:"created_at"`
+	UpdatedAt                  time.Time  `json:"updated_at"`
 }
 
 // NewUser creates a new User with a generated UUID and timestamps.

@@ -23,8 +23,8 @@ func NewSessionRepository(db *DB) *SessionRepository {
 // Create inserts a new session into the database.
 func (r *SessionRepository) Create(ctx context.Context, session *domain.Session) error {
 	query := `
-		INSERT INTO sessions (id, user_id, expires_at, created_at)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO sessions (id, user_id, expires_at, created_at, ip_address, user_agent, last_activity_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err := r.db.Pool.Exec(ctx, query,
@@ -32,6 +32,9 @@ func (r *SessionRepository) Create(ctx context.Context, session *domain.Session)
 		session.UserID,
 		session.ExpiresAt,
 		session.CreatedAt,
+		session.IPAddress,
+		session.UserAgent,
+		session.LastActivityAt,
 	)
 
 	return err
@@ -40,7 +43,7 @@ func (r *SessionRepository) Create(ctx context.Context, session *domain.Session)
 // GetByID retrieves a session by its ID.
 func (r *SessionRepository) GetByID(ctx context.Context, id string) (*domain.Session, error) {
 	query := `
-		SELECT id, user_id, expires_at, created_at
+		SELECT id, user_id, expires_at, created_at, ip_address, user_agent, last_activity_at
 		FROM sessions
 		WHERE id = $1
 	`
@@ -51,6 +54,9 @@ func (r *SessionRepository) GetByID(ctx context.Context, id string) (*domain.Ses
 		&session.UserID,
 		&session.ExpiresAt,
 		&session.CreatedAt,
+		&session.IPAddress,
+		&session.UserAgent,
+		&session.LastActivityAt,
 	)
 
 	if err != nil {

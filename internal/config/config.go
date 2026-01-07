@@ -15,6 +15,19 @@ type Config struct {
 	Database DatabaseConfig
 	App      AppConfig
 	Storage  StorageConfig
+	Auth     AuthConfig
+	Email    EmailConfig
+}
+
+// AuthConfig contains authentication settings.
+type AuthConfig struct {
+	Secret string
+}
+
+// EmailConfig contains email service settings.
+type EmailConfig struct {
+	ResendAPIKey    string
+	ResendFromEmail string
 }
 
 // ServerConfig contains HTTP server settings.
@@ -33,6 +46,7 @@ type AppConfig struct {
 	Env  string
 	Name string
 	Logo string
+	URL  string
 }
 
 // StorageConfig contains file/image storage settings.
@@ -68,11 +82,19 @@ func Load() (*Config, error) {
 			Env:  getEnv("APP_ENV", "development"),
 			Name: getEnv("APP_NAME", "Full Stack Go Template"),
 			Logo: getEnv("APP_LOGO", "/static/img/logo.svg"),
+			URL:  getEnv("APP_URL", "http://localhost:3000"),
 		},
 		Storage: StorageConfig{
 			Type:     getEnv("PROFILE_IMAGE_STORAGE", "database"),
 			S3Bucket: getEnv("S3_BUCKET", ""),
 			S3Region: getEnv("S3_REGION", "us-east-1"),
+		},
+		Auth: AuthConfig{
+			Secret: getEnv("AUTH_SECRET", ""),
+		},
+		Email: EmailConfig{
+			ResendAPIKey:    getEnv("RESEND_API_KEY", ""),
+			ResendFromEmail: getEnv("RESEND_FROM_EMAIL", "onboarding@resend.dev"),
 		},
 	}, nil
 }

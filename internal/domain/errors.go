@@ -14,6 +14,9 @@ var (
 	ErrForbidden          = errors.New("access forbidden")
 	ErrInvalidCredentials = errors.New("invalid email or password")
 	ErrSessionExpired     = errors.New("session has expired")
+	ErrInvalidToken       = errors.New("invalid or malformed token")
+	ErrTokenExpired       = errors.New("token has expired")
+	ErrEmailNotVerified   = errors.New("email not verified")
 )
 
 // ErrValidation represents a validation error for a specific field.

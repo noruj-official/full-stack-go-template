@@ -8,7 +8,7 @@ import (
 
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/profile"
 )
 
 // ActivityHandler handles activity-related HTTP requests.
@@ -41,13 +41,13 @@ func (h *ActivityHandler) UserActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Format activities for display
-	formattedActivities := make([]pages.ActivityViewModel, 0, len(activities))
+	formattedActivities := make([]profile.ActivityViewModel, 0, len(activities))
 	for _, activity := range activities {
 		var ipAddress string
 		if activity.IPAddress != nil {
 			ipAddress = *activity.IPAddress
 		}
-		formattedActivities = append(formattedActivities, pages.ActivityViewModel{
+		formattedActivities = append(formattedActivities, profile.ActivityViewModel{
 			Type:        string(activity.ActivityType),
 			Description: activity.Description,
 			IPAddress:   ipAddress,
@@ -56,7 +56,7 @@ func (h *ActivityHandler) UserActivity(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	h.RenderTempl(w, r, pages.UserActivity("Activity Log", formattedActivities, user, h.GetTheme(r)))
+	h.RenderTempl(w, r, profile.UserActivity("Activity Log", formattedActivities, user, h.GetTheme(r)))
 }
 
 // formatTimeAgo formats a time as a relative time string.

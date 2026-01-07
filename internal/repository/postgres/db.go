@@ -69,6 +69,12 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_type VARCHAR(50)`,
 		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_size INTEGER DEFAULT 0`,
 
+		// Add email verification columns
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255)`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMP WITH TIME ZONE`,
+		`CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token)`,
+
 		// Create sessions table
 		`CREATE TABLE IF NOT EXISTS sessions (
 			id VARCHAR(64) PRIMARY KEY,
@@ -78,6 +84,11 @@ func (db *DB) RunMigrations(ctx context.Context) error {
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)`,
+
+		// Add session security columns
+		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45)`,
+		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS user_agent TEXT`,
+		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()`,
 
 		// Create activity_logs table for user activities
 		`CREATE TABLE IF NOT EXISTS activity_logs (

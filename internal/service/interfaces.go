@@ -29,10 +29,10 @@ type UserService interface {
 // AuthService defines the interface for authentication operations.
 type AuthService interface {
 	// Register creates a new user account.
-	Register(ctx context.Context, input *domain.RegisterInput) (*domain.User, *domain.Session, error)
+	Register(ctx context.Context, input *domain.RegisterInput, ip, userAgent string) (*domain.User, error)
 
 	// Login authenticates a user and creates a session.
-	Login(ctx context.Context, input *domain.LoginInput) (*domain.User, *domain.Session, error)
+	Login(ctx context.Context, input *domain.LoginInput, ip, userAgent string) (*domain.User, *domain.Session, error)
 
 	// Logout destroys a user session.
 	Logout(ctx context.Context, sessionID string) error
@@ -42,4 +42,13 @@ type AuthService interface {
 
 	// GetCurrentUser retrieves the authenticated user from session.
 	GetCurrentUser(ctx context.Context, sessionID string) (*domain.User, error)
+
+	// VerifyEmail verifies a user's email address using a token.
+	VerifyEmail(ctx context.Context, token string) error
+}
+
+// EmailService defines the interface for email operations.
+type EmailService interface {
+	// SendVerificationEmail sends a verification email to the user.
+	SendVerificationEmail(ctx context.Context, emailAddr, name, token string) error
 }

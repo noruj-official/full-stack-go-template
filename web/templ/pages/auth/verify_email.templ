@@ -1,0 +1,109 @@
+package auth
+
+import (
+	"github.com/shaik-noor/full-stack-go-template/web/templ/components"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
+)
+
+type VerifyEmailPageProps struct {
+	Success bool
+	Message string
+	Theme   string
+}
+
+templ VerifyEmailPage(props VerifyEmailPageProps) {
+	@layouts.Auth("Email Verification", "Verify your email address", props.Theme) {
+		<style>
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -30px) scale(1.05); }
+        66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    @keyframes float-reverse {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(-40px, 20px) scale(1.1); }
+        66% { transform: translate(30px, -20px) scale(0.9); }
+    }
+    @keyframes pulse-glow {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.7; }
+    }
+    .bg-blob-1 { animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite; }
+    .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }
+    .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }
+    </style>
+		@components.Navbar(nil, false)
+		<div
+			class="min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden"
+		>
+			<div class="relative w-full max-w-md z-10">
+				<!-- Main Card -->
+				<div
+					class="card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-content/5"
+				>
+					<div class="card-body p-6 sm:p-8 text-center">
+						if props.Success {
+							<!-- Success State -->
+							<div class="mb-6">
+								<div class="inline-flex items-center justify-center w-20 h-20 bg-success/10 rounded-full mb-4 animate-scale-in">
+									<i data-lucide="check-circle" class="w-12 h-12 text-success"></i>
+								</div>
+								<h1 class="text-2xl font-bold text-base-content mb-2">Email Verified!</h1>
+								<p class="text-base-content/60">
+									{ props.Message }
+								</p>
+							</div>
+							<!-- Sign In Button -->
+							<a
+								href="/signin"
+								class="btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300"
+							>
+								<i data-lucide="log-in" class="w-5 h-5"></i>
+								Continue to Sign In
+							</a>
+						} else {
+							<!-- Error State -->
+							<div class="mb-6">
+								<div class="inline-flex items-center justify-center w-20 h-20 bg-error/10 rounded-full mb-4 animate-scale-in">
+									<i data-lucide="alert-circle" class="w-12 h-12 text-error"></i>
+								</div>
+								<h1 class="text-2xl font-bold text-base-content mb-2">Verification Failed</h1>
+								<p class="text-base-content/60">
+									{ props.Message }
+								</p>
+							</div>
+							<!-- Action Buttons -->
+							<div class="flex flex-col gap-3">
+								<a
+									href="/signin"
+									class="btn btn-primary w-full gap-2"
+								>
+									<i data-lucide="log-in" class="w-5 h-5"></i>
+									Go to Sign In
+								</a>
+								<a
+									href="/signup"
+									class="btn btn-outline w-full gap-2"
+								>
+									<i data-lucide="user-plus" class="w-5 h-5"></i>
+									Create New Account
+								</a>
+							</div>
+						}
+						<!-- Additional Help -->
+						<div class="divider text-base-content/40 text-sm my-6"></div>
+						<p class="text-sm text-base-content/60">
+							Need help?
+							<a href="mailto:support@example.com" class="link link-primary">
+								Contact Support
+							</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+    lucide.createIcons();
+    </script>
+	}
+}

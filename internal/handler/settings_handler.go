@@ -7,7 +7,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/profile"
 )
 
 // SettingsHandler handles user settings HTTP requests.
@@ -36,7 +36,7 @@ func (h *SettingsHandler) Settings(w http.ResponseWriter, r *http.Request) {
 	theme := getTheme(r)
 
 	if r.Method == http.MethodGet {
-		h.RenderTempl(w, r, pages.Settings("Settings", user, theme, ""))
+		h.RenderTempl(w, r, profile.Settings("Settings", user, theme, ""))
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *SettingsHandler) Settings(w http.ResponseWriter, r *http.Request) {
 	// Success response
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "profileUpdated")
-		h.RenderTempl(w, r, pages.SettingsSuccess("Profile updated successfully"))
+		h.RenderTempl(w, r, profile.SettingsSuccess("Profile updated successfully"))
 		return
 	}
 
@@ -124,11 +124,11 @@ func (h *SettingsHandler) renderSettingsError(w http.ResponseWriter, r *http.Req
 		// Let's simply re-render the full page and sending it.
 		// But to make it cleaner, let's update `settings.templ` in the NEXT step (iterative fix) if needed.
 		// For now, I will render the full page logic.
-		h.RenderTempl(w, r, pages.Settings("Settings", user, theme, errMsg))
+		h.RenderTempl(w, r, profile.Settings("Settings", user, theme, errMsg))
 		return
 	}
 
-	h.RenderTempl(w, r, pages.Settings("Settings", user, theme, errMsg))
+	h.RenderTempl(w, r, profile.Settings("Settings", user, theme, errMsg))
 }
 
 // getIPAddress extracts the client IP address from the request.

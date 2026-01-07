@@ -2,13 +2,14 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/auth"
 )
 
 // AuthHandler handles authentication-related HTTP requests.
@@ -50,12 +51,29 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	props := pages.SigninPageProps{
-		Email: "",
-		Error: "",
-		Theme: h.GetTheme(r),
+	// Check for query params (e.g. error=unverified&email=...)
+	email := r.URL.Query().Get("email")
+	msgType := ""
+	msg := ""
+
+	if r.URL.Query().Get("error") == "unverified" {
+		msgType = "info"
+		msg = "Email not verified. A new verification link has been sent to " + email
 	}
-	pages.SigninPage(props).Render(r.Context(), w)
+
+	if r.URL.Query().Get("success") == "registered" {
+		msgType = "success"
+		msg = "Account created! Please check your email to verify your account."
+	}
+
+	props := auth.SigninPageProps{
+		Email:       email,
+		Error:       "",
+		Message:     msg,
+		MessageType: msgType,
+		Theme:       h.GetTheme(r),
+	}
+	auth.SigninPage(props).Render(r.Context(), w)
 }
 
 // SignIn handles user sign in.
@@ -70,13 +88,35 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		Password: r.FormValue("password"),
 	}
 
-	user, session, err := h.authService.Login(r.Context(), input)
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+
+	user, session, err := h.authService.Login(r.Context(), input, ip, ua)
+	// Check for email verification error
+	if err == domain.ErrEmailNotVerified {
+		// Redirect back to sign in with error and email
+		// We use a query param 'error=unverified' to trigger the specific message
+		redirectURL := "/signin?error=unverified&email=" + input.Email
+
+		if isHTMXRequest(r) {
+			w.Header().Set("HX-Redirect", redirectURL)
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+		return
+	}
+
 	if err != nil {
 		errMsg := "An error occurred"
 		if domain.IsValidationError(err) {
 			errMsg = err.Error()
 		} else if domain.IsInvalidCredentialsError(err) {
 			errMsg = "Invalid email or password"
+		} else {
+			// Log the actual error for debugging
+			log.Printf("Login error for user %s: %v", input.Email, err)
 		}
 		h.renderSignInError(w, r, input.Email, errMsg)
 		return
@@ -94,8 +134,7 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// Log login activity
-	ip := getIPAddress(r)
-	ua := r.UserAgent()
+	// ip and ua already captured above
 	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, "User signed in", &ip, &ua)
 
 	// Redirect based on role
@@ -111,18 +150,18 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
-	props := pages.SigninPageProps{
+	props := auth.SigninPageProps{
 		Email: email,
 		Error: errMsg,
 		Theme: h.GetTheme(r),
 	}
 
 	if isHTMXRequest(r) {
-		pages.SigninForm(props).Render(r.Context(), w)
+		auth.SigninForm(props).Render(r.Context(), w)
 		return
 	}
 
-	pages.SigninPage(props).Render(r.Context(), w)
+	auth.SigninPage(props).Render(r.Context(), w)
 }
 
 // SignupPage renders the signup page.
@@ -133,12 +172,12 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	props := pages.SignupPageProps{
+	props := auth.SignupPageProps{
 		Form:  nil,
 		Error: "",
 		Theme: h.GetTheme(r),
 	}
-	pages.SignupPage(props).Render(r.Context(), w)
+	auth.SignupPage(props).Render(r.Context(), w)
 }
 
 // Signup handles user registration.
@@ -155,7 +194,11 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		ConfirmPassword: r.FormValue("confirm_password"),
 	}
 
-	user, session, err := h.authService.Register(r.Context(), input)
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+
+	// Register user
+	user, err := h.authService.Register(r.Context(), input, ip, ua)
 	if err != nil {
 		errMsg := "An error occurred"
 		if domain.IsValidationError(err) {
@@ -167,24 +210,14 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set session cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     middleware.SessionCookieName,
-		Value:    session.ID,
-		Path:     "/",
-		Expires:  session.ExpiresAt,
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteLaxMode,
-	})
+	// Remove session cookie setting logic (we don't auto-login anymore)
 
-	// Log signup as login activity
-	ip := getIPAddress(r)
-	ua := r.UserAgent()
-	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, "User registered and signed in", &ip, &ua)
+	// Log signup activity
+	// ip and ua already captured above
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, "User registered", &ip, &ua)
 
-	// Redirect based on role
-	redirectURL := getDashboardURLForRole(user)
+	// Redirect to sign in page with success message
+	redirectURL := "/signin?success=registered&email=" + input.Email
 
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Redirect", redirectURL)
@@ -196,18 +229,18 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, input *domain.RegisterInput, errMsg string) {
-	props := pages.SignupPageProps{
+	props := auth.SignupPageProps{
 		Form:  input,
 		Error: errMsg,
 		Theme: h.GetTheme(r),
 	}
 
 	if isHTMXRequest(r) {
-		pages.SignupForm(props).Render(r.Context(), w)
+		auth.SignupForm(props).Render(r.Context(), w)
 		return
 	}
 
-	pages.SignupPage(props).Render(r.Context(), w)
+	auth.SignupPage(props).Render(r.Context(), w)
 }
 
 // Logout handles user logout.
@@ -247,4 +280,38 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // LoginRedirect redirects /login to /signin for backwards compatibility.
 func (h *AuthHandler) LoginRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/signin", http.StatusMovedPermanently)
+}
+
+// VerifyEmailPage handles email verification via token.
+func (h *AuthHandler) VerifyEmailPage(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+
+	var props auth.VerifyEmailPageProps
+	props.Theme = h.GetTheme(r)
+
+	if token == "" {
+		props.Success = false
+		props.Message = "No verification token provided. Please use the link from your email."
+		auth.VerifyEmailPage(props).Render(r.Context(), w)
+		return
+	}
+
+	err := h.authService.VerifyEmail(r.Context(), token)
+	if err != nil {
+		props.Success = false
+		if domain.IsNotFoundError(err) || err == domain.ErrInvalidToken {
+			props.Message = "This verification link is invalid or has already been used."
+		} else if err == domain.ErrTokenExpired {
+			props.Message = "This verification link has expired. Please request a new one."
+		} else {
+			props.Message = "An error occurred during verification. Please try again later."
+		}
+		auth.VerifyEmailPage(props).Render(r.Context(), w)
+		return
+	}
+
+	// Success
+	props.Success = true
+	props.Message = "Your email has been successfully verified! You can now sign in to your account."
+	auth.VerifyEmailPage(props).Render(r.Context(), w)
 }

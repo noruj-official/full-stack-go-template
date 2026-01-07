@@ -19,6 +19,9 @@ type UserRepository interface {
 	// GetByEmail retrieves a user by their email address.
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
 
+	// GetByVerificationToken retrieves a user by their verification token.
+	GetByVerificationToken(ctx context.Context, token string) (*domain.User, error)
+
 	// List retrieves all users with optional pagination.
 	List(ctx context.Context, limit, offset int) ([]*domain.User, error)
 

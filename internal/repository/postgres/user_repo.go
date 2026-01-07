@@ -25,8 +25,8 @@ func NewUserRepository(db *DB) *UserRepository {
 // Create inserts a new user into the database.
 func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	query := `
-		INSERT INTO users (id, email, name, password_hash, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
 
 	_, err := r.db.Pool.Exec(ctx, query,
@@ -37,6 +37,9 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 		user.Role,
 		user.CreatedAt,
 		user.UpdatedAt,
+		user.EmailVerified,
+		user.VerificationToken,
+		user.VerificationTokenExpiresAt,
 	)
 
 	if err != nil {
@@ -52,7 +55,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 // GetByID retrieves a user by their unique identifier.
 func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at
+		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		WHERE id = $1
 	`
@@ -66,6 +69,9 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 		&user.Role,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.EmailVerified,
+		&user.VerificationToken,
+		&user.VerificationTokenExpiresAt,
 	)
 
 	if err != nil {
@@ -81,7 +87,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 // GetByEmail retrieves a user by their email address.
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at
+		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		WHERE email = $1
 	`
@@ -95,6 +101,41 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 		&user.Role,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.EmailVerified,
+		&user.VerificationToken,
+		&user.VerificationTokenExpiresAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// GetByVerificationToken retrieves a user by their verification token.
+func (r *UserRepository) GetByVerificationToken(ctx context.Context, token string) (*domain.User, error) {
+	query := `
+		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
+		FROM users
+		WHERE verification_token = $1
+	`
+
+	user := &domain.User{}
+	err := r.db.Pool.QueryRow(ctx, query, token).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Name,
+		&user.PasswordHash,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.EmailVerified,
+		&user.VerificationToken,
+		&user.VerificationTokenExpiresAt,
 	)
 
 	if err != nil {
@@ -110,7 +151,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 // List retrieves all users with pagination.
 func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at
+		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
@@ -133,6 +174,9 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain
 			&user.Role,
 			&user.CreatedAt,
 			&user.UpdatedAt,
+			&user.EmailVerified,
+			&user.VerificationToken,
+			&user.VerificationTokenExpiresAt,
 		); err != nil {
 			return nil, err
 		}
@@ -152,7 +196,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 
 	query := `
 		UPDATE users
-		SET email = $2, name = $3, password_hash = $4, role = $5, updated_at = $6
+		SET email = $2, name = $3, password_hash = $4, role = $5, updated_at = $6, email_verified = $7, verification_token = $8, verification_token_expires_at = $9
 		WHERE id = $1
 	`
 
@@ -163,6 +207,9 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 		user.PasswordHash,
 		user.Role,
 		user.UpdatedAt,
+		user.EmailVerified,
+		user.VerificationToken,
+		user.VerificationTokenExpiresAt,
 	)
 
 	if err != nil {

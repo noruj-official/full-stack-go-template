@@ -1,4 +1,4 @@
-package pages
+package auth
 
 import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/components"
@@ -6,9 +6,11 @@ import (
 )
 
 type SigninPageProps struct {
-	Email string
-	Error string
-	Theme string
+	Email       string
+	Error       string
+	Message     string
+	MessageType string // "info", "success", "warning", "error"
+	Theme       string
 }
 
 templ SigninForm(props SigninPageProps) {
@@ -21,6 +23,16 @@ templ SigninForm(props SigninPageProps) {
 		<div class="alert alert-error mb-6 animate-scale-in">
 			<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
 			<span>{ props.Error }</span>
+		</div>
+	}
+	if props.Message != "" {
+		<div class={"alert mb-6 animate-scale-in", 
+			templ.KV("alert-info", props.MessageType == "info"),
+			templ.KV("alert-success", props.MessageType == "success"),
+			templ.KV("alert-warning", props.MessageType == "warning"),
+			templ.KV("alert-error", props.MessageType == "error")} >
+			<i data-lucide="info" class="w-5 h-5 shrink-0"></i>
+			<span>{ props.Message }</span>
 		</div>
 	}
 	<form hx-post="/signin" hx-target="#signin-content" hx-swap="innerHTML" class="space-y-5">

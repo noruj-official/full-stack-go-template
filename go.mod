@@ -1,8 +1,8 @@
 module github.com/shaik-noor/full-stack-go-template
 
-go 1.23.0
+go 1.24.0
 
-toolchain go1.23.4
+toolchain go1.24.11
 
 require (
 	github.com/a-h/templ v0.3.977
@@ -10,6 +10,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.40.0
+	golang.org/x/time v0.14.0
 )
 
 require (

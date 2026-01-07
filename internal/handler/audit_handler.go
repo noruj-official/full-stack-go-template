@@ -9,7 +9,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/admin"
 )
 
 // AuditHandler handles audit log HTTP requests.
@@ -45,13 +45,13 @@ func (h *AuditHandler) AuditLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Format logs for display
-	formattedLogs := make([]pages.AuditLogItem, 0, len(logs))
+	formattedLogs := make([]admin.AuditLogItem, 0, len(logs))
 	for _, log := range logs {
 		ip := ""
 		if log.IPAddress != nil {
 			ip = *log.IPAddress
 		}
-		formattedLogs = append(formattedLogs, pages.AuditLogItem{
+		formattedLogs = append(formattedLogs, admin.AuditLogItem{
 			ID:           log.ID.String(),
 			AdminName:    log.AdminName,
 			Action:       string(log.Action),
@@ -64,7 +64,7 @@ func (h *AuditHandler) AuditLogs(w http.ResponseWriter, r *http.Request) {
 
 	totalPages := (total + limit - 1) / limit
 
-	props := pages.AuditLogsProps{
+	props := admin.AuditLogsProps{
 		User:        middleware.GetUserFromContext(r.Context()),
 		Logs:        formattedLogs,
 		Total:       int64(total),
@@ -73,7 +73,7 @@ func (h *AuditHandler) AuditLogs(w http.ResponseWriter, r *http.Request) {
 		Theme:       h.GetTheme(r),
 	}
 
-	pages.AuditLogs(props).Render(r.Context(), w)
+	admin.AuditLogs(props).Render(r.Context(), w)
 }
 
 // SystemHealth renders the system health monitoring page.
@@ -98,9 +98,9 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 		environment = appEnv.(string)
 	}
 
-	props := pages.SystemHealthProps{
+	props := admin.SystemHealthProps{
 		User: middleware.GetUserFromContext(r.Context()),
-		Database: pages.DatabaseHealth{
+		Database: admin.DatabaseHealth{
 			Status:         dbStatus,
 			Error:          dbError,
 			Type:           "PostgreSQL",
@@ -109,7 +109,7 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 			AcquiredConns:  poolStats.AcquiredConns(),
 			TotalConns:     poolStats.TotalConns(),
 		},
-		Application: pages.AppHealth{
+		Application: admin.AppHealth{
 			Name:         "Full Stack Go Template",
 			Environment:  environment,
 			GoVersion:    runtime.Version(),
@@ -118,7 +118,7 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 			NumGoroutine: runtime.NumGoroutine(),
 			NumCPU:       runtime.NumCPU(),
 		},
-		Server: pages.ServerHealth{
+		Server: admin.ServerHealth{
 			ReadTimeout:  "15s",
 			WriteTimeout: "15s",
 			IdleTimeout:  "60s",
@@ -126,5 +126,5 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 		Theme: h.GetTheme(r),
 	}
 
-	pages.SystemHealth(props).Render(r.Context(), w)
+	admin.SystemHealth(props).Render(r.Context(), w)
 }

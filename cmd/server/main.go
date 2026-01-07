@@ -60,8 +60,9 @@ func run() error {
 	auditRepo := postgres.NewAuditLogRepository(db)
 
 	// Initialize services
+	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
 	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(userRepo, sessionRepo)
+	authService := service.NewAuthService(userRepo, sessionRepo, emailService)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
 
@@ -98,12 +99,16 @@ func run() error {
 	mux.HandleFunc("GET /{$}", homeHandler.Index)
 	mux.HandleFunc("GET /health", homeHandler.HealthCheck)
 
+	// Rate limiter for auth routes (5 reqs/10s roughly, burst 5)
+	authLimiter := middleware.RateLimitMiddleware(0.5, 5)
+
 	// Auth routes
-	mux.HandleFunc("GET /signin", authHandler.SignInPage)
-	mux.HandleFunc("POST /signin", authHandler.SignIn)
-	mux.HandleFunc("GET /signup", authHandler.SignupPage)
-	mux.HandleFunc("POST /signup", authHandler.Signup)
+	mux.Handle("GET /signin", authLimiter(http.HandlerFunc(authHandler.SignInPage)))
+	mux.Handle("POST /signin", authLimiter(http.HandlerFunc(authHandler.SignIn)))
+	mux.Handle("GET /signup", authLimiter(http.HandlerFunc(authHandler.SignupPage)))
+	mux.Handle("POST /signup", authLimiter(http.HandlerFunc(authHandler.Signup)))
 	mux.HandleFunc("POST /logout", authHandler.Logout)
+	mux.HandleFunc("GET /verify-email", authHandler.VerifyEmailPage)
 
 	// Backwards compatible redirect from /login to /signin
 	mux.HandleFunc("GET /login", authHandler.LoginRedirect)

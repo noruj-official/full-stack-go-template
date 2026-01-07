@@ -7,7 +7,7 @@ import (
 
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/admin"
 )
 
 // AnalyticsHandler handles analytics-related HTTP requests.
@@ -63,7 +63,7 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 	}
 
 	// Get user growth data (last 7 days)
-	growthData := make([]pages.GrowthMetric, 7)
+	growthData := make([]admin.GrowthMetric, 7)
 	for i := 6; i >= 0; i-- {
 		date := time.Now().AddDate(0, 0, -i)
 		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
@@ -76,13 +76,13 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 			}
 		}
 
-		growthData[6-i] = pages.GrowthMetric{
+		growthData[6-i] = admin.GrowthMetric{
 			Date:  startOfDay.Format("Mon"),
 			Count: count,
 		}
 	}
 
-	props := pages.AdminAnalyticsProps{
+	props := admin.AdminAnalyticsProps{
 		User:          middleware.GetUserFromContext(r.Context()),
 		TotalUsers:    totalUsers,
 		RecentUsers:   recentCount,
@@ -91,7 +91,7 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 		Theme:         h.GetTheme(r),
 	}
 
-	pages.AdminAnalytics(props).Render(r.Context(), w)
+	admin.AdminAnalytics(props).Render(r.Context(), w)
 }
 
 // SystemActivity renders the system-wide activity feed.
@@ -113,7 +113,7 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 	}
 	defer rows.Close()
 
-	var activities []pages.SystemActivityItem
+	var activities []admin.SystemActivityItem
 	for rows.Next() {
 		var id, userID string
 		var userName, activityType, description string
@@ -124,7 +124,7 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 			continue
 		}
 
-		activities = append(activities, pages.SystemActivityItem{
+		activities = append(activities, admin.SystemActivityItem{
 			UserName:    userName,
 			Type:        activityType,
 			Description: description,
@@ -133,11 +133,11 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 		})
 	}
 
-	props := pages.SystemActivityProps{
+	props := admin.SystemActivityProps{
 		User:       middleware.GetUserFromContext(r.Context()),
 		Activities: activities,
 		Theme:      h.GetTheme(r),
 	}
 
-	pages.SystemActivity(props).Render(r.Context(), w)
+	admin.SystemActivity(props).Render(r.Context(), w)
 }
