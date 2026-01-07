@@ -134,26 +134,33 @@ func (h *Handler) RenderWithUser(w http.ResponseWriter, r *http.Request, name st
 		m["User"] = middleware.GetUserFromContext(r.Context())
 		m["AppName"] = h.appName
 		m["AppLogo"] = h.appLogo
-		// Inject Theme from cookie (fallback to light; use client hint when dark)
-		theme := "light"
-		if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
-			if c.Value == "dark" {
-				theme = "dark"
-			} else if c.Value == "light" {
-				theme = "light"
-			}
-		} else {
-			// Optional: use client hint if sent
-			if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
-				theme = "dark"
-			}
-		}
-		m["Theme"] = theme
+		m["AppName"] = h.appName
+		m["AppLogo"] = h.appLogo
+		// Inject Theme
+		m["Theme"] = h.GetTheme(r)
 		h.Render(w, name, m)
 		return
 	}
 	// For non-map data (e.g., structs used in partials), render as-is
 	h.Render(w, name, data)
+}
+
+// GetTheme extracts the theme from the request (cookie or client hint).
+func (h *Handler) GetTheme(r *http.Request) string {
+	theme := "light"
+	if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
+		if c.Value == "dark" {
+			theme = "dark"
+		} else if c.Value == "light" {
+			theme = "light"
+		}
+	} else {
+		// Optional: use client hint if sent
+		if v := r.Header.Get("Sec-CH-Prefers-Color-Scheme"); v == "dark" {
+			theme = "dark"
+		}
+	}
+	return theme
 }
 
 // RenderPartial renders a partial template (for HTMX responses).

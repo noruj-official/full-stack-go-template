@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
 )
 
 // AnalyticsHandler handles analytics-related HTTP requests.
@@ -111,7 +113,7 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 	}
 	defer rows.Close()
 
-	var activities []map[string]interface{}
+	var activities []pages.SystemActivityItem
 	for rows.Next() {
 		var id, userID string
 		var userName, activityType, description string
@@ -122,20 +124,20 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 			continue
 		}
 
-		activities = append(activities, map[string]interface{}{
-			"UserName":    userName,
-			"Type":        activityType,
-			"Description": description,
-			"IPAddress":   ipAddress,
-			"TimeAgo":     formatTimeAgo(createdAt),
+		activities = append(activities, pages.SystemActivityItem{
+			UserName:    userName,
+			Type:        activityType,
+			Description: description,
+			IPAddress:   ipAddress,
+			TimeAgo:     formatTimeAgo(createdAt),
 		})
 	}
 
-	data := map[string]any{
-		"Title":       "System Activity",
-		"Activities":  activities,
-		"ShowSidebar": true,
+	props := pages.SystemActivityProps{
+		User:       middleware.GetUserFromContext(r.Context()),
+		Activities: activities,
+		Theme:      h.GetTheme(r),
 	}
 
-	h.RenderWithUser(w, r, "system_activity.html", data)
+	pages.SystemActivity(props).Render(r.Context(), w)
 }

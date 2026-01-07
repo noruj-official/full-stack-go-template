@@ -1,0 +1,196 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
+)
+
+type DatabaseHealth struct {
+	Status         string
+	Error          string
+	Type           string
+	MaxConnections int32
+	IdleConns      int32
+	AcquiredConns  int32
+	TotalConns     int32
+}
+
+type AppHealth struct {
+	Name         string
+	Environment  string
+	GoVersion    string
+	GOOS         string
+	GOARCH       string
+	NumGoroutine int
+	NumCPU       int
+}
+
+type ServerHealth struct {
+	ReadTimeout  string
+	WriteTimeout string
+	IdleTimeout  string
+}
+
+type SystemHealthProps struct {
+	User        *domain.User
+	Database    DatabaseHealth
+	Application AppHealth
+	Server      ServerHealth
+	Theme       string
+}
+
+templ SystemHealth(props SystemHealthProps) {
+	@layouts.Base("System Health", "Monitor system status and performance", props.User, true, props.Theme) {
+		<!-- System Health Header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+			<div>
+				<h1 class="text-2xl font-bold text-base-content">System Health</h1>
+				<p class="text-base-content/70">Monitor system status and performance</p>
+			</div>
+			<a href="/s/dashboard" class="btn btn-ghost">
+				<i data-lucide="arrow-left" class="w-4 h-4"></i>
+				Back to Dashboard
+			</a>
+		</div>
+		<!-- Health Status Cards -->
+		<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+			<div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+				<div class="flex items-center justify-between mb-4">
+					<div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+						<i data-lucide="database" class="w-6 h-6 text-success"></i>
+					</div>
+					<span class="badge badge-success">Healthy</span>
+				</div>
+				<p class="text-xl font-bold text-base-content">Database</p>
+				<p class="text-sm text-base-content/70 mt-2">PostgreSQL connection active</p>
+			</div>
+			<div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+				<div class="flex items-center justify-between mb-4">
+					<div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+						<i data-lucide="server" class="w-6 h-6 text-success"></i>
+					</div>
+					<span class="badge badge-success">Running</span>
+				</div>
+				<p class="text-xl font-bold text-base-content">Web Server</p>
+				<p class="text-sm text-base-content/70 mt-2">HTTP server operational</p>
+			</div>
+			<div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+				<div class="flex items-center justify-between mb-4">
+					<div class="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
+						<i data-lucide="clock" class="w-6 h-6 text-info"></i>
+					</div>
+					<span class="badge badge-info">Active</span>
+				</div>
+				<p class="text-xl font-bold text-base-content">Uptime</p>
+				<p class="text-sm text-base-content/70 mt-2">System running smoothly</p>
+			</div>
+		</div>
+		<!-- System Information -->
+		<div class="grid lg:grid-cols-2 gap-6">
+			<!-- Database Info -->
+			<div class="card bg-base-100 shadow-sm border border-base-200">
+				<div class="card-header border-b border-base-200 p-4">
+					<h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+						<i data-lucide="database" class="w-5 h-5"></i>
+						Database Information
+					</h2>
+				</div>
+				<div class="card-body p-6">
+					<div class="space-y-4">
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Connection Status</span>
+							if props.Database.Status == "Connected" {
+								<span class="text-sm font-medium text-success">{ props.Database.Status }</span>
+							} else {
+								<span class="text-sm font-medium text-error">{ props.Database.Status }</span>
+							}
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Database Type</span>
+							<span class="text-sm font-medium">{ props.Database.Type }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Active Connections</span>
+							<span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.AcquiredConns) }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Idle Connections</span>
+							<span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.IdleConns) }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Max Connections</span>
+							<span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.MaxConnections) }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Total Connections</span>
+							<span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.TotalConns) }</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Application Info -->
+			<div class="card bg-base-100 shadow-sm border border-base-200">
+				<div class="card-header border-b border-base-200 p-4">
+					<h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+						<i data-lucide="server" class="w-5 h-5"></i>
+						Application Information
+					</h2>
+				</div>
+				<div class="card-body p-6">
+					<div class="space-y-4">
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Application</span>
+							<span class="text-sm font-medium">{ props.Application.Name }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Environment</span>
+							<span class="text-sm font-medium">{ props.Application.Environment }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Go Version</span>
+							<span class="text-sm font-medium">{ props.Application.GoVersion }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Platform</span>
+							<span class="text-sm font-medium">{ props.Application.GOOS }/{ props.Application.GOARCH }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Goroutines</span>
+							<span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Application.NumGoroutine) }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">CPU Cores</span>
+							<span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Application.NumCPU) }</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Server Configuration -->
+			<div class="card bg-base-100 shadow-sm border border-base-200 lg:col-span-2">
+				<div class="card-header border-b border-base-200 p-4">
+					<h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+						<i data-lucide="settings" class="w-5 h-5"></i>
+						Server Configuration
+					</h2>
+				</div>
+				<div class="card-body p-6">
+					<div class="grid md:grid-cols-3 gap-4">
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Read Timeout</span>
+							<span class="text-sm font-medium">{ props.Server.ReadTimeout }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Write Timeout</span>
+							<span class="text-sm font-medium">{ props.Server.WriteTimeout }</span>
+						</div>
+						<div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+							<span class="text-sm text-base-content/70">Idle Timeout</span>
+							<span class="text-sm font-medium">{ props.Server.IdleTimeout }</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

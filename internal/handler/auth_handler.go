@@ -8,6 +8,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
 )
 
 // AuthHandler handles authentication-related HTTP requests.
@@ -49,10 +50,12 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
-		"Title": "Sign In",
+	props := pages.SigninPageProps{
+		Email: "",
+		Error: "",
+		Theme: h.GetTheme(r),
 	}
-	h.RenderWithUser(w, r, "signin.html", data)
+	pages.SigninPage(props).Render(r.Context(), w)
 }
 
 // SignIn handles user sign in.
@@ -108,18 +111,18 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
-	data := map[string]any{
-		"Title": "Sign In",
-		"Email": email,
-		"Error": errMsg,
+	props := pages.SigninPageProps{
+		Email: email,
+		Error: errMsg,
+		Theme: h.GetTheme(r),
 	}
 
 	if isHTMXRequest(r) {
-		h.RenderPartial(w, "signin_form.html", data)
+		pages.SigninForm(props).Render(r.Context(), w)
 		return
 	}
 
-	h.RenderWithUser(w, r, "signin.html", data)
+	pages.SigninPage(props).Render(r.Context(), w)
 }
 
 // SignupPage renders the signup page.
@@ -130,10 +133,12 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
-		"Title": "Sign Up",
+	props := pages.SignupPageProps{
+		Form:  nil,
+		Error: "",
+		Theme: h.GetTheme(r),
 	}
-	h.RenderWithUser(w, r, "signup.html", data)
+	pages.SignupPage(props).Render(r.Context(), w)
 }
 
 // Signup handles user registration.
@@ -191,18 +196,18 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, input *domain.RegisterInput, errMsg string) {
-	data := map[string]any{
-		"Title": "Sign Up",
-		"Form":  input,
-		"Error": errMsg,
+	props := pages.SignupPageProps{
+		Form:  input,
+		Error: errMsg,
+		Theme: h.GetTheme(r),
 	}
 
 	if isHTMXRequest(r) {
-		h.RenderPartial(w, "signup_form.html", data)
+		pages.SignupForm(props).Render(r.Context(), w)
 		return
 	}
 
-	h.RenderWithUser(w, r, "signup.html", data)
+	pages.SignupPage(props).Render(r.Context(), w)
 }
 
 // Logout handles user logout.

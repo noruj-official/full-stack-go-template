@@ -9,6 +9,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
 )
 
 // AuditHandler handles audit log HTTP requests.
@@ -44,37 +45,39 @@ func (h *AuditHandler) AuditLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Format logs for display
-	formattedLogs := make([]map[string]interface{}, 0, len(logs))
+	formattedLogs := make([]pages.AuditLogItem, 0, len(logs))
 	for _, log := range logs {
-		formattedLogs = append(formattedLogs, map[string]interface{}{
-			"ID":           log.ID.String(),
-			"AdminName":    log.AdminName,
-			"Action":       log.Action,
-			"ResourceType": log.ResourceType,
-			"TimeAgo":      formatTimeAgo(log.CreatedAt),
-			"FullTime":     log.CreatedAt.Format("Jan 02, 2006 at 3:04 PM"),
-			"IPAddress":    log.IPAddress,
+		ip := ""
+		if log.IPAddress != nil {
+			ip = *log.IPAddress
+		}
+		formattedLogs = append(formattedLogs, pages.AuditLogItem{
+			ID:           log.ID.String(),
+			AdminName:    log.AdminName,
+			Action:       string(log.Action),
+			ResourceType: log.ResourceType,
+			TimeAgo:      formatTimeAgo(log.CreatedAt),
+			FullTime:     log.CreatedAt.Format("Jan 02, 2006 at 3:04 PM"),
+			IPAddress:    ip,
 		})
 	}
 
 	totalPages := (total + limit - 1) / limit
 
-	data := map[string]any{
-		"Title":       "Audit Logs",
-		"Logs":        formattedLogs,
-		"CurrentPage": page,
-		"TotalPages":  totalPages,
-		"Total":       total,
-		"ShowSidebar": true,
+	props := pages.AuditLogsProps{
+		User:        middleware.GetUserFromContext(r.Context()),
+		Logs:        formattedLogs,
+		Total:       int64(total),
+		CurrentPage: page,
+		TotalPages:  totalPages,
+		Theme:       h.GetTheme(r),
 	}
 
-	h.RenderWithUser(w, r, "audit_logs.html", data)
+	pages.AuditLogs(props).Render(r.Context(), w)
 }
 
 // SystemHealth renders the system health monitoring page.
 func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
-	user := middleware.GetUserFromContext(r.Context())
-
 	// Check database health
 	dbStatus := "Connected"
 	dbError := ""
@@ -95,34 +98,33 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 		environment = appEnv.(string)
 	}
 
-	data := map[string]any{
-		"Title":       "System Health",
-		"User":        user,
-		"ShowSidebar": true,
-		"Database": map[string]any{
-			"Status":         dbStatus,
-			"Error":          dbError,
-			"Type":           "PostgreSQL",
-			"MaxConnections": poolStats.MaxConns(),
-			"IdleConns":      poolStats.IdleConns(),
-			"AcquiredConns":  poolStats.AcquiredConns(),
-			"TotalConns":     poolStats.TotalConns(),
+	props := pages.SystemHealthProps{
+		User: middleware.GetUserFromContext(r.Context()),
+		Database: pages.DatabaseHealth{
+			Status:         dbStatus,
+			Error:          dbError,
+			Type:           "PostgreSQL",
+			MaxConnections: poolStats.MaxConns(),
+			IdleConns:      poolStats.IdleConns(),
+			AcquiredConns:  poolStats.AcquiredConns(),
+			TotalConns:     poolStats.TotalConns(),
 		},
-		"Application": map[string]any{
-			"Name":         "Full Stack Go Template",
-			"Environment":  environment,
-			"GoVersion":    runtime.Version(),
-			"GOOS":         runtime.GOOS,
-			"GOARCH":       runtime.GOARCH,
-			"NumGoroutine": runtime.NumGoroutine(),
-			"NumCPU":       runtime.NumCPU(),
+		Application: pages.AppHealth{
+			Name:         "Full Stack Go Template",
+			Environment:  environment,
+			GoVersion:    runtime.Version(),
+			GOOS:         runtime.GOOS,
+			GOARCH:       runtime.GOARCH,
+			NumGoroutine: runtime.NumGoroutine(),
+			NumCPU:       runtime.NumCPU(),
 		},
-		"Server": map[string]any{
-			"ReadTimeout":  "15s",
-			"WriteTimeout": "15s",
-			"IdleTimeout":  "60s",
+		Server: pages.ServerHealth{
+			ReadTimeout:  "15s",
+			WriteTimeout: "15s",
+			IdleTimeout:  "60s",
 		},
+		Theme: h.GetTheme(r),
 	}
 
-	h.RenderWithUser(w, r, "system_health.html", data)
+	pages.SystemHealth(props).Render(r.Context(), w)
 }
