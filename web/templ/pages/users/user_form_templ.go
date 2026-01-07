@@ -239,7 +239,7 @@ func UserForm(user *domain.User, formData *domain.CreateUserInput, err string) t
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</button> <a href=\"/a/users\" class=\"btn btn-neutral\">Cancel</a></div><script>\r\n\t\tlucide.createIcons();\r\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</button></div><script>\r\n\t\tlucide.createIcons();\r\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

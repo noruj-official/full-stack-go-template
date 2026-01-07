@@ -35,15 +35,7 @@ func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
 	h.RenderTempl(w, r, pages.Home("Full Stack Go Template", "A professional full-stack Go application", user, theme))
 }
 
-// OldIndex renders the home page using html/template (kept for reference)
-func (h *HomeHandler) OldIndex(w http.ResponseWriter, r *http.Request) {
-	data := map[string]any{
-		"Title":       "Full Stack Go Template",
-		"Description": "A professional full-stack Go application",
-		"ShowSidebar": true,
-	}
-	h.RenderWithUser(w, r, "home.html", data)
-}
+
 
 // DashboardRedirect redirects to the appropriate dashboard based on user role.
 func (h *HomeHandler) DashboardRedirect(w http.ResponseWriter, r *http.Request) {
