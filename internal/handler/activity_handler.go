@@ -3,11 +3,12 @@ package handler
 
 import (
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
 )
 
 // ActivityHandler handles activity-related HTTP requests.
@@ -40,24 +41,22 @@ func (h *ActivityHandler) UserActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Format activities for display
-	formattedActivities := make([]map[string]interface{}, 0, len(activities))
+	formattedActivities := make([]pages.ActivityViewModel, 0, len(activities))
 	for _, activity := range activities {
-		formattedActivities = append(formattedActivities, map[string]interface{}{
-			"Type":        activity.ActivityType,
-			"Description": activity.Description,
-			"IPAddress":   activity.IPAddress,
-			"TimeAgo":     formatTimeAgo(activity.CreatedAt),
-			"FullTime":    activity.CreatedAt.Format("Jan 02, 2006 at 3:04 PM"),
+		var ipAddress string
+		if activity.IPAddress != nil {
+			ipAddress = *activity.IPAddress
+		}
+		formattedActivities = append(formattedActivities, pages.ActivityViewModel{
+			Type:        string(activity.ActivityType),
+			Description: activity.Description,
+			IPAddress:   ipAddress,
+			TimeAgo:     formatTimeAgo(activity.CreatedAt),
+			FullTime:    activity.CreatedAt.Format("Jan 02, 2006 at 3:04 PM"),
 		})
 	}
 
-	data := map[string]any{
-		"Title":       "Activity Log",
-		"Activities":  formattedActivities,
-		"ShowSidebar": true,
-	}
-
-	h.RenderWithUser(w, r, "user_activity.html", data)
+	h.RenderTempl(w, r, pages.UserActivity("Activity Log", formattedActivities, user, h.GetTheme(r)))
 }
 
 // formatTimeAgo formats a time as a relative time string.

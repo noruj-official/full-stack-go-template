@@ -10,6 +10,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
 	"github.com/shaik-noor/full-stack-go-template/internal/service"
 	"github.com/shaik-noor/full-stack-go-template/internal/storage"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
 )
 
 // ProfileHandler handles user profile HTTP requests.
@@ -38,11 +39,12 @@ func (h *ProfileHandler) ProfilePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
-		"Title":       "Profile",
-		"ShowSidebar": true,
+	props := pages.UserProfileProps{
+		User:  user,
+		Theme: h.GetTheme(r),
 	}
-	h.RenderWithUser(w, r, "user_profile.html", data)
+
+	pages.UserProfile(props).Render(r.Context(), w)
 }
 
 // UpdateProfile handles profile information updates (name, email).
@@ -93,9 +95,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	// Success response
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "profileUpdated")
-		h.RenderPartialWithUser(w, r, "profile_success.html", map[string]any{
-			"Message": "Profile updated successfully",
-		})
+		pages.ProfileSuccess("Profile updated successfully").Render(r.Context(), w)
 		return
 	}
 
@@ -164,9 +164,9 @@ func (h *ProfileHandler) UploadProfileImage(w http.ResponseWriter, r *http.Reque
 	// Success response
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "profileImageUpdated")
-		h.RenderPartialWithUser(w, r, "profile_success.html", map[string]any{
-			"Message": "Profile image updated successfully",
-		})
+		// For image upload, we might want to return the success message or just empty/status
+		// The original code rendered profile_success.html
+		pages.ProfileSuccess("Profile image updated successfully").Render(r.Context(), w)
 		return
 	}
 
@@ -221,15 +221,17 @@ func (h *ProfileHandler) serveProfileImage(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *ProfileHandler) renderProfileError(w http.ResponseWriter, r *http.Request, errMsg string) {
-	data := map[string]any{
-		"Title": "Profile",
-		"Error": errMsg,
+	user := middleware.GetUserFromContext(r.Context())
+	props := pages.UserProfileProps{
+		User:  user,
+		Error: errMsg,
+		Theme: h.GetTheme(r),
 	}
 
 	if isHTMXRequest(r) {
-		h.RenderPartialWithUser(w, r, "profile_form.html", data)
+		pages.ProfileForm(props).Render(r.Context(), w)
 		return
 	}
 
-	h.RenderWithUser(w, r, "user_profile.html", data)
+	pages.UserProfile(props).Render(r.Context(), w)
 }

@@ -35,8 +35,6 @@ func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
 	h.RenderTempl(w, r, pages.Home("Full Stack Go Template", "A professional full-stack Go application", user, theme))
 }
 
-
-
 // DashboardRedirect redirects to the appropriate dashboard based on user role.
 func (h *HomeHandler) DashboardRedirect(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
@@ -189,11 +187,8 @@ func formatUnit(value int, unit string) string {
 // NotFound renders the custom 404 page.
 func (h *HomeHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	data := map[string]any{
-		"Title":       "Page Not Found",
-		"Description": "The page you requested was not found.",
-	}
-	h.RenderWithUser(w, r, "404.html", data)
+	user := middleware.GetUserFromContext(r.Context())
+	h.RenderTempl(w, r, pages.NotFound("Page Not Found", "The page you requested was not found.", user, h.GetTheme(r)))
 }
 
 func getTheme(r *http.Request) string {

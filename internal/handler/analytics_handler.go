@@ -63,7 +63,7 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 	}
 
 	// Get user growth data (last 7 days)
-	growthData := make([]map[string]interface{}, 7)
+	growthData := make([]pages.GrowthMetric, 7)
 	for i := 6; i >= 0; i-- {
 		date := time.Now().AddDate(0, 0, -i)
 		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
@@ -76,22 +76,22 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 			}
 		}
 
-		growthData[6-i] = map[string]interface{}{
-			"date":  startOfDay.Format("Mon"),
-			"count": count,
+		growthData[6-i] = pages.GrowthMetric{
+			Date:  startOfDay.Format("Mon"),
+			Count: count,
 		}
 	}
 
-	data := map[string]any{
-		"Title":         "Analytics",
-		"TotalUsers":    totalUsers,
-		"RecentUsers":   recentCount,
-		"UserRoleStats": roleStats,
-		"GrowthData":    growthData,
-		"ShowSidebar":   true,
+	props := pages.AdminAnalyticsProps{
+		User:          middleware.GetUserFromContext(r.Context()),
+		TotalUsers:    totalUsers,
+		RecentUsers:   recentCount,
+		UserRoleStats: roleStats,
+		GrowthData:    growthData,
+		Theme:         h.GetTheme(r),
 	}
 
-	h.RenderWithUser(w, r, "admin_analytics.html", data)
+	pages.AdminAnalytics(props).Render(r.Context(), w)
 }
 
 // SystemActivity renders the system-wide activity feed.

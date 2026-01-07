@@ -123,7 +123,17 @@ func Base(title string, description string, user *domain.User, showSidebar bool,
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<main class=\"flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-24 transition-all duration-300\" :class=\"{ 'lg:ml-64': sidebarOpen, 'lg:ml-0': !sidebarOpen }\"><div class=\"max-w-7xl mx-auto animate-fade-in\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<main class=\"flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-24 transition-all duration-300\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if showSidebar {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " :class=\"{ 'lg:ml-64': sidebarOpen, 'lg:ml-0': !sidebarOpen }\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "><div class=\"max-w-7xl mx-auto animate-fade-in\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -131,7 +141,7 @@ func Base(title string, description string, user *domain.User, showSidebar bool,
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -141,7 +151,7 @@ func Base(title string, description string, user *domain.User, showSidebar bool,
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div id=\"toast-container\" class=\"fixed bottom-4 right-4 z-50 space-y-2\"></div><script>\r\n\t\t\t\tlucide.createIcons();\r\n\t\t\t\tdocument.body.addEventListener('htmx:afterSwap', function () { lucide.createIcons(); });\r\n\t\t\t\tfunction showToast(message, type = 'success') {\r\n\t\t\t\t\tconst container = document.getElementById('toast-container');\r\n\t\t\t\t\tconst toast = document.createElement('div');\r\n\t\t\t\t\tconst bgColor = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-red-500' : 'bg-primary-500';\r\n\t\t\t\t\ttoast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg animate-slide-up flex items-center gap-2`;\r\n\t\t\t\t\ttoast.innerHTML = `<span>${message}</span><button onclick=\"this.parentElement.remove()\" class=\"ml-2 hover:opacity-75\"><i data-lucide=\"x\" class=\"w-4 h-4\"></i></button>`;\r\n\t\t\t\t\tcontainer.appendChild(toast);\r\n\t\t\t\t\tlucide.createIcons();\r\n\t\t\t\t\tsetTimeout(() => {\r\n\t\t\t\t\t\ttoast.style.opacity = '0';\r\n\t\t\t\t\t\ttoast.style.transform = 'translateY(10px)';\r\n\t\t\t\t\t\ttoast.style.transition = 'all 0.3s ease-out';\r\n\t\t\t\t\t\tsetTimeout(() => toast.remove(), 300);\r\n\t\t\t\t\t}, 5000);\r\n\t\t\t\t}\r\n\t\t\t\tdocument.body.addEventListener('userCreated', () => showToast('User created successfully!'));\r\n\t\t\t\tdocument.body.addEventListener('userUpdated', () => showToast('User updated successfully!'));\r\n\t\t\t\tdocument.body.addEventListener('userDeleted', () => showToast('User deleted successfully!'));\r\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div id=\"toast-container\" class=\"fixed bottom-4 right-4 z-50 space-y-2\"></div><script>\r\n\t\t\t\tlucide.createIcons();\r\n\t\t\t\tdocument.body.addEventListener('htmx:afterSwap', function () { lucide.createIcons(); });\r\n\t\t\t\tfunction showToast(message, type = 'success') {\r\n\t\t\t\t\tconst container = document.getElementById('toast-container');\r\n\t\t\t\t\tconst toast = document.createElement('div');\r\n\t\t\t\t\tconst bgColor = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-red-500' : 'bg-primary-500';\r\n\t\t\t\t\ttoast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg animate-slide-up flex items-center gap-2`;\r\n\t\t\t\t\ttoast.innerHTML = `<span>${message}</span><button onclick=\"this.parentElement.remove()\" class=\"ml-2 hover:opacity-75\"><i data-lucide=\"x\" class=\"w-4 h-4\"></i></button>`;\r\n\t\t\t\t\tcontainer.appendChild(toast);\r\n\t\t\t\t\tlucide.createIcons();\r\n\t\t\t\t\tsetTimeout(() => {\r\n\t\t\t\t\t\ttoast.style.opacity = '0';\r\n\t\t\t\t\t\ttoast.style.transform = 'translateY(10px)';\r\n\t\t\t\t\t\ttoast.style.transition = 'all 0.3s ease-out';\r\n\t\t\t\t\t\tsetTimeout(() => toast.remove(), 300);\r\n\t\t\t\t\t}, 5000);\r\n\t\t\t\t}\r\n\t\t\t\tdocument.body.addEventListener('userCreated', () => showToast('User created successfully!'));\r\n\t\t\t\tdocument.body.addEventListener('userUpdated', () => showToast('User updated successfully!'));\r\n\t\t\t\tdocument.body.addEventListener('userDeleted', () => showToast('User deleted successfully!'));\r\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

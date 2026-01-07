@@ -72,10 +72,8 @@ func run() error {
 	}
 
 	// Initialize handlers
-	baseHandler := handler.NewHandler("web/templates", cfg.App.Name, cfg.App.Logo)
-	if err := baseHandler.LoadTemplates(); err != nil {
-		return fmt.Errorf("failed to load templates: %w", err)
-	}
+	// Initialize handlers
+	baseHandler := handler.NewHandler(cfg.App.Name, cfg.App.Logo)
 
 	homeHandler := handler.NewHomeHandler(baseHandler, db)
 	userHandler := handler.NewUserHandler(baseHandler, userService, auditService)

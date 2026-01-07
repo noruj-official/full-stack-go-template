@@ -57,7 +57,9 @@ templ Base(title string, description string, user *domain.User, showSidebar bool
 			}
 			<main
 				class="flex-1 overflow-y-auto p-4 lg:p-8 pt-20 lg:pt-24 transition-all duration-300"
-				:class="{ 'lg:ml-64': sidebarOpen, 'lg:ml-0': !sidebarOpen }"
+				if showSidebar {
+					:class="{ 'lg:ml-64': sidebarOpen, 'lg:ml-0': !sidebarOpen }"
+				}
 			>
 				<div class="max-w-7xl mx-auto animate-fade-in">
 					{ children... }
