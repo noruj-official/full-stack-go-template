@@ -77,7 +77,7 @@ func Settings(title string, user *domain.User, theme string, errStr string) temp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></form></div></div><!-- Quick Links Card --><div class=\"card bg-base-100 shadow-sm border border-base-200 mt-6\"><div class=\"card-header border-b border-base-200 p-4\"><h2 class=\"text-lg font-semibold text-base-content\">Account Activity</h2></div><div class=\"card-body p-4 space-y-3\"><a href=\"/u/activity\" class=\"flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group\"><div class=\"w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center group-hover:scale-110 transition-transform\"><i data-lucide=\"activity\" class=\"w-5 h-5 text-info\"></i></div><div><p class=\"font-medium text-base-content\">View Activity Log</p><p class=\"text-xs text-base-content/70\">See your recent activities</p></div></a></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></form></div></div><!-- Quick Links Card --><div class=\"card bg-base-100 shadow-sm border border-base-200 mt-6\"><div class=\"card-header border-b border-base-200 p-4\"><h2 class=\"text-lg font-semibold text-base-content\">Account Activity</h2></div><div class=\"card-body p-4 space-y-3\"><a href=\"/u/activity\" class=\"flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group\"><div class=\"w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center group-hover:scale-110 transition-transform\"><i data-lucide=\"activity\" class=\"w-5 h-5 text-info\"></i></div><div><p class=\"font-medium text-base-content\">View Activity Log</p><p class=\"text-xs text-base-content/70\">See your recent activities</p></div></a></div></div><!-- Session Management --><div class=\"card bg-base-100 shadow-sm border border-error/20 mt-6\"><div class=\"card-header border-b border-error/20 p-4 bg-error/10\"><h2 class=\"text-lg font-semibold text-error\">Danger Zone</h2></div><div class=\"card-body p-4 space-y-3\"><p class=\"text-sm text-base-content/80\">If you believe your account has been compromised or you want to ensure you are logged out of all other devices, you can sign out of all sessions.</p><form method=\"POST\" action=\"/u/signout-all\"><button type=\"submit\" class=\"btn btn-error btn-outline btn-sm\"><i data-lucide=\"log-out\" class=\"w-4 h-4\"></i> Sign Out All Devices</button></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -119,7 +119,7 @@ func SettingsFormFields(user *domain.User) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 69, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 86, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -132,7 +132,7 @@ func SettingsFormFields(user *domain.User) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 75, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 92, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -145,7 +145,7 @@ func SettingsFormFields(user *domain.User) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(user.Role))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 81, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 98, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -187,7 +187,7 @@ func SettingsSuccess(message string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 98, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/profile/settings.templ`, Line: 115, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {

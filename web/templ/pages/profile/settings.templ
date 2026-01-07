@@ -57,6 +57,23 @@ templ Settings(title string, user *domain.User, theme string, errStr string) {
 					</a>
 				</div>
 			</div>
+			<!-- Session Management -->
+			<div class="card bg-base-100 shadow-sm border border-error/20 mt-6">
+				<div class="card-header border-b border-error/20 p-4 bg-error/10">
+					<h2 class="text-lg font-semibold text-error">Danger Zone</h2>
+				</div>
+				<div class="card-body p-4 space-y-3">
+					<p class="text-sm text-base-content/80">
+						If you believe your account has been compromised or you want to ensure you are logged out of all other devices, you can sign out of all sessions.
+					</p>
+					<form method="POST" action="/u/signout-all">
+						<button type="submit" class="btn btn-error btn-outline btn-sm">
+							<i data-lucide="log-out" class="w-4 h-4"></i>
+							Sign Out All Devices
+						</button>
+					</form>
+				</div>
+			</div>
 		</div>
 	}
 }

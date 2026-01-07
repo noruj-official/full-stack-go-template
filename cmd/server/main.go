@@ -135,6 +135,7 @@ func run() error {
 	mux.Handle("GET /u/profile/image", userOnly(http.HandlerFunc(profileHandler.GetMyProfileImage)))
 	mux.Handle("GET /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
 	mux.Handle("POST /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
+	mux.Handle("POST /u/signout-all", userOnly(http.HandlerFunc(authHandler.SignOutAllDevices)))
 
 	// API routes for retrieving user profile images (accessible to authenticated users)
 	mux.Handle("GET /api/users/{id}/image", userOnly(http.HandlerFunc(profileHandler.GetUserProfileImage)))

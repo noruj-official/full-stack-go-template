@@ -51,6 +51,9 @@ type AuthService interface {
 
 	// ResetPassword resets the user's password using the token.
 	ResetPassword(ctx context.Context, token, newPassword string) error
+
+	// SignOutAllDevices invalidates all sessions for a user.
+	SignOutAllDevices(ctx context.Context, userID uuid.UUID) error
 }
 
 // EmailService defines the interface for email operations.

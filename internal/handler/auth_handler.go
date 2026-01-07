@@ -262,6 +262,42 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/signin", http.StatusSeeOther)
 }
 
+// SignOutAllDevices handles invalidating all user sessions.
+func (h *AuthHandler) SignOutAllDevices(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+		return
+	}
+
+	if err := h.authService.SignOutAllDevices(r.Context(), user.ID); err != nil {
+		log.Printf("Failed to sign out all devices for user %s: %v", user.ID, err)
+		// Continue to logout current session anyway
+	}
+
+	// Log activity
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogout, "User signed out all devices", &ip, &ua)
+
+	// Clear session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     middleware.SessionCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	if isHTMXRequest(r) {
+		w.Header().Set("HX-Redirect", "/signin?success=signed_out_all")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Redirect(w, r, "/signin?success=signed_out_all", http.StatusSeeOther)
+}
+
 // ForgotPasswordPage renders the forgot password page.
 func (h *AuthHandler) ForgotPasswordPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

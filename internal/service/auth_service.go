@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository"
 	"golang.org/x/crypto/bcrypt"
@@ -148,6 +149,11 @@ func (s *authService) Login(ctx context.Context, input *domain.LoginInput, ip, u
 // Logout destroys a user session.
 func (s *authService) Logout(ctx context.Context, sessionID string) error {
 	return s.sessionRepo.Delete(ctx, sessionID)
+}
+
+// SignOutAllDevices invalidates all sessions for a user.
+func (s *authService) SignOutAllDevices(ctx context.Context, userID uuid.UUID) error {
+	return s.sessionRepo.DeleteByUserID(ctx, userID)
 }
 
 // ValidateSession checks if a session is valid and returns the user.
