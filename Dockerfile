@@ -3,15 +3,22 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata
+# Install build dependencies including Node.js for CSS compilation
+RUN apk add --no-cache git ca-certificates tzdata nodejs npm
 
 # Copy go mod files first for better caching
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy package files for npm dependencies
+COPY package.json ./
+RUN npm install
+
 # Copy source code
 COPY . .
+
+# Build CSS from source
+RUN npm run build
 
 # Install templ
 RUN go install github.com/a-h/templ/cmd/templ@latest

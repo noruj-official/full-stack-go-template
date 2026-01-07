@@ -2,7 +2,9 @@
 
 @plugin "daisyui" {
     themes: corporate, night, light, dark;
+    components: btn, menu, dropdown, badge, tooltip, card, alert, avatar, input, select, textarea, checkbox, table, loading, progress;
 }
+
 
 @plugin "daisyui/theme" {
     name: "light";

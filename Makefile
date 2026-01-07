@@ -10,7 +10,7 @@ templ:
 	go run github.com/a-h/templ/cmd/templ generate
 
 # Build production binary
-build:
+build: css templ
 	go build -o bin/server ./cmd/server
 
 # Run the built binary
