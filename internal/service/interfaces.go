@@ -45,10 +45,19 @@ type AuthService interface {
 
 	// VerifyEmail verifies a user's email address using a token.
 	VerifyEmail(ctx context.Context, token string) error
+
+	// RequestPasswordReset initiates the password reset flow.
+	RequestPasswordReset(ctx context.Context, email string) error
+
+	// ResetPassword resets the user's password using the token.
+	ResetPassword(ctx context.Context, token, newPassword string) error
 }
 
 // EmailService defines the interface for email operations.
 type EmailService interface {
 	// SendVerificationEmail sends a verification email to the user.
 	SendVerificationEmail(ctx context.Context, emailAddr, name, token string) error
+
+	// SendPasswordResetEmail sends a password reset email to the user.
+	SendPasswordResetEmail(ctx context.Context, emailAddr, name, token string) error
 }

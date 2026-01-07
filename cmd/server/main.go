@@ -56,13 +56,14 @@ func run() error {
 	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
 	sessionRepo := postgres.NewSessionRepository(db)
+	passwordResetRepo := postgres.NewPasswordResetRepository(db)
 	activityRepo := postgres.NewActivityLogRepository(db)
 	auditRepo := postgres.NewAuditLogRepository(db)
 
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
 	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(userRepo, sessionRepo, emailService)
+	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, emailService)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
 
@@ -109,6 +110,10 @@ func run() error {
 	mux.Handle("POST /signup", authLimiter(http.HandlerFunc(authHandler.Signup)))
 	mux.HandleFunc("POST /logout", authHandler.Logout)
 	mux.HandleFunc("GET /verify-email", authHandler.VerifyEmailPage)
+	mux.Handle("GET /forgot-password", authLimiter(http.HandlerFunc(authHandler.ForgotPasswordPage)))
+	mux.Handle("POST /forgot-password", authLimiter(http.HandlerFunc(authHandler.ForgotPassword)))
+	mux.Handle("GET /reset-password", authLimiter(http.HandlerFunc(authHandler.ResetPasswordPage)))
+	mux.Handle("POST /reset-password", authLimiter(http.HandlerFunc(authHandler.ResetPassword)))
 
 	// Backwards compatible redirect from /login to /signin
 	mux.HandleFunc("GET /login", authHandler.LoginRedirect)

@@ -61,7 +61,7 @@ templ SigninForm(props SigninPageProps) {
 		<div class="form-control w-full" x-data="{ showPassword: false }">
 			<label class="label pb-1" for="password">
 				<span class="label-text font-medium text-base-content">Password</span>
-				<a href="#" class="label-text-alt link link-primary">Forgot password?</a>
+				<a href="/forgot-password" hx-boost="false" class="label-text-alt link link-primary">Forgot password?</a>
 			</label>
 			<label
 				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"

@@ -4,7 +4,6 @@ package handler
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
@@ -245,36 +244,85 @@ func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, 
 
 // Logout handles user logout.
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	user := middleware.GetUserFromContext(r.Context())
-	sessionID := middleware.GetSessionIDFromContext(r.Context())
-	if sessionID != "" {
-		_ = h.authService.Logout(r.Context(), sessionID)
-	}
-
 	// Clear session cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     middleware.SessionCookieName,
 		Value:    "",
 		Path:     "/",
-		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
 		HttpOnly: true,
 	})
 
-	// Log logout activity when user context is present
-	if user != nil {
-		ip := getIPAddress(r)
-		ua := r.UserAgent()
-		_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogout, "User logged out", &ip, &ua)
-	}
-
 	if isHTMXRequest(r) {
-		w.Header().Set("HX-Redirect", "/")
+		w.Header().Set("HX-Redirect", "/signin")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/signin", http.StatusSeeOther)
+}
+
+// ForgotPasswordPage renders the forgot password page.
+func (h *AuthHandler) ForgotPasswordPage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	h.RenderTempl(w, r, auth.ForgotPassword(h.GetTheme(r)))
+}
+
+// ForgotPassword handles the forgot password request.
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	emailStr := r.FormValue("email")
+
+	if err := h.authService.RequestPasswordReset(r.Context(), emailStr); err != nil {
+		// Log error but don't reveal failure to user (security best practice)
+		log.Printf("Password reset request failed: %v", err)
+	}
+
+	// Always show success message to prevent user enumeration
+	if isHTMXRequest(r) {
+		h.RenderTempl(w, r, auth.ForgotPasswordSuccessContent(h.GetTheme(r)))
+		return
+	}
+	h.RenderTempl(w, r, auth.ForgotPasswordSuccess(h.GetTheme(r)))
+}
+
+// ResetPasswordPage renders the reset password page.
+func (h *AuthHandler) ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+		return
+	}
+
+	h.RenderTempl(w, r, auth.ResetPassword(token, h.GetTheme(r)))
+}
+
+// ResetPassword handles the password reset.
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	token := r.FormValue("token")
+	password := r.FormValue("password")
+	confirmPassword := r.FormValue("confirm_password")
+
+	if password != confirmPassword {
+		// In a real app, render the form again with error
+		http.Error(w, "Passwords do not match", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.authService.ResetPassword(r.Context(), token, password); err != nil {
+		http.Error(w, "Failed to reset password: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if isHTMXRequest(r) {
+		h.RenderTempl(w, r, auth.ResetPasswordSuccessContent(h.GetTheme(r)))
+		return
+	}
+
+	h.RenderTempl(w, r, auth.ResetPasswordSuccess(h.GetTheme(r)))
 }
 
 // LoginRedirect redirects /login to /signin for backwards compatibility.

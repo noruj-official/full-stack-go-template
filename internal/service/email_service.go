@@ -71,6 +71,53 @@ func (s *resendEmailService) SendVerificationEmail(ctx context.Context, emailAdd
 	if resp.StatusCode >= 400 {
 		return errors.New("failed to send email via Resend")
 	}
+	return nil
+}
+
+// SendPasswordResetEmail sends a password reset email to the user.
+func (s *resendEmailService) SendPasswordResetEmail(ctx context.Context, emailAddr, name, token string) error {
+	if s.apiKey == "" {
+		fmt.Printf("[MOCK EMAIL] Password Reset -> To: %s, Token: %s\n", emailAddr, token)
+		return nil
+	}
+
+	url := "https://api.resend.com/emails"
+
+	// Create reset link
+	resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.appURL, token)
+
+	htmlContent := email.GetPasswordResetEmailContent(name, resetLink)
+
+	payload := map[string]interface{}{
+		"from":    s.fromEmail,
+		"to":      []string{emailAddr},
+		"subject": "Reset your password",
+		"html":    htmlContent,
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+s.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return errors.New("failed to send email via Resend")
+	}
 
 	return nil
 }
