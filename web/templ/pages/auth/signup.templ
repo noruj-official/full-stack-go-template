@@ -11,8 +11,9 @@ type SignupPageProps struct {
 	Error       string
 	Message     string
 	MessageType string
-	Theme       string
+	Theme        string
 	ThemeEnabled bool
+	EmailAuthEnabled bool
 }
 
 templ SignupForm(props SignupPageProps) {
@@ -37,172 +38,180 @@ templ SignupForm(props SignupPageProps) {
 			<span>{ props.Message }</span>
 		</div>
 	}
-	<form hx-post="/signup" hx-target="#signup-content" hx-swap="innerHTML" class="space-y-4">
-		<!-- Name Field -->
-		<div class="form-control w-full">
-			<label class="label pb-1" for="name">
-				<span class="label-text font-medium text-base-content">Full name</span>
-			</label>
-			<label
-				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
-			>
-				<i data-lucide="user" class="w-5 h-5 text-base-content/40 shrink-0"></i>
-				<input
-					type="text"
-					id="name"
-					name="name"
-					if props.Form != nil {
-						value={ props.Form.Name }
-					}
-					class="grow bg-transparent border-none focus:outline-none min-w-0"
-					placeholder="John Doe"
-					required
-					autocomplete="name"
-				/>
-			</label>
+
+	if !props.EmailAuthEnabled {
+		<div class="alert alert-warning mb-6 animate-scale-in">
+			<i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
+			<span>New user registration is currently disabled.</span>
 		</div>
-		<!-- Email Field -->
-		<div class="form-control w-full">
-			<label class="label pb-1" for="email">
-				<span class="label-text font-medium text-base-content">Email address</span>
-			</label>
-			<label
-				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
-			>
-				<i data-lucide="mail" class="w-5 h-5 text-base-content/40 shrink-0"></i>
-				<input
-					type="email"
-					id="email"
-					name="email"
-					if props.Form != nil {
-						value={ props.Form.Email }
-					}
-					class="grow bg-transparent border-none focus:outline-none min-w-0"
-					placeholder="you@example.com"
-					required
-					autocomplete="email"
-				/>
-			</label>
-		</div>
-		<!-- Password Field with Strength Meter -->
-		<div
-			class="form-control w-full"
-			x-data="{ 
-                        password: '', 
-                        showPassword: false,
-                        get strength() {
-                            let score = 0;
-                            if (this.password.length >= 8) score++;
-                            if (this.password.match(/[a-z]/) && this.password.match(/[A-Z]/)) score++;
-                            if (this.password.match(/[0-9]/)) score++;
-                            if (this.password.match(/[^a-zA-Z0-9]/)) score++;
-                            return score;
-                        },
-                        get strengthText() {
-                            const texts = ['Weak', 'Fair', 'Good', 'Strong'];
-                            return this.password.length > 0 ? texts[this.strength - 1] || 'Weak' : '';
-                        },
-                        get strengthClass() {
-                            const classes = ['progress-error', 'progress-warning', 'progress-accent', 'progress-success'];
-                            return classes[this.strength - 1] || 'progress-error';
-                        }
-                    }"
-		>
-			<label class="label pb-1" for="password">
-				<span class="label-text font-medium text-base-content">Password</span>
-			</label>
-			<label
-				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
-			>
-				<i data-lucide="lock" class="w-5 h-5 text-base-content/40 shrink-0"></i>
-				<input
-					:type="showPassword ? 'text' : 'password'"
-					id="password"
-					name="password"
-					x-model="password"
-					class="grow bg-transparent border-none focus:outline-none min-w-0"
-					placeholder="Create a strong password"
-					required
-					autocomplete="new-password"
-					minlength="8"
-				/>
-				<button
-					type="button"
-					@click="showPassword = !showPassword"
-					class="btn btn-ghost btn-xs btn-circle shrink-0"
+	} else {
+		<form hx-post="/signup" hx-target="#signup-content" hx-swap="innerHTML" class="space-y-4">
+			<!-- Name Field -->
+			<div class="form-control w-full">
+				<label class="label pb-1" for="name">
+					<span class="label-text font-medium text-base-content">Full name</span>
+				</label>
+				<label
+					class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
 				>
-					<i x-show="!showPassword" data-lucide="eye" class="w-4 h-4"></i>
-					<i x-show="showPassword" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
-				</button>
-			</label>
-			<!-- Password Strength Indicator -->
-			<div x-show="password.length > 0" x-cloak class="mt-2 space-y-1">
-				<progress
-					class="progress w-full h-1.5 transition-all duration-300"
-					:class="strengthClass"
-					:value="strength * 25"
-					max="100"
-				></progress>
-				<p class="text-xs text-base-content/60">
-					Password strength: <span class="font-medium" x-text="strengthText"></span>
-				</p>
+					<i data-lucide="user" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+					<input
+						type="text"
+						id="name"
+						name="name"
+						if props.Form != nil {
+							value={ props.Form.Name }
+						}
+						class="grow bg-transparent border-none focus:outline-none min-w-0"
+						placeholder="John Doe"
+						required
+						autocomplete="name"
+					/>
+				</label>
 			</div>
-		</div>
-		<!-- Confirm Password Field -->
-		<div class="form-control w-full" x-data="{ showPassword: false }">
-			<label class="label pb-1" for="confirm_password">
-				<span class="label-text font-medium text-base-content">Confirm password</span>
-			</label>
-			<label
-				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
-			>
-				<i data-lucide="lock" class="w-5 h-5 text-base-content/40 shrink-0"></i>
-				<input
-					:type="showPassword ? 'text' : 'password'"
-					id="confirm_password"
-					name="confirm_password"
-					class="grow bg-transparent border-none focus:outline-none min-w-0"
-					placeholder="Confirm your password"
-					required
-					autocomplete="new-password"
-				/>
-				<button
-					type="button"
-					@click="showPassword = !showPassword"
-					class="btn btn-ghost btn-xs btn-circle shrink-0"
+			<!-- Email Field -->
+			<div class="form-control w-full">
+				<label class="label pb-1" for="email">
+					<span class="label-text font-medium text-base-content">Email address</span>
+				</label>
+				<label
+					class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
 				>
-					<i x-show="!showPassword" data-lucide="eye" class="w-4 h-4"></i>
-					<i x-show="showPassword" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
-				</button>
-			</label>
-		</div>
-		<!-- Terms Checkbox -->
-		<div class="form-control">
-			<label class="label cursor-pointer justify-start gap-3 py-0">
-				<input
-					type="checkbox"
-					id="terms"
-					name="terms"
-					required
-					class="checkbox checkbox-primary checkbox-sm"
-				/>
-				<span class="label-text text-base-content/80 text-sm">
-					I agree to the
-					<a href="#" class="link link-primary">Terms of Service</a> and
-					<a href="#" class="link link-primary">Privacy Policy</a>
-				</span>
-			</label>
-		</div>
-		<!-- Submit Button -->
-		<button
-			type="submit"
-			class="btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 mt-2"
-		>
-			<span class="htmx-indicator loading loading-spinner loading-sm"></span>
-			<i data-lucide="user-plus" class="w-5 h-5"></i>
-			Create account
-		</button>
-	</form>
+					<i data-lucide="mail" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+					<input
+						type="email"
+						id="email"
+						name="email"
+						if props.Form != nil {
+							value={ props.Form.Email }
+						}
+						class="grow bg-transparent border-none focus:outline-none min-w-0"
+						placeholder="you@example.com"
+						required
+						autocomplete="email"
+					/>
+				</label>
+			</div>
+			<!-- Password Field with Strength Meter -->
+			<div
+				class="form-control w-full"
+				x-data="{ 
+							password: '', 
+							showPassword: false,
+							get strength() {
+								let score = 0;
+								if (this.password.length >= 8) score++;
+								if (this.password.match(/[a-z]/) && this.password.match(/[A-Z]/)) score++;
+								if (this.password.match(/[0-9]/)) score++;
+								if (this.password.match(/[^a-zA-Z0-9]/)) score++;
+								return score;
+							},
+							get strengthText() {
+								const texts = ['Weak', 'Fair', 'Good', 'Strong'];
+								return this.password.length > 0 ? texts[this.strength - 1] || 'Weak' : '';
+							},
+							get strengthClass() {
+								const classes = ['progress-error', 'progress-warning', 'progress-accent', 'progress-success'];
+								return classes[this.strength - 1] || 'progress-error';
+							}
+						}"
+			>
+				<label class="label pb-1" for="password">
+					<span class="label-text font-medium text-base-content">Password</span>
+				</label>
+				<label
+					class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
+				>
+					<i data-lucide="lock" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+					<input
+						:type="showPassword ? 'text' : 'password'"
+						id="password"
+						name="password"
+						x-model="password"
+						class="grow bg-transparent border-none focus:outline-none min-w-0"
+						placeholder="Create a strong password"
+						required
+						autocomplete="new-password"
+						minlength="8"
+					/>
+					<button
+						type="button"
+						@click="showPassword = !showPassword"
+						class="btn btn-ghost btn-xs btn-circle shrink-0"
+					>
+						<i x-show="!showPassword" data-lucide="eye" class="w-4 h-4"></i>
+						<i x-show="showPassword" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
+					</button>
+				</label>
+				<!-- Password Strength Indicator -->
+				<div x-show="password.length > 0" x-cloak class="mt-2 space-y-1">
+					<progress
+						class="progress w-full h-1.5 transition-all duration-300"
+						:class="strengthClass"
+						:value="strength * 25"
+						max="100"
+					></progress>
+					<p class="text-xs text-base-content/60">
+						Password strength: <span class="font-medium" x-text="strengthText"></span>
+					</p>
+				</div>
+			</div>
+			<!-- Confirm Password Field -->
+			<div class="form-control w-full" x-data="{ showPassword: false }">
+				<label class="label pb-1" for="confirm_password">
+					<span class="label-text font-medium text-base-content">Confirm password</span>
+				</label>
+				<label
+					class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
+				>
+					<i data-lucide="lock" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+					<input
+						:type="showPassword ? 'text' : 'password'"
+						id="confirm_password"
+						name="confirm_password"
+						class="grow bg-transparent border-none focus:outline-none min-w-0"
+						placeholder="Confirm your password"
+						required
+						autocomplete="new-password"
+					/>
+					<button
+						type="button"
+						@click="showPassword = !showPassword"
+						class="btn btn-ghost btn-xs btn-circle shrink-0"
+					>
+						<i x-show="!showPassword" data-lucide="eye" class="w-4 h-4"></i>
+						<i x-show="showPassword" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
+					</button>
+				</label>
+			</div>
+			<!-- Terms Checkbox -->
+			<div class="form-control">
+				<label class="label cursor-pointer justify-start gap-3 py-0">
+					<input
+						type="checkbox"
+						id="terms"
+						name="terms"
+						required
+						class="checkbox checkbox-primary checkbox-sm"
+					/>
+					<span class="label-text text-base-content/80 text-sm">
+						I agree to the
+						<a href="#" class="link link-primary">Terms of Service</a> and
+						<a href="#" class="link link-primary">Privacy Policy</a>
+					</span>
+				</label>
+			</div>
+			<!-- Submit Button -->
+			<button
+				type="submit"
+				class="btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 mt-2"
+			>
+				<span class="htmx-indicator loading loading-spinner loading-sm"></span>
+				<i data-lucide="user-plus" class="w-5 h-5"></i>
+				Create account
+			</button>
+		</form>
+	}
 	<!-- Info Alert -->
 	<div class="alert bg-info/10 border border-info/20 mt-6">
 		<i data-lucide="info" class="w-5 h-5 text-info shrink-0"></i>

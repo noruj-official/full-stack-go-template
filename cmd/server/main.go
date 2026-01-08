@@ -75,6 +75,10 @@ func run() error {
 			Description:    "Enables theme switching logic",
 			DefaultEnabled: true,
 		},
+		domain.FeatureEmailAuth: {
+			Description:    "Enables email-based sign-in and sign-up",
+			DefaultEnabled: true,
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to sync feature flags: %w", err)

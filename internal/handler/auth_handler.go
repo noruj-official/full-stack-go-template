@@ -72,19 +72,33 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 
 	theme, themeEnabled := h.GetTheme(r)
 
+	// Check email auth feature
+	emailAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err != nil {
+		emailAuthEnabled = true // Default to true if check fails
+	}
+
 	props := auth.SigninPageProps{
-		Email:        email,
-		Error:        "",
-		Message:      msg,
-		MessageType:  msgType,
-		Theme:        theme,
-		ThemeEnabled: themeEnabled,
+		Email:            email,
+		Error:            "",
+		Message:          msg,
+		MessageType:      msgType,
+		Theme:            theme,
+		ThemeEnabled:     themeEnabled,
+		EmailAuthEnabled: emailAuthEnabled,
 	}
 	auth.SigninPage(props).Render(r.Context(), w)
 }
 
 // SignIn handles user sign in.
 func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
+	// Check feature flag
+	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err == nil && !enabled {
+		h.Error(w, r, http.StatusForbidden, "Email sign in is currently disabled")
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		h.renderSignInError(w, r, "", "Invalid form data")
 		return
@@ -159,10 +173,11 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
 	theme, themeEnabled := h.GetTheme(r)
 	props := auth.SigninPageProps{
-		Email:        email,
-		Error:        errMsg,
-		Theme:        theme,
-		ThemeEnabled: themeEnabled,
+		Email:            email,
+		Error:            errMsg,
+		Theme:            theme,
+		ThemeEnabled:     themeEnabled,
+		EmailAuthEnabled: true, // If we are here, we probably tried to sign in, so let's assume it was enabled or we want to show the form to show the error
 	}
 
 	if isHTMXRequest(r) {
@@ -182,17 +197,32 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	theme, themeEnabled := h.GetTheme(r)
+
+	// Check email auth feature
+	emailAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err != nil {
+		emailAuthEnabled = true
+	}
+
 	props := auth.SignupPageProps{
-		Form:         nil,
-		Error:        "",
-		Theme:        theme,
-		ThemeEnabled: themeEnabled,
+		Form:             nil,
+		Error:            "",
+		Theme:            theme,
+		ThemeEnabled:     themeEnabled,
+		EmailAuthEnabled: emailAuthEnabled,
 	}
 	auth.SignupPage(props).Render(r.Context(), w)
 }
 
 // Signup handles user registration.
 func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
+	// Check feature flag
+	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err == nil && !enabled {
+		h.Error(w, r, http.StatusForbidden, "Sign up is currently disabled")
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		h.renderSignupError(w, r, nil, "Invalid form data")
 		return
@@ -242,10 +272,12 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, input *domain.RegisterInput, errMsg string) {
 	theme, themeEnabled := h.GetTheme(r)
 	props := auth.SignupPageProps{
-		Form:         input,
-		Error:        errMsg,
-		Theme:        theme,
-		ThemeEnabled: themeEnabled,
+		Form:  input,
+		Error: errMsg,
+		Theme: theme,
+
+		ThemeEnabled:     themeEnabled,
+		EmailAuthEnabled: true,
 	}
 
 	if isHTMXRequest(r) {

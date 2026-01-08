@@ -10,8 +10,9 @@ type SigninPageProps struct {
 	Error       string
 	Message     string
 	MessageType string // "info", "success", "warning", "error"
-	Theme       string
+	Theme        string
 	ThemeEnabled bool
+	EmailAuthEnabled bool
 }
 
 templ SigninForm(props SigninPageProps) {
@@ -36,79 +37,87 @@ templ SigninForm(props SigninPageProps) {
 			<span>{ props.Message }</span>
 		</div>
 	}
-	<form hx-post="/signin" hx-target="#signin-content" hx-swap="innerHTML" class="space-y-5">
-		<!-- Email Field -->
-		<div class="form-control w-full">
-			<label class="label pb-1" for="email">
-				<span class="label-text font-medium text-base-content">Email address</span>
-			</label>
-			<label
-				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
-			>
-				<i data-lucide="mail" class="w-5 h-5 text-base-content/40 shrink-0"></i>
-				<input
-					type="email"
-					id="email"
-					name="email"
-					value={ props.Email }
-					class="grow bg-transparent border-none focus:outline-none min-w-0"
-					placeholder="you@example.com"
-					required
-					autocomplete="email"
-				/>
-			</label>
+
+	if !props.EmailAuthEnabled {
+		<div class="alert alert-warning mb-6 animate-scale-in">
+			<i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
+			<span>Email sign in is currently disabled. Please use Magic Link or Google Sign In.</span>
 		</div>
-		<!-- Password Field -->
-		<div class="form-control w-full" x-data="{ showPassword: false }">
-			<label class="label pb-1" for="password">
-				<span class="label-text font-medium text-base-content">Password</span>
-				<a href="/forgot-password" hx-boost="false" class="label-text-alt link link-primary">Forgot password?</a>
-			</label>
-			<label
-				class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
-			>
-				<i data-lucide="lock" class="w-5 h-5 text-base-content/40 shrink-0"></i>
-				<input
-					:type="showPassword ? 'text' : 'password'"
-					id="password"
-					name="password"
-					class="grow bg-transparent border-none focus:outline-none min-w-0"
-					placeholder="Enter your password"
-					required
-					autocomplete="current-password"
-				/>
-				<button
-					type="button"
-					@click="showPassword = !showPassword"
-					class="btn btn-ghost btn-xs btn-circle shrink-0"
+	} else {
+		<form hx-post="/signin" hx-target="#signin-content" hx-swap="innerHTML" class="space-y-5">
+			<!-- Email Field -->
+			<div class="form-control w-full">
+				<label class="label pb-1" for="email">
+					<span class="label-text font-medium text-base-content">Email address</span>
+				</label>
+				<label
+					class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
 				>
-					<i x-show="!showPassword" data-lucide="eye" class="w-4 h-4"></i>
-					<i x-show="showPassword" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
-				</button>
-			</label>
-		</div>
-		<!-- Remember Me -->
-		<div class="form-control">
-			<label class="label cursor-pointer justify-start gap-3 py-0">
-				<input
-					type="checkbox"
-					id="remember"
-					name="remember"
-					class="checkbox checkbox-primary checkbox-sm"
-				/>
-				<span class="label-text text-base-content/80">Remember me for 7 days</span>
-			</label>
-		</div>
-		<!-- Submit Button -->
-		<button
-			type="submit"
-			class="btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300"
-		>
-			<span class="htmx-indicator loading loading-spinner loading-sm"></span>
-			<i data-lucide="log-in" class="w-5 h-5"></i>
-			Sign in
-		</button>
-	</form>
+					<i data-lucide="mail" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+					<input
+						type="email"
+						id="email"
+						name="email"
+						value={ props.Email }
+						class="grow bg-transparent border-none focus:outline-none min-w-0"
+						placeholder="you@example.com"
+						required
+						autocomplete="email"
+					/>
+				</label>
+			</div>
+			<!-- Password Field -->
+			<div class="form-control w-full" x-data="{ showPassword: false }">
+				<label class="label pb-1" for="password">
+					<span class="label-text font-medium text-base-content">Password</span>
+					<a href="/forgot-password" hx-boost="false" class="label-text-alt link link-primary">Forgot password?</a>
+				</label>
+				<label
+					class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200"
+				>
+					<i data-lucide="lock" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+					<input
+						:type="showPassword ? 'text' : 'password'"
+						id="password"
+						name="password"
+						class="grow bg-transparent border-none focus:outline-none min-w-0"
+						placeholder="Enter your password"
+						required
+						autocomplete="current-password"
+					/>
+					<button
+						type="button"
+						@click="showPassword = !showPassword"
+						class="btn btn-ghost btn-xs btn-circle shrink-0"
+					>
+						<i x-show="!showPassword" data-lucide="eye" class="w-4 h-4"></i>
+						<i x-show="showPassword" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
+					</button>
+				</label>
+			</div>
+			<!-- Remember Me -->
+			<div class="form-control">
+				<label class="label cursor-pointer justify-start gap-3 py-0">
+					<input
+						type="checkbox"
+						id="remember"
+						name="remember"
+						class="checkbox checkbox-primary checkbox-sm"
+					/>
+					<span class="label-text text-base-content/80">Remember me for 7 days</span>
+				</label>
+			</div>
+			<!-- Submit Button -->
+			<button
+				type="submit"
+				class="btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300"
+			>
+				<span class="htmx-indicator loading loading-spinner loading-sm"></span>
+				<i data-lucide="log-in" class="w-5 h-5"></i>
+				Sign in
+			</button>
+		</form>
+	}
 	<!-- Divider -->
 	<div class="divider text-base-content/40 text-sm my-6">or continue with</div>
 	<!-- Social Login -->

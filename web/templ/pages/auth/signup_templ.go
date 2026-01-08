@@ -15,12 +15,13 @@ import (
 )
 
 type SignupPageProps struct {
-	Form         *domain.RegisterInput
-	Error        string
-	Message      string
-	MessageType  string
-	Theme        string
-	ThemeEnabled bool
+	Form             *domain.RegisterInput
+	Error            string
+	Message          string
+	MessageType      string
+	Theme            string
+	ThemeEnabled     bool
+	EmailAuthEnabled bool
 }
 
 func SignupForm(props SignupPageProps) templ.Component {
@@ -56,7 +57,7 @@ func SignupForm(props SignupPageProps) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 27, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 28, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -97,7 +98,7 @@ func SignupForm(props SignupPageProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 37, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 38, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -108,53 +109,64 @@ func SignupForm(props SignupPageProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form hx-post=\"/signup\" hx-target=\"#signup-content\" hx-swap=\"innerHTML\" class=\"space-y-4\"><!-- Name Field --><div class=\"form-control w-full\"><label class=\"label pb-1\" for=\"name\"><span class=\"label-text font-medium text-base-content\">Full name</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"user\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input type=\"text\" id=\"name\" name=\"name\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if !props.EmailAuthEnabled {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"alert alert-warning mb-6 animate-scale-in\"><i data-lucide=\"alert-triangle\" class=\"w-5 h-5 shrink-0\"></i> <span>New user registration is currently disabled.</span></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form hx-post=\"/signup\" hx-target=\"#signup-content\" hx-swap=\"innerHTML\" class=\"space-y-4\"><!-- Name Field --><div class=\"form-control w-full\"><label class=\"label pb-1\" for=\"name\"><span class=\"label-text font-medium text-base-content\">Full name</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"user\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input type=\"text\" id=\"name\" name=\"name\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if props.Form != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 63, Col: 30}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"John Doe\" required autocomplete=\"name\"></label></div><!-- Email Field --><div class=\"form-control w-full\"><label class=\"label pb-1\" for=\"email\"><span class=\"label-text font-medium text-base-content\">Email address</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"mail\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input type=\"email\" id=\"email\" name=\"email\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if props.Form != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form.Email)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 86, Col: 31}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"you@example.com\" required autocomplete=\"email\"></label></div><!-- Password Field with Strength Meter --><div class=\"form-control w-full\" x-data=\"{ \r\n\t\t\t\t\t\t\tpassword: '', \r\n\t\t\t\t\t\t\tshowPassword: false,\r\n\t\t\t\t\t\t\tget strength() {\r\n\t\t\t\t\t\t\t\tlet score = 0;\r\n\t\t\t\t\t\t\t\tif (this.password.length >= 8) score++;\r\n\t\t\t\t\t\t\t\tif (this.password.match(/[a-z]/) && this.password.match(/[A-Z]/)) score++;\r\n\t\t\t\t\t\t\t\tif (this.password.match(/[0-9]/)) score++;\r\n\t\t\t\t\t\t\t\tif (this.password.match(/[^a-zA-Z0-9]/)) score++;\r\n\t\t\t\t\t\t\t\treturn score;\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t\tget strengthText() {\r\n\t\t\t\t\t\t\t\tconst texts = ['Weak', 'Fair', 'Good', 'Strong'];\r\n\t\t\t\t\t\t\t\treturn this.password.length > 0 ? texts[this.strength - 1] || 'Weak' : '';\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t\tget strengthClass() {\r\n\t\t\t\t\t\t\t\tconst classes = ['progress-error', 'progress-warning', 'progress-accent', 'progress-success'];\r\n\t\t\t\t\t\t\t\treturn classes[this.strength - 1] || 'progress-error';\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\"><label class=\"label pb-1\" for=\"password\"><span class=\"label-text font-medium text-base-content\">Password</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"lock\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input :type=\"showPassword ? 'text' : 'password'\" id=\"password\" name=\"password\" x-model=\"password\" class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"Create a strong password\" required autocomplete=\"new-password\" minlength=\"8\"> <button type=\"button\" @click=\"showPassword = !showPassword\" class=\"btn btn-ghost btn-xs btn-circle shrink-0\"><i x-show=\"!showPassword\" data-lucide=\"eye\" class=\"w-4 h-4\"></i> <i x-show=\"showPassword\" data-lucide=\"eye-off\" class=\"w-4 h-4\" x-cloak></i></button></label><!-- Password Strength Indicator --><div x-show=\"password.length > 0\" x-cloak class=\"mt-2 space-y-1\"><progress class=\"progress w-full h-1.5 transition-all duration-300\" :class=\"strengthClass\" :value=\"strength * 25\" max=\"100\"></progress><p class=\"text-xs text-base-content/60\">Password strength: <span class=\"font-medium\" x-text=\"strengthText\"></span></p></div></div><!-- Confirm Password Field --><div class=\"form-control w-full\" x-data=\"{ showPassword: false }\"><label class=\"label pb-1\" for=\"confirm_password\"><span class=\"label-text font-medium text-base-content\">Confirm password</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"lock\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input :type=\"showPassword ? 'text' : 'password'\" id=\"confirm_password\" name=\"confirm_password\" class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"Confirm your password\" required autocomplete=\"new-password\"> <button type=\"button\" @click=\"showPassword = !showPassword\" class=\"btn btn-ghost btn-xs btn-circle shrink-0\"><i x-show=\"!showPassword\" data-lucide=\"eye\" class=\"w-4 h-4\"></i> <i x-show=\"showPassword\" data-lucide=\"eye-off\" class=\"w-4 h-4\" x-cloak></i></button></label></div><!-- Terms Checkbox --><div class=\"form-control\"><label class=\"label cursor-pointer justify-start gap-3 py-0\"><input type=\"checkbox\" id=\"terms\" name=\"terms\" required class=\"checkbox checkbox-primary checkbox-sm\"> <span class=\"label-text text-base-content/80 text-sm\">I agree to the <a href=\"#\" class=\"link link-primary\">Terms of Service</a> and <a href=\"#\" class=\"link link-primary\">Privacy Policy</a></span></label></div><!-- Submit Button --><button type=\"submit\" class=\"btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 mt-2\"><span class=\"htmx-indicator loading loading-spinner loading-sm\"></span> <i data-lucide=\"user-plus\" class=\"w-5 h-5\"></i> Create account</button></form>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		if props.Form != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 55, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"John Doe\" required autocomplete=\"name\"></label></div><!-- Email Field --><div class=\"form-control w-full\"><label class=\"label pb-1\" for=\"email\"><span class=\"label-text font-medium text-base-content\">Email address</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"mail\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input type=\"email\" id=\"email\" name=\"email\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.Form != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form.Email)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 78, Col: 30}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"you@example.com\" required autocomplete=\"email\"></label></div><!-- Password Field with Strength Meter --><div class=\"form-control w-full\" x-data=\"{ \r\n                        password: '', \r\n                        showPassword: false,\r\n                        get strength() {\r\n                            let score = 0;\r\n                            if (this.password.length >= 8) score++;\r\n                            if (this.password.match(/[a-z]/) && this.password.match(/[A-Z]/)) score++;\r\n                            if (this.password.match(/[0-9]/)) score++;\r\n                            if (this.password.match(/[^a-zA-Z0-9]/)) score++;\r\n                            return score;\r\n                        },\r\n                        get strengthText() {\r\n                            const texts = ['Weak', 'Fair', 'Good', 'Strong'];\r\n                            return this.password.length > 0 ? texts[this.strength - 1] || 'Weak' : '';\r\n                        },\r\n                        get strengthClass() {\r\n                            const classes = ['progress-error', 'progress-warning', 'progress-accent', 'progress-success'];\r\n                            return classes[this.strength - 1] || 'progress-error';\r\n                        }\r\n                    }\"><label class=\"label pb-1\" for=\"password\"><span class=\"label-text font-medium text-base-content\">Password</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"lock\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input :type=\"showPassword ? 'text' : 'password'\" id=\"password\" name=\"password\" x-model=\"password\" class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"Create a strong password\" required autocomplete=\"new-password\" minlength=\"8\"> <button type=\"button\" @click=\"showPassword = !showPassword\" class=\"btn btn-ghost btn-xs btn-circle shrink-0\"><i x-show=\"!showPassword\" data-lucide=\"eye\" class=\"w-4 h-4\"></i> <i x-show=\"showPassword\" data-lucide=\"eye-off\" class=\"w-4 h-4\" x-cloak></i></button></label><!-- Password Strength Indicator --><div x-show=\"password.length > 0\" x-cloak class=\"mt-2 space-y-1\"><progress class=\"progress w-full h-1.5 transition-all duration-300\" :class=\"strengthClass\" :value=\"strength * 25\" max=\"100\"></progress><p class=\"text-xs text-base-content/60\">Password strength: <span class=\"font-medium\" x-text=\"strengthText\"></span></p></div></div><!-- Confirm Password Field --><div class=\"form-control w-full\" x-data=\"{ showPassword: false }\"><label class=\"label pb-1\" for=\"confirm_password\"><span class=\"label-text font-medium text-base-content\">Confirm password</span></label> <label class=\"input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200\"><i data-lucide=\"lock\" class=\"w-5 h-5 text-base-content/40 shrink-0\"></i> <input :type=\"showPassword ? 'text' : 'password'\" id=\"confirm_password\" name=\"confirm_password\" class=\"grow bg-transparent border-none focus:outline-none min-w-0\" placeholder=\"Confirm your password\" required autocomplete=\"new-password\"> <button type=\"button\" @click=\"showPassword = !showPassword\" class=\"btn btn-ghost btn-xs btn-circle shrink-0\"><i x-show=\"!showPassword\" data-lucide=\"eye\" class=\"w-4 h-4\"></i> <i x-show=\"showPassword\" data-lucide=\"eye-off\" class=\"w-4 h-4\" x-cloak></i></button></label></div><!-- Terms Checkbox --><div class=\"form-control\"><label class=\"label cursor-pointer justify-start gap-3 py-0\"><input type=\"checkbox\" id=\"terms\" name=\"terms\" required class=\"checkbox checkbox-primary checkbox-sm\"> <span class=\"label-text text-base-content/80 text-sm\">I agree to the <a href=\"#\" class=\"link link-primary\">Terms of Service</a> and <a href=\"#\" class=\"link link-primary\">Privacy Policy</a></span></label></div><!-- Submit Button --><button type=\"submit\" class=\"btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 mt-2\"><span class=\"htmx-indicator loading loading-spinner loading-sm\"></span> <i data-lucide=\"user-plus\" class=\"w-5 h-5\"></i> Create account</button></form><!-- Info Alert --><div class=\"alert bg-info/10 border border-info/20 mt-6\"><i data-lucide=\"info\" class=\"w-5 h-5 text-info shrink-0\"></i> <span class=\"text-sm text-base-content/80\">The first registered user will become <strong>Super Admin</strong> with full system access.</span></div><!-- Sign In Link --><p class=\"text-center text-base-content/60 mt-6\">Already have an account? <a href=\"/signin\" class=\"link link-primary font-semibold hover:link-secondary transition-colors\">Sign in</a></p><script>\r\n    lucide.createIcons();\r\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Info Alert --><div class=\"alert bg-info/10 border border-info/20 mt-6\"><i data-lucide=\"info\" class=\"w-5 h-5 text-info shrink-0\"></i> <span class=\"text-sm text-base-content/80\">The first registered user will become <strong>Super Admin</strong> with full system access.</span></div><!-- Sign In Link --><p class=\"text-center text-base-content/60 mt-6\">Already have an account? <a href=\"/signin\" class=\"link link-primary font-semibold hover:link-secondary transition-colors\">Sign in</a></p><script>\r\n    lucide.createIcons();\r\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -195,7 +207,7 @@ func SignupPage(props SignupPageProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<style>\r\n    @keyframes float {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(30px, -30px) scale(1.05); }\r\n        66% { transform: translate(-20px, 20px) scale(0.95); }\r\n    }\r\n    @keyframes float-reverse {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(-40px, 20px) scale(1.1); }\r\n        66% { transform: translate(30px, -20px) scale(0.9); }\r\n    }\r\n    @keyframes pulse-glow {\r\n        0%, 100% { opacity: 0.4; }\r\n        50% { opacity: 0.7; }\r\n    }\r\n    .bg-blob-1 { animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite; }\r\n    .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }\r\n    .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }\r\n    </style> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<style>\r\n    @keyframes float {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(30px, -30px) scale(1.05); }\r\n        66% { transform: translate(-20px, 20px) scale(0.95); }\r\n    }\r\n    @keyframes float-reverse {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(-40px, 20px) scale(1.1); }\r\n        66% { transform: translate(30px, -20px) scale(0.9); }\r\n    }\r\n    @keyframes pulse-glow {\r\n        0%, 100% { opacity: 0.4; }\r\n        50% { opacity: 0.7; }\r\n    }\r\n    .bg-blob-1 { animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite; }\r\n    .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }\r\n    .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }\r\n    </style> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -203,7 +215,7 @@ func SignupPage(props SignupPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " <div class=\"min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden\"><div class=\"relative w-full max-w-md z-10 py-8\"><!-- Main Card --><div class=\"card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-content/5\"><div class=\"card-body p-6 sm:p-8\" id=\"signup-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " <div class=\"min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden\"><div class=\"relative w-full max-w-md z-10 py-8\"><!-- Main Card --><div class=\"card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-content/5\"><div class=\"card-body p-6 sm:p-8\" id=\"signup-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -211,7 +223,7 @@ func SignupPage(props SignupPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
