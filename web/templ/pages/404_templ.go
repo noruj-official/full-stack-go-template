@@ -13,7 +13,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-func NotFound(title string, description string, user *domain.User, theme string) templ.Component {
+func NotFound(title string, description string, user *domain.User, theme string, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -52,7 +52,7 @@ func NotFound(title string, description string, user *domain.User, theme string)
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(title, description, user, false, theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(title, description, user, false, theme, themeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

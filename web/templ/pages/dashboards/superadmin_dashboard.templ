@@ -6,8 +6,8 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-templ SuperAdminDashboard(title string, userCount int64, adminCount int, activeSessions int64, recentUsers []map[string]string, user *domain.User, theme string) {
-	@layouts.Base(title, "Super Admin Dashboard", user, true, theme) {
+templ SuperAdminDashboard(title string, userCount int64, adminCount int, activeSessions int64, recentUsers []map[string]string, user *domain.User, theme string, themeEnabled bool) {
+	@layouts.Base(title, "Super Admin Dashboard", user, true, theme, themeEnabled) {
 		<!-- Super Admin Dashboard Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

@@ -113,6 +113,17 @@ func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, input *domai
 	return user, nil
 }
 
+// UpdateStatus updates the status of a user.
+func (s *userService) UpdateStatus(ctx context.Context, id uuid.UUID, status domain.UserStatus) error {
+	user, err := s.userRepo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	user.Status = status
+	return s.userRepo.Update(ctx, user)
+}
+
 // DeleteUser removes a user.
 func (s *userService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return s.userRepo.Delete(ctx, id)

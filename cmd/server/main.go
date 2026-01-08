@@ -59,6 +59,7 @@ func run() error {
 	passwordResetRepo := postgres.NewPasswordResetRepository(db)
 	activityRepo := postgres.NewActivityLogRepository(db)
 	auditRepo := postgres.NewAuditLogRepository(db)
+	featureRepo := postgres.NewFeatureRepository(db)
 
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
@@ -66,6 +67,18 @@ func run() error {
 	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, emailService)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
+	featureService := service.NewFeatureService(featureRepo)
+
+	// SyncFeatures feature flags
+	err = featureService.SyncFeatures(context.Background(), map[string]domain.FeatureConfig{
+		domain.FeatureThemeManagement: {
+			Description:    "Enables theme switching logic",
+			DefaultEnabled: true,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to sync feature flags: %w", err)
+	}
 
 	// Initialize storage service
 	storageService, err := storage.NewService(cfg, db.Pool)
@@ -74,8 +87,7 @@ func run() error {
 	}
 
 	// Initialize handlers
-	// Initialize handlers
-	baseHandler := handler.NewHandler(cfg.App.Name, cfg.App.Logo)
+	baseHandler := handler.NewHandler(cfg.App.Name, cfg.App.Logo, featureService)
 
 	homeHandler := handler.NewHomeHandler(baseHandler, db)
 	userHandler := handler.NewUserHandler(baseHandler, userService, auditService)
@@ -85,6 +97,7 @@ func run() error {
 	settingsHandler := handler.NewSettingsHandler(baseHandler, userService, activityService)
 	analyticsHandler := handler.NewAnalyticsHandler(baseHandler, db)
 	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db)
+	featureHandler := handler.NewFeatureHandler(baseHandler, featureService, auditService)
 
 	// Initialize auth middleware
 	authMiddleware := middleware.NewAuth(authService)
@@ -147,7 +160,12 @@ func run() error {
 	mux.Handle("POST /a/users/create", adminOnly(http.HandlerFunc(userHandler.Create)))
 	mux.Handle("GET /a/users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
 	mux.Handle("POST /a/users/{id}/edit", adminOnly(http.HandlerFunc(userHandler.Edit)))
+	mux.Handle("POST /a/users/{id}/status", adminOnly(http.HandlerFunc(userHandler.UpdateStatus)))
 	mux.Handle("DELETE /a/users/{id}", middleware.RequireRole(domain.RoleSuperAdmin)(http.HandlerFunc(userHandler.Delete)))
+
+	// Feature Flags Admin
+	mux.Handle("GET /a/features", adminOnly(http.HandlerFunc(featureHandler.List)))
+	mux.Handle("POST /a/features/toggle", adminOnly(http.HandlerFunc(featureHandler.Toggle)))
 
 	// Admin analytics and activity routes
 	mux.Handle("GET /a/analytics", adminOnly(http.HandlerFunc(analyticsHandler.AdminAnalytics)))

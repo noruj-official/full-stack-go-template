@@ -14,7 +14,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-func SuperAdminDashboard(title string, userCount int64, adminCount int, activeSessions int64, recentUsers []map[string]string, user *domain.User, theme string) templ.Component {
+func SuperAdminDashboard(title string, userCount int64, adminCount int, activeSessions int64, recentUsers []map[string]string, user *domain.User, theme string, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -174,7 +174,7 @@ func SuperAdminDashboard(title string, userCount int64, adminCount int, activeSe
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(title, "Super Admin Dashboard", user, true, theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(title, "Super Admin Dashboard", user, true, theme, themeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

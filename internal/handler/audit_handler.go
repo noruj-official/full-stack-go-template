@@ -64,13 +64,17 @@ func (h *AuditHandler) AuditLogs(w http.ResponseWriter, r *http.Request) {
 
 	totalPages := (total + limit - 1) / limit
 
+	theme, themeEnabled := h.GetTheme(r)
+
 	props := admin.AuditLogsProps{
 		User:        middleware.GetUserFromContext(r.Context()),
 		Logs:        formattedLogs,
 		Total:       int64(total),
 		CurrentPage: page,
 		TotalPages:  totalPages,
-		Theme:       h.GetTheme(r),
+
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 
 	admin.AuditLogs(props).Render(r.Context(), w)
@@ -98,6 +102,8 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 		environment = appEnv.(string)
 	}
 
+	theme, themeEnabled := h.GetTheme(r)
+
 	props := admin.SystemHealthProps{
 		User: middleware.GetUserFromContext(r.Context()),
 		Database: admin.DatabaseHealth{
@@ -123,7 +129,9 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 			WriteTimeout: "15s",
 			IdleTimeout:  "60s",
 		},
-		Theme: h.GetTheme(r),
+
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 
 	admin.SystemHealth(props).Render(r.Context(), w)

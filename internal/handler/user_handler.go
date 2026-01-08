@@ -42,18 +42,18 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := middleware.GetUserFromContext(r.Context())
-	theme := getTheme(r)
+	theme, themeEnabled := h.GetTheme(r)
 	showSidebar := true
 
-	h.RenderTempl(w, r, usersPage.List("Users", "Manage your application users", user, showSidebar, theme, users, total, page, int((total+9)/10)))
+	h.RenderTempl(w, r, usersPage.List("Users", "Manage your application users", user, showSidebar, theme, themeEnabled, users, total, page, int((total+9)/10)))
 }
 
 // Create handles user creation form display and submission.
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		user := middleware.GetUserFromContext(r.Context())
-		theme := getTheme(r)
-		h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, nil, ""))
+		theme, themeEnabled := h.GetTheme(r)
+		h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, themeEnabled, nil, ""))
 		return
 	}
 
@@ -110,8 +110,8 @@ func (h *UserHandler) renderCreateForm(w http.ResponseWriter, r *http.Request, i
 
 	// Otherwise render the full create page
 	user := middleware.GetUserFromContext(r.Context())
-	theme := getTheme(r)
-	h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, input, errMsg))
+	theme, themeEnabled := h.GetTheme(r)
+	h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, themeEnabled, input, errMsg))
 }
 
 // Edit handles user edit form display and submission.
@@ -135,8 +135,8 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		currentUser := middleware.GetUserFromContext(r.Context())
-		theme := getTheme(r)
-		h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, user, ""))
+		theme, themeEnabled := h.GetTheme(r)
+		h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, themeEnabled, user, ""))
 		return
 	}
 
@@ -198,8 +198,8 @@ func (h *UserHandler) renderEditForm(w http.ResponseWriter, r *http.Request, tar
 	}
 
 	currentUser := middleware.GetUserFromContext(r.Context())
-	theme := getTheme(r)
-	h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, targetUser, errMsg))
+	theme, themeEnabled := h.GetTheme(r)
+	h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, themeEnabled, targetUser, errMsg))
 }
 
 // Delete handles user deletion.
@@ -229,6 +229,52 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	if isHTMXRequest(r) {
 		w.Header().Set("HX-Trigger", "userDeleted")
 		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Redirect(w, r, "/a/users", http.StatusSeeOther)
+}
+
+// UpdateStatus handles user status updates.
+func (h *UserHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		h.Error(w, r, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	status := domain.UserStatus(r.FormValue("status"))
+	switch status {
+	case domain.UserStatusActive, domain.UserStatusSuspended, domain.UserStatusBanned:
+		// Valid status
+	default:
+		h.Error(w, r, http.StatusBadRequest, "Invalid status")
+		return
+	}
+
+	if err := h.userService.UpdateStatus(r.Context(), id, status); err != nil {
+		if domain.IsNotFoundError(err) {
+			h.Error(w, r, http.StatusNotFound, "User not found")
+			return
+		}
+		h.Error(w, r, http.StatusInternalServerError, "Failed to update user status")
+		return
+	}
+
+	// Log audit for status update
+	if admin := middleware.GetUserFromContext(r.Context()); admin != nil {
+		ip := getIPAddress(r)
+		_ = h.auditService.LogAudit(r.Context(), admin.ID, domain.AuditUserUpdate, "user", &id, nil, map[string]interface{}{
+			"status": status,
+		}, &ip)
+	}
+
+	user, _ := h.userService.GetUser(r.Context(), id)
+
+	if isHTMXRequest(r) {
+		w.Header().Set("HX-Trigger", "userStatusUpdated")
+		h.RenderTempl(w, r, usersPage.UserRow(user))
 		return
 	}
 

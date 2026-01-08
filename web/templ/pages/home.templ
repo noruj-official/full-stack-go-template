@@ -5,8 +5,8 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-templ Home(title string, description string, user *domain.User, theme string) {
-	@layouts.Base(title, description, user, true, theme) {
+templ Home(title string, description string, user *domain.User, theme string, themeEnabled bool) {
+	@layouts.Base(title, description, user, true, theme, themeEnabled) {
 		<section class="px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
 			<div class="max-w-4xl mx-auto text-center">
 				<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-base-content mb-6 leading-tight">

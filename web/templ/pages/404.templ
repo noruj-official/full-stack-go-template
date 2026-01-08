@@ -5,8 +5,8 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-templ NotFound(title string, description string, user *domain.User, theme string) {
-	@layouts.Base(title, description, user, false, theme) {
+templ NotFound(title string, description string, user *domain.User, theme string, themeEnabled bool) {
+	@layouts.Base(title, description, user, false, theme, themeEnabled) {
 		<div class="min-h-screen flex flex-col items-center justify-center text-center pt-16">
 			<!-- Hero Content -->
 			<div class="max-w-2xl mx-auto px-4">

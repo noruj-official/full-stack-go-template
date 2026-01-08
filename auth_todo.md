@@ -68,27 +68,27 @@ This document outlines the step-by-step plan to implement recommended authentica
 ### Day 4: Enhanced User Status (Ban/Suspend)
 **Goal**: Give admins control over user access without deleting data.
 
-- [ ] **Step 1: Database Migration**
-    - [ ] Add `status` column to `users` (active, suspended, banned).
-- [ ] **Step 2: Update Auth Middleware**
-    - [ ] Check `user.Status` in `RequireAuth` middleware.
-    - [ ] Deny access if not "active".
-- [ ] **Step 3: Admin Actions**
-    - [ ] Add endpoints for Admins to change user status.
-    - [ ] **Test**: Admin suspends User A. User A is immediately logged out/blocked on next request.
+- [x] **Step 1: Database Migration**
+    - [x] Add `status` column to `users` (active, suspended, banned).
+- [x] **Step 2: Update Auth Middleware**
+    - [x] Check `user.Status` in `RequireAuth` middleware.
+    - [x] Deny access if not "active".
+- [x] **Step 3: Admin Actions**
+    - [x] Add endpoints for Admins to change user status.
+    - [x] **Test**: Admin suspends User A. User A is immediately logged out/blocked on next request.
 
 ### Day 5: Feature Flag System
 **Goal**: Enable safe rollout of new features (like those in Phase 3).
 
-- [ ] **Step 1: Create Feature Flags Table**
-    - [ ] `feature_flags` (key, enabled, description).
-- [ ] **Step 2: Feature Service**
-    - [ ] Create `internal/service/feature_service.go` (IsEnabled check).
-- [ ] **Step 3: Admin UI for Flags**
-    - [ ] Simple page to toggle flags on/off (Admin only).
-- [ ] **Step 4: Integration**
-    - [ ] Add `Features` to template context or API responses.
-    - [ ] **Test**: Add dummy flag, toggle it, verify UI changes.
+- [x] **Step 1: Create Feature Flags Table**
+    - [x] `feature_flags` (key, enabled, description).
+- [x] **Step 2: Feature Service**
+    - [x] Create `internal/service/feature_service.go` (IsEnabled check).
+- [x] **Step 3: Admin UI for Flags**
+    - [x] Simple page to toggle flags on/off (Admin only).
+- [x] **Step 4: Integration**
+    - [x] Add `Features` to template context or API responses.
+    - [x] **Test**: Add dummy flag, toggle it, verify UI changes.
 
 ---
 

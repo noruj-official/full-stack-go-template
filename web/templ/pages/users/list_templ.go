@@ -14,7 +14,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-func List(title string, description string, user *domain.User, showSidebar bool, theme string, usersList []*domain.User, total int64, currentPage int, totalPages int) templ.Component {
+func List(title string, description string, user *domain.User, showSidebar bool, theme string, themeEnabled bool, usersList []*domain.User, total int64, currentPage int, totalPages int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -47,7 +47,7 @@ func List(title string, description string, user *domain.User, showSidebar bool,
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Page Header --> <div class=\"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8\"><div><h1 class=\"text-2xl font-bold text-slate-900 dark:text-white\">Users</h1><p class=\"text-slate-500 dark:text-slate-400\">Manage your application users</p></div><a href=\"/a/users/create\" class=\"btn btn-primary\"><i data-lucide=\"user-plus\" class=\"w-4 h-4\"></i> Add User</a></div><!-- Filters and Search --> <div class=\"card mb-6\"><div class=\"card-body p-4\"><div class=\"flex flex-col sm:flex-row gap-4\"><div class=\"flex-1 relative\"><i data-lucide=\"search\" class=\"absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400\"></i> <input type=\"text\" placeholder=\"Search users...\" class=\"input pl-10 w-full\" hx-get=\"/a/users/search\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#users-table-body\"></div><div class=\"flex gap-2\"><select class=\"select w-full sm:w-auto\"><option value=\"\">All Roles</option> <option value=\"admin\">Admin</option> <option value=\"user\">User</option></select> <select class=\"select w-full sm:w-auto\"><option value=\"\">Status</option> <option value=\"active\">Active</option> <option value=\"inactive\">Inactive</option></select></div></div></div></div><!-- Users Table --> <div class=\"card overflow-hidden\"><div class=\"overflow-x-auto md:overflow-x-visible\"><table class=\"table table-zebra table-fixed w-full\"><thead><tr><th class=\"bg-slate-50 dark:bg-slate-800/50\">User</th><th class=\"bg-slate-50 dark:bg-slate-800/50\">Details</th><th class=\"bg-slate-50 dark:bg-slate-800/50\">Joined</th><th class=\"bg-slate-50 dark:bg-slate-800/50 text-right\">Actions</th></tr></thead> <tbody id=\"users-table-body\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Page Header --> <div class=\"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8\"><div><h1 class=\"text-2xl font-bold text-slate-900 dark:text-white\">Users</h1><p class=\"text-slate-500 dark:text-slate-400\">Manage your application users</p></div><a href=\"/a/users/create\" class=\"btn btn-primary\"><i data-lucide=\"user-plus\" class=\"w-4 h-4\"></i> Add User</a></div><!-- Filters and Search --> <div class=\"card mb-6\"><div class=\"card-body p-4\"><div class=\"flex flex-col sm:flex-row gap-4\"><div class=\"flex-1 relative\"><i data-lucide=\"search\" class=\"absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400\"></i> <input type=\"text\" placeholder=\"Search users...\" class=\"input pl-10 w-full\" hx-get=\"/a/users/search\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#users-table-body\"></div><div class=\"flex gap-2\"><select class=\"select w-full sm:w-auto\"><option value=\"\">All Roles</option> <option value=\"admin\">Admin</option> <option value=\"user\">User</option></select> <select class=\"select w-full sm:w-auto\"><option value=\"\">Status</option> <option value=\"active\">Active</option> <option value=\"inactive\">Inactive</option></select></div></div></div></div><!-- Users Table --> <div class=\"card overflow-hidden\"><div class=\"overflow-x-auto md:overflow-x-visible\"><table class=\"table table-zebra table-fixed w-full\"><thead><tr><th class=\"bg-slate-50 dark:bg-slate-800/50\">User</th><th class=\"bg-slate-50 dark:bg-slate-800/50\">Details</th><th class=\"bg-slate-50 dark:bg-slate-800/50\">Status</th><th class=\"bg-slate-50 dark:bg-slate-800/50\">Joined</th><th class=\"bg-slate-50 dark:bg-slate-800/50 text-right\">Actions</th></tr></thead> <tbody id=\"users-table-body\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -71,7 +71,7 @@ func List(title string, description string, user *domain.User, showSidebar bool,
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", (currentPage-1)*10+1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 78, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 79, Col: 113}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -84,7 +84,7 @@ func List(title string, description string, user *domain.User, showSidebar bool,
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", min(currentPage*10, int(total))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 79, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 80, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -97,7 +97,7 @@ func List(title string, description string, user *domain.User, showSidebar bool,
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", total))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 80, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 81, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -120,7 +120,7 @@ func List(title string, description string, user *domain.User, showSidebar bool,
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", currentPage))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 84, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/users/list.templ`, Line: 85, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -142,7 +142,7 @@ func List(title string, description string, user *domain.User, showSidebar bool,
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(title, description, user, showSidebar, theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(title, description, user, showSidebar, theme, themeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

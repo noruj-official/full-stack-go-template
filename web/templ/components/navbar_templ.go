@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/shaik-noor/full-stack-go-template/internal/domain"
 
-func Navbar(user *domain.User, showSidebar bool) templ.Component {
+func Navbar(user *domain.User, showSidebar bool, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -46,25 +46,31 @@ func Navbar(user *domain.User, showSidebar bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Brand Logo/Title moved next to toggle --><a href=\"/\" class=\"flex items-center gap-2 px-2\"><span class=\"text-xl font-bold text-base-content\">Full Stack Go Template</span></a></div><!-- Right side actions --><div class=\"flex items-center gap-2\"><!-- Dark mode toggle --><button @click=\"darkMode = !darkMode\" class=\"btn btn-ghost p-2\" :title=\"darkMode ? 'Switch to light mode' : 'Switch to dark mode'\"><i x-show=\"!darkMode\" data-lucide=\"moon\" class=\"w-5 h-5\"></i> <i x-show=\"darkMode\" data-lucide=\"sun\" class=\"w-5 h-5\" x-cloak></i></button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Brand Logo/Title moved next to toggle --><a href=\"/\" class=\"flex items-center gap-2 px-2\"><span class=\"text-xl font-bold text-base-content\">Full Stack Go Template</span></a></div><!-- Right side actions --><div class=\"flex items-center gap-2\"><!-- Dark mode toggle -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		if themeEnabled {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<button @click=\"darkMode = !darkMode\" class=\"btn btn-ghost p-2\" :title=\"darkMode ? 'Switch to light mode' : 'Switch to dark mode'\"><i x-show=\"!darkMode\" data-lucide=\"moon\" class=\"w-5 h-5\"></i> <i x-show=\"darkMode\" data-lucide=\"sun\" class=\"w-5 h-5\" x-cloak></i></button> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
 		if user != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- User menu (authenticated) --> <div class=\"dropdown dropdown-end\" x-data=\"{ open: false }\" :class=\"{ 'dropdown-open': open }\"><button @click=\"open = !open\" @click.away=\"open = false\" class=\"flex items-center gap-2 p-1.5 rounded-xl hover:bg-base-200 transition-colors\"><div class=\"avatar\"><div class=\"w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium overflow-hidden\"><img class=\"w-full h-full object-cover\" src=\"/u/profile/image\" alt=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- User menu (authenticated) --> <div class=\"dropdown dropdown-end\" x-data=\"{ open: false }\" :class=\"{ 'dropdown-open': open }\"><button @click=\"open = !open\" @click.away=\"open = false\" class=\"flex items-center gap-2 p-1.5 rounded-xl hover:bg-base-200 transition-colors\"><div class=\"avatar\"><div class=\"w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium overflow-hidden\"><img class=\"w-full h-full object-cover\" src=\"/u/profile/image\" alt=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 54, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 56, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" onerror=\"this.style.display='none'; this.nextElementSibling.style.display='flex';\" onload=\"this.style.display='block'; this.nextElementSibling.style.display='none';\"> <span class=\"w-full h-full flex items-center justify-center\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" onerror=\"this.style.display='none'; this.nextElementSibling.style.display='flex';\" onload=\"this.style.display='block'; this.nextElementSibling.style.display='none';\"> <span class=\"w-full h-full flex items-center justify-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,53 +78,53 @@ func Navbar(user *domain.User, showSidebar bool) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string([]rune(user.Name)[0]))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 60, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 62, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span></div></div><span class=\"hidden sm:block text-sm font-medium text-base-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div></div><span class=\"hidden sm:block text-sm font-medium text-base-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 65, Col: 87}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 67, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span> <i data-lucide=\"chevron-down\" class=\"w-4 h-4 text-base-content/50 hidden sm:block\"></i></button><ul x-show=\"open\" x-transition:enter=\"transition ease-out duration-200\" x-transition:enter-start=\"opacity-0 scale-95\" x-transition:enter-end=\"opacity-100 scale-100\" x-transition:leave=\"transition ease-in duration-150\" x-transition:leave-start=\"opacity-100 scale-100\" x-transition:leave-end=\"opacity-0 scale-95\" class=\"menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-56 border border-base-200\"><li class=\"menu-title px-4 py-2 border-b border-base-200 mb-2\"><span class=\"text-base-content block text-sm font-medium\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span> <i data-lucide=\"chevron-down\" class=\"w-4 h-4 text-base-content/50 hidden sm:block\"></i></button><ul x-show=\"open\" x-transition:enter=\"transition ease-out duration-200\" x-transition:enter-start=\"opacity-0 scale-95\" x-transition:enter-end=\"opacity-100 scale-100\" x-transition:leave=\"transition ease-in duration-150\" x-transition:leave-start=\"opacity-100 scale-100\" x-transition:leave-end=\"opacity-0 scale-95\" class=\"menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-56 border border-base-200\"><li class=\"menu-title px-4 py-2 border-b border-base-200 mb-2\"><span class=\"text-base-content block text-sm font-medium\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 79, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 81, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span> <span class=\"text-base-content/70 block text-xs font-normal\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span> <span class=\"text-base-content/70 block text-xs font-normal\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 80, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 82, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -130,7 +136,7 @@ func Navbar(user *domain.User, showSidebar bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -143,30 +149,30 @@ func Navbar(user *domain.User, showSidebar bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(user.Role.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 85, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/navbar.templ`, Line: 87, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></li><li><a href=\"/u/profile\"><i data-lucide=\"user\" class=\"w-4 h-4\"></i> Profile</a></li><li><a href=\"/u/settings\"><i data-lucide=\"settings\" class=\"w-4 h-4\"></i> Settings</a></li><div class=\"divider my-1\"></div><li><form action=\"/logout\" method=\"POST\" class=\"w-full\"><button type=\"submit\" class=\"w-full flex items-center gap-3 text-error hover:bg-error/10\"><i data-lucide=\"log-out\" class=\"w-4 h-4\"></i> Logout</button></form></li></ul></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></li><li><a href=\"/u/profile\"><i data-lucide=\"user\" class=\"w-4 h-4\"></i> Profile</a></li><li><a href=\"/u/settings\"><i data-lucide=\"settings\" class=\"w-4 h-4\"></i> Settings</a></li><div class=\"divider my-1\"></div><li><form action=\"/logout\" method=\"POST\" class=\"w-full\"><button type=\"submit\" class=\"w-full flex items-center gap-3 text-error hover:bg-error/10\"><i data-lucide=\"log-out\" class=\"w-4 h-4\"></i> Logout</button></form></li></ul></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<!-- Auth buttons (not authenticated) --> <a href=\"/signin\" class=\"btn btn-ghost text-sm\">Sign in</a> <a href=\"/signup\" class=\"btn btn-primary text-sm\">Sign up</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Auth buttons (not authenticated) --> <a href=\"/signin\" class=\"btn btn-ghost text-sm\">Sign in</a> <a href=\"/signup\" class=\"btn btn-primary text-sm\">Sign up</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div></div></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

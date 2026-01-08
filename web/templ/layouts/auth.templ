@@ -2,14 +2,15 @@ package layouts
 
 import "fmt"
 
-templ Auth(title string, description string, theme string) {
+templ Auth(title string, description string, theme string, themeEnabled bool) {
 	<!DOCTYPE html>
 	<html
 		lang="en"
 		class={ templ.KV("dark", theme == "dark") }
 		data-theme={ theme }
-		x-data={ fmt.Sprintf("{ darkMode: %t }", theme == "dark") }
+		x-data={ fmt.Sprintf("{ darkMode: %t, themeEnabled: %t }", theme == "dark", themeEnabled) }
 		x-init="() => {
+			if (!themeEnabled) return;
             const init = document.documentElement.classList.contains('dark');
             darkMode = init;
             $watch('darkMode', val => {
@@ -26,7 +27,7 @@ templ Auth(title string, description string, theme string) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<meta name="description" content={ description }/>
-			<meta name="color-scheme" content="light dark"/>
+			<meta name="color-scheme" content={ func() string { if themeEnabled { return "light dark" } else { return "light" } }() }/>
 			<title>{ title } | Full Stack Go Template</title>
 			<link rel="stylesheet" href="/assets/css/output.css"/>
 			<script src="/assets/vendor/htmx.min.js"></script>

@@ -24,10 +24,11 @@ type AuditLogsProps struct {
 	CurrentPage int
 	TotalPages  int
 	Theme       string
+	ThemeEnabled bool
 }
 
 templ AuditLogs(props AuditLogsProps) {
-	@layouts.Base("Audit Logs", "Complete record of all administrative actions", props.User, true, props.Theme) {
+	@layouts.Base("Audit Logs", "Complete record of all administrative actions", props.User, true, props.Theme, props.ThemeEnabled) {
 		<!-- Audit Logs Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

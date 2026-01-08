@@ -254,96 +254,118 @@ func Sidebar(user *domain.User, title string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\"><i data-lucide=\"server\" class=\"w-5 h-5\"></i> System Health</a></li><li><a href=\"#\" class=\"opacity-50 cursor-not-allowed\"><i data-lucide=\"shield\" class=\"w-5 h-5\"></i> Admin Management <span class=\"badge badge-primary badge-xs ml-auto\">Soon</span></a></li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\"><i data-lucide=\"server\" class=\"w-5 h-5\"></i> System Health</a></li><li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var20 = []any{templ.KV("active", title == "Feature Flags")}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var20...)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<a href=\"/a/features\" class=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var21 string
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var20).String())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 1, Col: 0}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"><i data-lucide=\"toggle-left\" class=\"w-5 h-5\"></i> Feature Flags</a></li><li><a href=\"#\" class=\"opacity-50 cursor-not-allowed\"><i data-lucide=\"shield\" class=\"w-5 h-5\"></i> Admin Management <span class=\"badge badge-primary badge-xs ml-auto\">Soon</span></a></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<!-- Coming Soon / Resources -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- Coming Soon / Resources -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if user != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<li class=\"menu-title mt-6 text-base-content/60 uppercase tracking-wider\">More</li><li><a href=\"#\" class=\"opacity-50 cursor-not-allowed\"><i data-lucide=\"help-circle\" class=\"w-5 h-5\"></i> Help & Support <span class=\"badge badge-primary badge-xs ml-auto\">Soon</span></a></li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<li class=\"menu-title mt-6 text-base-content/60 uppercase tracking-wider\">More</li><li><a href=\"#\" class=\"opacity-50 cursor-not-allowed\"><i data-lucide=\"help-circle\" class=\"w-5 h-5\"></i> Help & Support <span class=\"badge badge-primary badge-xs ml-auto\">Soon</span></a></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- For non-authenticated users --> <li class=\"menu-title mt-6 text-base-content/60 uppercase tracking-wider\">Resources</li><li><a href=\"#\" class=\"opacity-50 cursor-not-allowed\"><i data-lucide=\"file-text\" class=\"w-5 h-5\"></i> Documentation <span class=\"badge badge-primary badge-xs ml-auto\">Soon</span></a></li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<!-- For non-authenticated users --> <li class=\"menu-title mt-6 text-base-content/60 uppercase tracking-wider\">Resources</li><li><a href=\"#\" class=\"opacity-50 cursor-not-allowed\"><i data-lucide=\"file-text\" class=\"w-5 h-5\"></i> Documentation <span class=\"badge badge-primary badge-xs ml-auto\">Soon</span></a></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</ul><!-- Bottom section -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</ul><!-- Bottom section -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if user != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"p-4 border-t border-base-200/80\"><div class=\"flex items-center gap-3 p-3 rounded-xl bg-base-200/50\"><div class=\"avatar\"><div class=\"w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium overflow-hidden\"><img class=\"w-full h-full object-cover\" src=\"/u/profile/image\" alt=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 139, Col: 24}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" onerror=\"this.style.display='none'; this.nextElementSibling.style.display='flex';\" onload=\"this.style.display='block'; this.nextElementSibling.style.display='none';\"> <span class=\"w-full h-full flex items-center justify-center\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if len(user.Name) > 0 {
-				var templ_7745c5c3_Var21 string
-				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(string([]rune(user.Name)[0]))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 145, Col: 40}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</span></div></div><div class=\"flex-1 min-w-0\"><p class=\"text-sm font-medium text-base-content truncate\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"p-4 border-t border-base-200/80\"><div class=\"flex items-center gap-3 p-3 rounded-xl bg-base-200/50\"><div class=\"avatar\"><div class=\"w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium overflow-hidden\"><img class=\"w-full h-full object-cover\" src=\"/u/profile/image\" alt=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 151, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 145, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</p><p class=\"text-xs text-base-content/70 truncate\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" onerror=\"this.style.display='none'; this.nextElementSibling.style.display='flex';\" onload=\"this.style.display='block'; this.nextElementSibling.style.display='none';\"> <span class=\"w-full h-full flex items-center justify-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 152, Col: 68}
+			if len(user.Name) > 0 {
+				var templ_7745c5c3_Var23 string
+				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string([]rune(user.Name)[0]))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 151, Col: 40}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</span></div></div><div class=\"flex-1 min-w-0\"><p class=\"text-sm font-medium text-base-content truncate\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</p></div><form action=\"/logout\" method=\"POST\"><button type=\"submit\" class=\"btn btn-ghost p-2 text-base-content/60 hover:text-error\" title=\"Logout\"><i data-lucide=\"log-out\" class=\"w-4 h-4\"></i></button></form></div></div>")
+			var templ_7745c5c3_Var24 string
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 157, Col: 76}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</p><p class=\"text-xs text-base-content/70 truncate\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var25 string
+			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/components/sidebar.templ`, Line: 158, Col: 68}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</p></div><form action=\"/logout\" method=\"POST\"><button type=\"submit\" class=\"btn btn-ghost p-2 text-base-content/60 hover:text-error\" title=\"Logout\"><i data-lucide=\"log-out\" class=\"w-4 h-4\"></i></button></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div class=\"p-4 border-t border-base-200/80\"><div class=\"card p-4 bg-gradient-to-br from-primary-500/10 to-accent-500/10 border-primary-200/50 dark:border-primary-800/50\"><div class=\"flex items-center gap-3 mb-3\"><div class=\"w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center\"><i data-lucide=\"user-plus\" class=\"w-5 h-5 text-primary-600 dark:text-primary-400\"></i></div><div><p class=\"text-sm font-semibold text-base-content\">Get Started</p><p class=\"text-xs text-base-content/70\">Create an account</p></div></div><a href=\"/signup\" class=\"btn btn-primary w-full text-sm\">Sign Up Free</a></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<div class=\"p-4 border-t border-base-200/80\"><div class=\"card p-4 bg-gradient-to-br from-primary-500/10 to-accent-500/10 border-primary-200/50 dark:border-primary-800/50\"><div class=\"flex items-center gap-3 mb-3\"><div class=\"w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center\"><i data-lucide=\"user-plus\" class=\"w-5 h-5 text-primary-600 dark:text-primary-400\"></i></div><div><p class=\"text-sm font-semibold text-base-content\">Get Started</p><p class=\"text-xs text-base-content/70\">Create an account</p></div></div><a href=\"/signup\" class=\"btn btn-primary w-full text-sm\">Sign Up Free</a></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

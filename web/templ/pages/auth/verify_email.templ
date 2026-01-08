@@ -9,10 +9,11 @@ type VerifyEmailPageProps struct {
 	Success bool
 	Message string
 	Theme   string
+	ThemeEnabled bool
 }
 
 templ VerifyEmailPage(props VerifyEmailPageProps) {
-	@layouts.Auth("Email Verification", "Verify your email address", props.Theme) {
+	@layouts.Auth("Email Verification", "Verify your email address", props.Theme, props.ThemeEnabled) {
 		<style>
     @keyframes float {
         0%, 100% { transform: translate(0, 0) scale(1); }
@@ -32,7 +33,7 @@ templ VerifyEmailPage(props VerifyEmailPageProps) {
     .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }
     .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }
     </style>
-		@components.Navbar(nil, false)
+		@components.Navbar(nil, false, props.ThemeEnabled)
 		<div
 			class="min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden"
 		>

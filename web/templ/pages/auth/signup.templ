@@ -12,6 +12,7 @@ type SignupPageProps struct {
 	Message     string
 	MessageType string
 	Theme       string
+	ThemeEnabled bool
 }
 
 templ SignupForm(props SignupPageProps) {
@@ -225,7 +226,7 @@ templ SignupForm(props SignupPageProps) {
 }
 
 templ SignupPage(props SignupPageProps) {
-	@layouts.Auth("Sign Up", "Create your account", props.Theme) {
+	@layouts.Auth("Sign Up", "Create your account", props.Theme, props.ThemeEnabled) {
 		<style>
     @keyframes float {
         0%, 100% { transform: translate(0, 0) scale(1); }
@@ -245,7 +246,7 @@ templ SignupPage(props SignupPageProps) {
     .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }
     .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }
     </style>
-		@components.Navbar(nil, false)
+		@components.Navbar(nil, false, props.ThemeEnabled)
 		<div
 			class="min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden"
 		>

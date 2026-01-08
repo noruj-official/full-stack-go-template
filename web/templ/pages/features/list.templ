@@ -1,0 +1,64 @@
+package features
+
+import (
+	"fmt"
+	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
+	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+)
+
+templ List(title string, description string, user *domain.User, showSidebar bool, theme string, themeEnabled bool, features []*domain.FeatureFlag) {
+	@layouts.Base(title, description, user, showSidebar, theme, themeEnabled) {
+		<div class="mb-8">
+			<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Feature Flags</h1>
+			<p class="text-slate-500 dark:text-slate-400">Manage application feature toggles.</p>
+		</div>
+
+		<div class="card overflow-hidden">
+			<div class="overflow-x-auto">
+				<table class="table table-zebra w-full">
+					<thead>
+						<tr>
+							<th class="bg-slate-50 dark:bg-slate-800/50">Feature</th>
+							<th class="bg-slate-50 dark:bg-slate-800/50">Description</th>
+							<th class="bg-slate-50 dark:bg-slate-800/50">State</th>
+							<th class="bg-slate-50 dark:bg-slate-800/50 text-right">Last Updated</th>
+						</tr>
+					</thead>
+					<tbody>
+						if len(features) > 0 {
+							for _, f := range features {
+								<tr>
+									<td class="font-medium text-slate-900 dark:text-white">{ f.Name }</td>
+									<td class="text-slate-500 dark:text-slate-400">{ f.Description }</td>
+									<td>
+										<label class="relative inline-flex items-center cursor-pointer">
+											<input type="checkbox" class="sr-only peer" 
+												checked?={ f.Enabled }
+												hx-post={ fmt.Sprintf("/a/features/toggle?name=%s&enabled=%t", f.Name, !f.Enabled) }
+												hx-swap="none"
+												hx-on:click="this.checked = !this.checked; setTimeout(() => window.location.reload(), 100)"
+											/>
+											<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+										</label>
+									</td>
+									<td class="text-right text-slate-500 dark:text-slate-400 text-sm">
+										{ f.UpdatedAt.Format("Jan 02, 15:04") }
+									</td>
+								</tr>
+							}
+						} else {
+							<tr>
+								<td colspan="4" class="text-center py-8 text-slate-500">
+									No feature flags found.
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<script>
+			lucide.createIcons();
+		</script>
+	}
+}

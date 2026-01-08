@@ -82,13 +82,16 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 		}
 	}
 
+	theme, themeEnabled := h.GetTheme(r)
+
 	props := admin.AdminAnalyticsProps{
 		User:          middleware.GetUserFromContext(r.Context()),
 		TotalUsers:    totalUsers,
 		RecentUsers:   recentCount,
 		UserRoleStats: roleStats,
 		GrowthData:    growthData,
-		Theme:         h.GetTheme(r),
+		Theme:         theme,
+		ThemeEnabled:  themeEnabled,
 	}
 
 	admin.AdminAnalytics(props).Render(r.Context(), w)
@@ -133,10 +136,13 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 		})
 	}
 
+	theme, themeEnabled := h.GetTheme(r)
+
 	props := admin.SystemActivityProps{
-		User:       middleware.GetUserFromContext(r.Context()),
-		Activities: activities,
-		Theme:      h.GetTheme(r),
+		User:         middleware.GetUserFromContext(r.Context()),
+		Activities:   activities,
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 
 	admin.SystemActivity(props).Render(r.Context(), w)

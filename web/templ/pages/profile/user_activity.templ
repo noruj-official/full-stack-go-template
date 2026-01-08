@@ -13,8 +13,8 @@ type ActivityViewModel struct {
 	FullTime    string
 }
 
-templ UserActivity(title string, activities []ActivityViewModel, user *domain.User, theme string) {
-	@layouts.Base(title, "Track your recent account activities", user, true, theme) {
+templ UserActivity(title string, activities []ActivityViewModel, user *domain.User, theme string, themeEnabled bool) {
+	@layouts.Base(title, "Track your recent account activities", user, true, theme, themeEnabled) {
 		<!-- User Activity Log Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

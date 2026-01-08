@@ -8,6 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
+// UserStatus represents the status of a user.
+type UserStatus string
+
+const (
+	UserStatusActive    UserStatus = "active"
+	UserStatusSuspended UserStatus = "suspended"
+	UserStatusBanned    UserStatus = "banned"
+)
+
 // User represents a user entity in the system.
 type User struct {
 	ID                         uuid.UUID  `json:"id"`
@@ -21,6 +30,7 @@ type User struct {
 	EmailVerified              bool       `json:"email_verified"`
 	VerificationToken          *string    `json:"-"`
 	VerificationTokenExpiresAt *time.Time `json:"-"`
+	Status                     UserStatus `json:"status"`
 	CreatedAt                  time.Time  `json:"created_at"`
 	UpdatedAt                  time.Time  `json:"updated_at"`
 }
@@ -34,6 +44,7 @@ func NewUser(email, name, passwordHash string, role Role) *User {
 		Name:         name,
 		PasswordHash: passwordHash,
 		Role:         role,
+		Status:       UserStatusActive,
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}

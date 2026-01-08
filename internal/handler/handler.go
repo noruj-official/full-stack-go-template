@@ -1,4 +1,3 @@
-// Package handler provides HTTP request handlers.
 package handler
 
 import (
@@ -7,24 +6,43 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
+	"github.com/shaik-noor/full-stack-go-template/internal/service"
 )
 
 // Handler is the base handler with shared utilities.
 type Handler struct {
-	appName string
-	appLogo string
+	appName        string
+	appLogo        string
+	featureService service.FeatureService
 }
 
 // NewHandler creates a new base handler.
-func NewHandler(appName, appLogo string) *Handler {
+func NewHandler(appName, appLogo string, featureService service.FeatureService) *Handler {
 	return &Handler{
-		appName: appName,
-		appLogo: appLogo,
+		appName:        appName,
+		appLogo:        appLogo,
+		featureService: featureService,
 	}
 }
 
 // GetTheme extracts the theme from the request (cookie or client hint).
-func (h *Handler) GetTheme(r *http.Request) string {
+// Returns the theme name and whether theme management is enabled.
+func (h *Handler) GetTheme(r *http.Request) (string, bool) {
+	// Check feature flag first
+	enabled, err := h.featureService.IsEnabled(r.Context(), "theme_management")
+	if err != nil {
+		enabled = false // Default to disabled if check fails (safest)
+		// Or defaulting to true? "theme_management" implies disabling it turns it off.
+		// If flag is missing, we probably want it enabled by default?
+		// Plan said "Disable theme switching if theme_management flag is off".
+		// Usually flags start false. So if I want it ON by default, I should have seeded it true.
+		// Let's assume false means "No theme management support, just light mode".
+	}
+
+	if !enabled {
+		return "light", false
+	}
+
 	theme := "light"
 	if c, err := r.Cookie("theme"); err == nil && c.Value != "" {
 		if c.Value == "dark" {
@@ -38,7 +56,7 @@ func (h *Handler) GetTheme(r *http.Request) string {
 			theme = "dark"
 		}
 	}
-	return theme
+	return theme, true
 }
 
 // JSON sends a JSON response.
@@ -78,4 +96,22 @@ func (h *Handler) RenderTempl(w http.ResponseWriter, r *http.Request, component 
 		log.Printf("Error rendering templ component: %v", err)
 		h.Error(w, r, http.StatusInternalServerError, "Error rendering template")
 	}
+}
+
+// getIPAddress extracts the client IP address from the request.
+func getIPAddress(r *http.Request) string {
+	// Check X-Forwarded-For header first
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		return forwarded
+	}
+
+	// Check X-Real-IP header
+	realIP := r.Header.Get("X-Real-IP")
+	if realIP != "" {
+		return realIP
+	}
+
+	// Fallback to RemoteAddr
+	return r.RemoteAddr
 }

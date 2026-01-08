@@ -6,7 +6,7 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/components"
 )
 
-templ Base(title string, description string, user *domain.User, showSidebar bool, theme string) {
+templ Base(title string, description string, user *domain.User, showSidebar bool, theme string, themeEnabled bool) {
 	<!DOCTYPE html>
 	<html
 		lang="en"
@@ -51,7 +51,7 @@ templ Base(title string, description string, user *domain.User, showSidebar bool
 			</style>
 		</head>
 		<body class="min-h-screen" hx-boost="true">
-			@components.Navbar(user, showSidebar)
+			@components.Navbar(user, showSidebar, themeEnabled)
 			if showSidebar {
 				@components.Sidebar(user, title)
 			}

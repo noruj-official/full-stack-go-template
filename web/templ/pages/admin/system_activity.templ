@@ -17,10 +17,11 @@ type SystemActivityProps struct {
 	User       *domain.User
 	Activities []SystemActivityItem
 	Theme      string
+	ThemeEnabled bool
 }
 
 templ SystemActivity(props SystemActivityProps) {
-	@layouts.Base("System Activity", "Monitor all user activities across the system", props.User, true, props.Theme) {
+	@layouts.Base("System Activity", "Monitor all user activities across the system", props.User, true, props.Theme, props.ThemeEnabled) {
 		<!-- System Activity Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

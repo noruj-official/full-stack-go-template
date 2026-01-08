@@ -42,7 +42,7 @@ func ForgotPasswordForm(theme string) templ.Component {
 	})
 }
 
-func ForgotPassword(theme string) templ.Component {
+func ForgotPassword(theme string, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -75,7 +75,7 @@ func ForgotPassword(theme string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = components.Navbar(nil, false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.Navbar(nil, false, themeEnabled).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -93,7 +93,7 @@ func ForgotPassword(theme string) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Auth("Forgot Password", "Reset your password", theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Auth("Forgot Password", "Reset your password", theme, themeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -101,7 +101,7 @@ func ForgotPassword(theme string) templ.Component {
 	})
 }
 
-func ForgotPasswordSuccessContent(theme string) templ.Component {
+func ForgotPasswordSuccessContent(theme string, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -130,7 +130,7 @@ func ForgotPasswordSuccessContent(theme string) templ.Component {
 	})
 }
 
-func ForgotPasswordSuccess(theme string) templ.Component {
+func ForgotPasswordSuccess(theme string, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -163,7 +163,7 @@ func ForgotPasswordSuccess(theme string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = components.Navbar(nil, false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.Navbar(nil, false, themeEnabled).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -171,7 +171,7 @@ func ForgotPasswordSuccess(theme string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = ForgotPasswordSuccessContent(theme).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ForgotPasswordSuccessContent(theme, themeEnabled).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -181,7 +181,7 @@ func ForgotPasswordSuccess(theme string) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Auth("Email Sent", "We have sent a password reset link to your email address.", theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Auth("Email Sent", "We have sent a password reset link to your email address.", theme, themeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

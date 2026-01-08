@@ -98,6 +98,12 @@ templ Sidebar(user *domain.User, title string) {
 						</a>
 					</li>
 					<li>
+						<a href="/a/features" class={ templ.KV("active", title == "Feature Flags") }>
+							<i data-lucide="toggle-left" class="w-5 h-5"></i>
+							Feature Flags
+						</a>
+					</li>
+					<li>
 						<a href="#" class="opacity-50 cursor-not-allowed">
 							<i data-lucide="shield" class="w-5 h-5"></i>
 							Admin Management

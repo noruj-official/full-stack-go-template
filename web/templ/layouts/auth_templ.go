@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
 
-func Auth(title string, description string, theme string) templ.Component {
+func Auth(title string, description string, theme string, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -71,41 +71,60 @@ func Auth(title string, description string, theme string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ darkMode: %t }", theme == "dark"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ darkMode: %t, themeEnabled: %t }", theme == "dark", themeEnabled))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 11, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 11, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" x-init=\"() => {\r\n            const init = document.documentElement.classList.contains('dark');\r\n            darkMode = init;\r\n            $watch('darkMode', val => {\r\n                document.documentElement.classList.toggle('dark', val);\r\n                document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light');\r\n                localStorage.setItem('darkMode', val);\r\n                document.cookie = 'theme=' + (val ? 'dark' : 'light') + '; path=/; max-age=31536000';\r\n            });\r\n        }\" :class=\"{ 'dark': darkMode }\" :data-theme=\"darkMode ? 'dark' : 'light'\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" x-init=\"() => {\r\n\t\t\tif (!themeEnabled) return;\r\n            const init = document.documentElement.classList.contains('dark');\r\n            darkMode = init;\r\n            $watch('darkMode', val => {\r\n                document.documentElement.classList.toggle('dark', val);\r\n                document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light');\r\n                localStorage.setItem('darkMode', val);\r\n                document.cookie = 'theme=' + (val ? 'dark' : 'light') + '; path=/; max-age=31536000';\r\n            });\r\n        }\" :class=\"{ 'dark': darkMode }\" :data-theme=\"darkMode ? 'dark' : 'light'\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 28, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 29, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><meta name=\"color-scheme\" content=\"light dark\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><meta name=\"color-scheme\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(func() string {
+			if themeEnabled {
+				return "light dark"
+			} else {
+				return "light"
+			}
+		}())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 30, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 30, Col: 122}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " | Full Stack Go Template</title><link rel=\"stylesheet\" href=\"/assets/css/output.css\"><script src=\"/assets/vendor/htmx.min.js\"></script><script defer src=\"/assets/vendor/alpine.min.js\"></script><script src=\"/assets/vendor/lucide.min.js\"></script><style>\r\n\t\t\t\t[x-cloak] {\r\n\t\t\t\t\tdisplay: none !important;\r\n\t\t\t\t}\r\n\t\t\t</style></head><body class=\"min-h-screen\" hx-boost=\"true\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/layouts/auth.templ`, Line: 31, Col: 17}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " | Full Stack Go Template</title><link rel=\"stylesheet\" href=\"/assets/css/output.css\"><script src=\"/assets/vendor/htmx.min.js\"></script><script defer src=\"/assets/vendor/alpine.min.js\"></script><script src=\"/assets/vendor/lucide.min.js\"></script><style>\r\n\t\t\t\t[x-cloak] {\r\n\t\t\t\t\tdisplay: none !important;\r\n\t\t\t\t}\r\n\t\t\t</style></head><body class=\"min-h-screen\" hx-boost=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -113,7 +132,7 @@ func Auth(title string, description string, theme string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<script>\r\n\t\t\t\tlucide.createIcons();\r\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<script>\r\n\t\t\t\tlucide.createIcons();\r\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

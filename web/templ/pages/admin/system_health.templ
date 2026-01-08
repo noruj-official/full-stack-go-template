@@ -38,10 +38,11 @@ type SystemHealthProps struct {
 	Application AppHealth
 	Server      ServerHealth
 	Theme       string
+	ThemeEnabled bool
 }
 
 templ SystemHealth(props SystemHealthProps) {
-	@layouts.Base("System Health", "Monitor system status and performance", props.User, true, props.Theme) {
+	@layouts.Base("System Health", "Monitor system status and performance", props.User, true, props.Theme, props.ThemeEnabled) {
 		<!-- System Health Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

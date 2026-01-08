@@ -22,6 +22,9 @@ type UserService interface {
 	// UpdateUser updates an existing user.
 	UpdateUser(ctx context.Context, id uuid.UUID, input *domain.UpdateUserInput) (*domain.User, error)
 
+	// UpdateStatus updates the status of a user.
+	UpdateStatus(ctx context.Context, id uuid.UUID, status domain.UserStatus) error
+
 	// DeleteUser removes a user.
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 }
@@ -63,4 +66,22 @@ type EmailService interface {
 
 	// SendPasswordResetEmail sends a password reset email to the user.
 	SendPasswordResetEmail(ctx context.Context, emailAddr, name, token string) error
+}
+
+// FeatureService defines the interface for feature flag operations.
+type FeatureService interface {
+	// IsEnabled checks if a feature flag is enabled.
+	IsEnabled(ctx context.Context, name string) (bool, error)
+
+	// GetAll retrieves all feature flags.
+	GetAll(ctx context.Context) ([]*domain.FeatureFlag, error)
+
+	// Toggle enables or disables a feature flag.
+	Toggle(ctx context.Context, name string, enabled bool) error
+
+	// SyncFeatures synchronizes feature flags from a map.
+	SyncFeatures(ctx context.Context, features map[string]domain.FeatureConfig) error
+
+	// Upsert creates or updates a feature flag with full details.
+	Upsert(ctx context.Context, name, description string, enabled bool) error
 }

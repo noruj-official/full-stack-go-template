@@ -2,7 +2,7 @@ package components
 
 import "github.com/shaik-noor/full-stack-go-template/internal/domain"
 
-templ Navbar(user *domain.User, showSidebar bool) {
+templ Navbar(user *domain.User, showSidebar bool, themeEnabled bool) {
 	<header class="fixed top-0 left-0 right-0 z-50 bg-base-100/90 backdrop-blur-xl border-b border-base-200 shadow-sm">
 		<div class="w-full px-4 sm:px-6 lg:px-8">
 			<div class="flex items-center justify-between h-16">
@@ -38,10 +38,12 @@ templ Navbar(user *domain.User, showSidebar bool) {
 				<!-- Right side actions -->
 				<div class="flex items-center gap-2">
 					<!-- Dark mode toggle -->
-					<button @click="darkMode = !darkMode" class="btn btn-ghost p-2" :title="darkMode ? 'Switch to light mode' : 'Switch to dark mode'">
-						<i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
-						<i x-show="darkMode" data-lucide="sun" class="w-5 h-5" x-cloak></i>
-					</button>
+					if themeEnabled {
+						<button @click="darkMode = !darkMode" class="btn btn-ghost p-2" :title="darkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+							<i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
+							<i x-show="darkMode" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+						</button>
+					}
 					if user != nil {
 						<!-- User menu (authenticated) -->
 						<div class="dropdown dropdown-end" x-data="{ open: false }" :class="{ 'dropdown-open': open }">

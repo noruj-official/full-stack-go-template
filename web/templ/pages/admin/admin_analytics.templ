@@ -18,6 +18,7 @@ type AdminAnalyticsProps struct {
 	UserRoleStats map[string]int
 	GrowthData    []GrowthMetric
 	Theme         string
+	ThemeEnabled  bool
 }
 
 func getRoleCount(stats map[string]int, role string) int {
@@ -42,7 +43,7 @@ func calculateHeight(count int) int {
 }
 
 templ AdminAnalytics(props AdminAnalyticsProps) {
-	@layouts.Base("Analytics & Reports", "User statistics and growth insights", props.User, true, props.Theme) {
+	@layouts.Base("Analytics & Reports", "User statistics and growth insights", props.User, true, props.Theme, props.ThemeEnabled) {
 		<!-- Analytics Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

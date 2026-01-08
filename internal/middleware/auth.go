@@ -80,6 +80,27 @@ func RequireAuth(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
 		}
+
+		// Check user status
+		if user.Status != domain.UserStatusActive {
+			// Clear any session if present
+			http.SetCookie(w, &http.Cookie{
+				Name:     SessionCookieName,
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			})
+
+			if r.Header.Get("HX-Request") == "true" {
+				w.Header().Set("HX-Redirect", "/signin")
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+			http.Redirect(w, r, "/signin?error=account_suspended", http.StatusSeeOther)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

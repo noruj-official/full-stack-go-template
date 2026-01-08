@@ -22,9 +22,10 @@ type SystemActivityItem struct {
 }
 
 type SystemActivityProps struct {
-	User       *domain.User
-	Activities []SystemActivityItem
-	Theme      string
+	User         *domain.User
+	Activities   []SystemActivityItem
+	Theme        string
+	ThemeEnabled bool
 }
 
 func SystemActivity(props SystemActivityProps) templ.Component {
@@ -102,7 +103,7 @@ func SystemActivity(props SystemActivityProps) templ.Component {
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(activity.UserName)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 61, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 62, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 					if templ_7745c5c3_Err != nil {
@@ -115,7 +116,7 @@ func SystemActivity(props SystemActivityProps) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(activity.Description)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 61, Col: 91}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 62, Col: 91}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -128,7 +129,7 @@ func SystemActivity(props SystemActivityProps) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(activity.TimeAgo)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 66, Col: 30}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 67, Col: 30}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -146,7 +147,7 @@ func SystemActivity(props SystemActivityProps) templ.Component {
 						var templ_7745c5c3_Var6 string
 						templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(*activity.IPAddress)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 71, Col: 34}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/system_activity.templ`, Line: 72, Col: 34}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 						if templ_7745c5c3_Err != nil {
@@ -178,7 +179,7 @@ func SystemActivity(props SystemActivityProps) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base("System Activity", "Monitor all user activities across the system", props.User, true, props.Theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base("System Activity", "Monitor all user activities across the system", props.User, true, props.Theme, props.ThemeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

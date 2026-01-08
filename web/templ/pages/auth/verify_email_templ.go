@@ -14,9 +14,10 @@ import (
 )
 
 type VerifyEmailPageProps struct {
-	Success bool
-	Message string
-	Theme   string
+	Success      bool
+	Message      string
+	Theme        string
+	ThemeEnabled bool
 }
 
 func VerifyEmailPage(props VerifyEmailPageProps) templ.Component {
@@ -56,7 +57,7 @@ func VerifyEmailPage(props VerifyEmailPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Navbar(nil, false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.Navbar(nil, false, props.ThemeEnabled).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,7 +73,7 @@ func VerifyEmailPage(props VerifyEmailPageProps) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Message)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/verify_email.templ`, Line: 53, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/verify_email.templ`, Line: 54, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -90,7 +91,7 @@ func VerifyEmailPage(props VerifyEmailPageProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Message)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/verify_email.templ`, Line: 72, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/verify_email.templ`, Line: 73, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -107,7 +108,7 @@ func VerifyEmailPage(props VerifyEmailPageProps) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Auth("Email Verification", "Verify your email address", props.Theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Auth("Email Verification", "Verify your email address", props.Theme, props.ThemeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

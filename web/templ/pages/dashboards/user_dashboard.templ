@@ -5,8 +5,8 @@ import (
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
 
-templ UserDashboard(title string, user *domain.User, theme string) {
-	@layouts.Base(title, "User Dashboard", user, true, theme) {
+templ UserDashboard(title string, user *domain.User, theme string, themeEnabled bool) {
+	@layouts.Base(title, "User Dashboard", user, true, theme, themeEnabled) {
 		<!-- User Dashboard Header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 			<div>

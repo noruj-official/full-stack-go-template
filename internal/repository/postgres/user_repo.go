@@ -25,8 +25,8 @@ func NewUserRepository(db *DB) *UserRepository {
 // Create inserts a new user into the database.
 func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	query := `
-		INSERT INTO users (id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO users (id, email, name, password_hash, role, status, created_at, updated_at, email_verified, verification_token, verification_token_expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`
 
 	_, err := r.db.Pool.Exec(ctx, query,
@@ -35,6 +35,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 		user.Name,
 		user.PasswordHash,
 		user.Role,
+		user.Status,
 		user.CreatedAt,
 		user.UpdatedAt,
 		user.EmailVerified,
@@ -55,7 +56,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 // GetByID retrieves a user by their unique identifier.
 func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
+		SELECT id, email, name, password_hash, role, status, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		WHERE id = $1
 	`
@@ -67,6 +68,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
+		&user.Status,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.EmailVerified,
@@ -87,7 +89,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 // GetByEmail retrieves a user by their email address.
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
+		SELECT id, email, name, password_hash, role, status, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		WHERE email = $1
 	`
@@ -99,6 +101,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
+		&user.Status,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.EmailVerified,
@@ -119,7 +122,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 // GetByVerificationToken retrieves a user by their verification token.
 func (r *UserRepository) GetByVerificationToken(ctx context.Context, token string) (*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
+		SELECT id, email, name, password_hash, role, status, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		WHERE verification_token = $1
 	`
@@ -131,6 +134,7 @@ func (r *UserRepository) GetByVerificationToken(ctx context.Context, token strin
 		&user.Name,
 		&user.PasswordHash,
 		&user.Role,
+		&user.Status,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.EmailVerified,
@@ -151,7 +155,7 @@ func (r *UserRepository) GetByVerificationToken(ctx context.Context, token strin
 // List retrieves all users with pagination.
 func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain.User, error) {
 	query := `
-		SELECT id, email, name, password_hash, role, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
+		SELECT id, email, name, password_hash, role, status, created_at, updated_at, email_verified, verification_token, verification_token_expires_at
 		FROM users
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
@@ -172,6 +176,7 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain
 			&user.Name,
 			&user.PasswordHash,
 			&user.Role,
+			&user.Status,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.EmailVerified,
@@ -196,7 +201,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 
 	query := `
 		UPDATE users
-		SET email = $2, name = $3, password_hash = $4, role = $5, updated_at = $6, email_verified = $7, verification_token = $8, verification_token_expires_at = $9
+		SET email = $2, name = $3, password_hash = $4, role = $5, status = $6, updated_at = $7, email_verified = $8, verification_token = $9, verification_token_expires_at = $10
 		WHERE id = $1
 	`
 
@@ -206,6 +211,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 		user.Name,
 		user.PasswordHash,
 		user.Role,
+		user.Status,
 		user.UpdatedAt,
 		user.EmailVerified,
 		user.VerificationToken,

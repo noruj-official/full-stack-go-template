@@ -30,6 +30,10 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMP WITH TIME ZONE;
 CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);
 
+-- Status column
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'active';
+CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+
 -- ============================================
 -- Sessions Table
 -- ============================================
@@ -102,3 +106,15 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
+
+-- ============================================
+-- Feature Flags Table
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS feature_flags (
+    name VARCHAR(100) PRIMARY KEY,
+    enabled BOOLEAN NOT NULL DEFAULT false,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

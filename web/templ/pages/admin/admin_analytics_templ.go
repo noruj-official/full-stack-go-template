@@ -26,6 +26,7 @@ type AdminAnalyticsProps struct {
 	UserRoleStats map[string]int
 	GrowthData    []GrowthMetric
 	Theme         string
+	ThemeEnabled  bool
 }
 
 func getRoleCount(stats map[string]int, role string) int {
@@ -89,7 +90,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.TotalUsers))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 65, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 66, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -102,7 +103,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.RecentUsers))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 74, Col: 90}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 75, Col: 90}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -115,7 +116,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", getRoleCount(props.UserRoleStats, "admin")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 83, Col: 115}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 84, Col: 115}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -128,7 +129,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", getRoleCount(props.UserRoleStats, "user")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 92, Col: 114}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 93, Col: 114}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -146,7 +147,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("height: %dpx", calculateHeight(data.Count)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 109, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 110, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -159,7 +160,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.Date)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 111, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 112, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -172,7 +173,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", data.Count))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 112, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 113, Col: 91}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -190,7 +191,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", getRoleCount(props.UserRoleStats, "user")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 128, Col: 115}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 129, Col: 115}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -203,7 +204,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %d%%", calculatePercentage(getRoleCount(props.UserRoleStats, "user"), props.TotalUsers)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 133, Col: 125}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 134, Col: 125}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -216,7 +217,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", getRoleCount(props.UserRoleStats, "admin")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 140, Col: 116}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 141, Col: 116}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -229,7 +230,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %d%%", calculatePercentage(getRoleCount(props.UserRoleStats, "admin"), props.TotalUsers)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 145, Col: 126}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 146, Col: 126}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -242,7 +243,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", getRoleCount(props.UserRoleStats, "super_admin")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 152, Col: 120}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 153, Col: 120}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -255,7 +256,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %d%%", calculatePercentage(getRoleCount(props.UserRoleStats, "super_admin"), props.TotalUsers)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 157, Col: 132}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/admin/admin_analytics.templ`, Line: 158, Col: 132}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -267,7 +268,7 @@ func AdminAnalytics(props AdminAnalyticsProps) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base("Analytics & Reports", "User statistics and growth insights", props.User, true, props.Theme).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base("Analytics & Reports", "User statistics and growth insights", props.User, true, props.Theme, props.ThemeEnabled).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

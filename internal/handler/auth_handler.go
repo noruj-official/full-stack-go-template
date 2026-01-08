@@ -60,17 +60,25 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		msg = "Email not verified. A new verification link has been sent to " + email
 	}
 
+	if r.URL.Query().Get("error") == "account_suspended" {
+		msgType = "error"
+		msg = "Your account has been suspended. Please contact support for assistance."
+	}
+
 	if r.URL.Query().Get("success") == "registered" {
 		msgType = "success"
 		msg = "Account created! Please check your email to verify your account."
 	}
 
+	theme, themeEnabled := h.GetTheme(r)
+
 	props := auth.SigninPageProps{
-		Email:       email,
-		Error:       "",
-		Message:     msg,
-		MessageType: msgType,
-		Theme:       h.GetTheme(r),
+		Email:        email,
+		Error:        "",
+		Message:      msg,
+		MessageType:  msgType,
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 	auth.SigninPage(props).Render(r.Context(), w)
 }
@@ -149,10 +157,12 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
+	theme, themeEnabled := h.GetTheme(r)
 	props := auth.SigninPageProps{
-		Email: email,
-		Error: errMsg,
-		Theme: h.GetTheme(r),
+		Email:        email,
+		Error:        errMsg,
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 
 	if isHTMXRequest(r) {
@@ -171,10 +181,12 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	theme, themeEnabled := h.GetTheme(r)
 	props := auth.SignupPageProps{
-		Form:  nil,
-		Error: "",
-		Theme: h.GetTheme(r),
+		Form:         nil,
+		Error:        "",
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 	auth.SignupPage(props).Render(r.Context(), w)
 }
@@ -228,10 +240,12 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, input *domain.RegisterInput, errMsg string) {
+	theme, themeEnabled := h.GetTheme(r)
 	props := auth.SignupPageProps{
-		Form:  input,
-		Error: errMsg,
-		Theme: h.GetTheme(r),
+		Form:         input,
+		Error:        errMsg,
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
 	}
 
 	if isHTMXRequest(r) {
@@ -305,7 +319,8 @@ func (h *AuthHandler) ForgotPasswordPage(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.RenderTempl(w, r, auth.ForgotPassword(h.GetTheme(r)))
+	theme, themeEnabled := h.GetTheme(r)
+	h.RenderTempl(w, r, auth.ForgotPassword(theme, themeEnabled))
 }
 
 // ForgotPassword handles the forgot password request.
@@ -318,11 +333,12 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Always show success message to prevent user enumeration
+	theme, themeEnabled := h.GetTheme(r)
 	if isHTMXRequest(r) {
-		h.RenderTempl(w, r, auth.ForgotPasswordSuccessContent(h.GetTheme(r)))
+		h.RenderTempl(w, r, auth.ForgotPasswordSuccessContent(theme, themeEnabled))
 		return
 	}
-	h.RenderTempl(w, r, auth.ForgotPasswordSuccess(h.GetTheme(r)))
+	h.RenderTempl(w, r, auth.ForgotPasswordSuccess(theme, themeEnabled))
 }
 
 // ResetPasswordPage renders the reset password page.
@@ -333,7 +349,8 @@ func (h *AuthHandler) ResetPasswordPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	h.RenderTempl(w, r, auth.ResetPassword(token, h.GetTheme(r)))
+	theme, themeEnabled := h.GetTheme(r)
+	h.RenderTempl(w, r, auth.ResetPassword(token, theme, themeEnabled))
 }
 
 // ResetPassword handles the password reset.
@@ -353,12 +370,13 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	theme, themeEnabled := h.GetTheme(r)
 	if isHTMXRequest(r) {
-		h.RenderTempl(w, r, auth.ResetPasswordSuccessContent(h.GetTheme(r)))
+		h.RenderTempl(w, r, auth.ResetPasswordSuccessContent(theme, themeEnabled))
 		return
 	}
 
-	h.RenderTempl(w, r, auth.ResetPasswordSuccess(h.GetTheme(r)))
+	h.RenderTempl(w, r, auth.ResetPasswordSuccess(theme, themeEnabled))
 }
 
 // LoginRedirect redirects /login to /signin for backwards compatibility.
@@ -371,7 +389,9 @@ func (h *AuthHandler) VerifyEmailPage(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 
 	var props auth.VerifyEmailPageProps
-	props.Theme = h.GetTheme(r)
+	theme, themeEnabled := h.GetTheme(r)
+	props.Theme = theme
+	props.ThemeEnabled = themeEnabled
 
 	if token == "" {
 		props.Success = false
