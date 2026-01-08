@@ -55,3 +55,24 @@ type SessionRepository interface {
 	// CountActive returns the number of active (non-expired) sessions.
 	CountActive(ctx context.Context) (int64, error)
 }
+
+// OAuthRepository defines the interface for OAuth data access operations.
+type OAuthRepository interface {
+	// GetProvider retrieves an OAuth provider by its name (e.g. "google").
+	GetProvider(ctx context.Context, name domain.OAuthProviderType) (*domain.OAuthProvider, error)
+
+	// ListProviders retrieves all configured OAuth providers.
+	ListProviders(ctx context.Context) ([]*domain.OAuthProvider, error)
+
+	// UpdateProvider updates an OAuth provider's configuration.
+	UpdateProvider(ctx context.Context, provider *domain.OAuthProvider) error
+
+	// CreateUserOAuth creates a new link between a user and an OAuth provider.
+	CreateUserOAuth(ctx context.Context, userOAuth *domain.UserOAuth) error
+
+	// GetUserOAuth retrieves a user OAuth link by provider and provider user ID.
+	GetUserOAuth(ctx context.Context, provider domain.OAuthProviderType, providerUserID string) (*domain.UserOAuth, error)
+
+	// GetUserOAuthByUserID retrieves a user OAuth link by user ID and provider.
+	GetUserOAuthByUserID(ctx context.Context, userID uuid.UUID, provider domain.OAuthProviderType) (*domain.UserOAuth, error)
+}

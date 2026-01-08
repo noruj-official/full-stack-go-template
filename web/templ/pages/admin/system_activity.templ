@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"strconv"
+
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
 )
@@ -14,9 +16,11 @@ type SystemActivityItem struct {
 }
 
 type SystemActivityProps struct {
-	User       *domain.User
-	Activities []SystemActivityItem
-	Theme      string
+	User         *domain.User
+	Activities   []SystemActivityItem
+	CurrentCount int
+	HasMore      bool
+	Theme        string
 	ThemeEnabled bool
 }
 
@@ -40,44 +44,10 @@ templ SystemActivity(props SystemActivityProps) {
 			</div>
 			<div class="card-body p-0">
 				if len(props.Activities) > 0 {
-					<div class="divide-y divide-base-200">
-						for _, activity := range props.Activities {
-							<div class="p-4 hover:bg-base-200/30 transition-colors">
-								<div class="flex items-start gap-4">
-									<!-- Activity Icon -->
-									<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-										if activity.Type == "login" {
-											<i data-lucide="log-in" class="w-5 h-5 text-primary"></i>
-										} else if activity.Type == "logout" {
-											<i data-lucide="log-out" class="w-5 h-5 text-primary"></i>
-										} else if activity.Type == "profile_update" {
-											<i data-lucide="user-check" class="w-5 h-5 text-success"></i>
-										} else {
-											<i data-lucide="activity" class="w-5 h-5 text-info"></i>
-										}
-									</div>
-									<!-- Activity Details -->
-									<div class="flex-1 min-w-0">
-										<p class="text-sm font-medium text-base-content">
-											<span class="text-primary">{ activity.UserName }</span> - { activity.Description }
-										</p>
-										<div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-base-content/70">
-											<span class="flex items-center gap-1">
-												<i data-lucide="clock" class="w-3 h-3"></i>
-												{ activity.TimeAgo }
-											</span>
-											if activity.IPAddress != nil {
-												<span class="flex items-center gap-1">
-													<i data-lucide="map-pin" class="w-3 h-3"></i>
-													{ *activity.IPAddress }
-												</span>
-											}
-										</div>
-									</div>
-								</div>
-							</div>
-						}
+					<div id="activity-list" class="divide-y divide-base-200">
+						@SystemActivityItems(props.Activities, props.CurrentCount, false)
 					</div>
+					@LoadMoreButton(props.CurrentCount, props.HasMore)
 				} else {
 					<div class="p-8 text-center">
 						<div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
@@ -89,4 +59,63 @@ templ SystemActivity(props SystemActivityProps) {
 			</div>
 		</div>
 	}
+}
+
+templ SystemActivityItems(activities []SystemActivityItem, currentCount int, hasMore bool) {
+	for _, activity := range activities {
+		<div class="p-4 hover:bg-base-200/30 transition-colors">
+			<div class="flex items-start gap-4">
+				<!-- Activity Icon -->
+				<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+					if activity.Type == "login" {
+						<i data-lucide="log-in" class="w-5 h-5 text-primary"></i>
+					} else if activity.Type == "logout" {
+						<i data-lucide="log-out" class="w-5 h-5 text-primary"></i>
+					} else if activity.Type == "profile_update" {
+						<i data-lucide="user-check" class="w-5 h-5 text-success"></i>
+					} else {
+						<i data-lucide="activity" class="w-5 h-5 text-info"></i>
+					}
+				</div>
+				<!-- Activity Details -->
+				<div class="flex-1 min-w-0">
+					<p class="text-sm font-medium text-base-content">
+						<span class="text-primary">{ activity.UserName }</span> - { activity.Description }
+					</p>
+					<div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-base-content/70">
+						<span class="flex items-center gap-1">
+							<i data-lucide="clock" class="w-3 h-3"></i>
+							{ activity.TimeAgo }
+						</span>
+						if activity.IPAddress != nil {
+							<span class="flex items-center gap-1">
+								<i data-lucide="map-pin" class="w-3 h-3"></i>
+								{ *activity.IPAddress }
+							</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ LoadMoreButton(currentCount int, hasMore bool) {
+	if hasMore {
+		<div id="load-more-container" class="p-4 border-t border-base-200 text-center">
+			<button
+				class="btn btn-outline btn-sm"
+				hx-get={ "/a/activity?offset=" + templ.EscapeString(formatInt(currentCount)) }
+				hx-target="#load-more-container"
+				hx-swap="outerHTML"
+			>
+				<span class="loading loading-spinner loading-xs htmx-indicator"></span>
+				Load More
+			</button>
+		</div>
+	}
+}
+
+func formatInt(n int) string {
+	return strconv.Itoa(n)
 }

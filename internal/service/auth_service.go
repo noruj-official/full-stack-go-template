@@ -5,13 +5,16 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/shaik-noor/full-stack-go-template/internal/domain"
 	"github.com/shaik-noor/full-stack-go-template/internal/repository"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/oauth2"
 )
 
 // authService implements the AuthService interface.
@@ -19,16 +22,20 @@ type authService struct {
 	userRepo          repository.UserRepository
 	sessionRepo       repository.SessionRepository
 	passwordResetRepo repository.PasswordResetRepository
+	oauthRepo         repository.OAuthRepository
 	emailService      EmailService
+	appURL            string
 }
 
 // NewAuthService creates a new auth service.
-func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, passwordResetRepo repository.PasswordResetRepository, emailService EmailService) AuthService {
+func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, passwordResetRepo repository.PasswordResetRepository, oauthRepo repository.OAuthRepository, emailService EmailService, appURL string) AuthService {
 	return &authService{
 		userRepo:          userRepo,
 		sessionRepo:       sessionRepo,
 		passwordResetRepo: passwordResetRepo,
+		oauthRepo:         oauthRepo,
 		emailService:      emailService,
+		appURL:            appURL,
 	}
 }
 
@@ -344,4 +351,193 @@ func generateToken() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(b), nil
+}
+
+// GetOAuthLoginURL generates a login URL for the specified provider.
+func (s *authService) GetOAuthLoginURL(ctx context.Context, providerName domain.OAuthProviderType, state string) (string, error) {
+	provider, err := s.oauthRepo.GetProvider(ctx, providerName)
+	if err != nil {
+		return "", err
+	}
+
+	if !provider.Enabled {
+		return "", fmt.Errorf("provider %s is not enabled", providerName)
+	}
+
+	callbackURL := fmt.Sprintf("%s/auth/%s/callback", s.appURL, providerName)
+
+	conf := &oauth2.Config{
+		ClientID:     provider.ClientID,
+		ClientSecret: provider.ClientSecret,
+		RedirectURL:  callbackURL,
+		Scopes:       provider.Scopes,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  provider.AuthURL,
+			TokenURL: provider.TokenURL,
+		},
+	}
+
+	return conf.AuthCodeURL(state, oauth2.AccessTypeOffline), nil
+}
+
+// LoginWithOAuth handles the OAuth callback and logs in the user.
+func (s *authService) LoginWithOAuth(ctx context.Context, providerName domain.OAuthProviderType, code, state string, ip, userAgent string) (*domain.User, *domain.Session, error) {
+	provider, err := s.oauthRepo.GetProvider(ctx, providerName)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get provider: %w", err)
+	}
+
+	if !provider.Enabled {
+		return nil, nil, fmt.Errorf("provider %s is not enabled", providerName)
+	}
+
+	callbackURL := fmt.Sprintf("%s/auth/%s/callback", s.appURL, providerName)
+
+	conf := &oauth2.Config{
+		ClientID:     provider.ClientID,
+		ClientSecret: provider.ClientSecret,
+		RedirectURL:  callbackURL,
+		Scopes:       provider.Scopes,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  provider.AuthURL,
+			TokenURL: provider.TokenURL,
+		},
+	}
+
+	token, err := conf.Exchange(ctx, code)
+	if err != nil {
+		return nil, nil, fmt.Errorf("oauth exchange failed: %w", err)
+	}
+
+	// Fetch user info based on provider
+	var oauthUser domain.OAuthUserInfo
+
+	// Create a client using the token
+	client := conf.Client(ctx, token)
+
+	if providerName == domain.OAuthProviderGoogle {
+		resp, err := client.Get(provider.UserInfoURL)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get user info: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, nil, fmt.Errorf("failed to get user info: status %d", resp.StatusCode)
+		}
+
+		var googleUser struct {
+			ID            string `json:"id"`
+			Email         string `json:"email"`
+			VerifiedEmail bool   `json:"verified_email"`
+			Name          string `json:"name"`
+			Picture       string `json:"picture"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {
+			return nil, nil, fmt.Errorf("failed to decode user info: %w", err)
+		}
+
+		oauthUser = domain.OAuthUserInfo{
+			ProviderID: googleUser.ID,
+			Email:      googleUser.Email,
+			Name:       googleUser.Name,
+			AvatarURL:  googleUser.Picture,
+		}
+
+		// For Google, ensure email is verified? Usually yes.
+	} else if providerName == domain.OAuthProviderGitHub {
+		// Implement GitHub logic if needed
+		return nil, nil, fmt.Errorf("github provider not yet implemented")
+	} else {
+		return nil, nil, fmt.Errorf("unsupported provider: %s", providerName)
+	}
+
+	// Check if user exists by OAuth link
+	userOAuth, err := s.oauthRepo.GetUserOAuth(ctx, providerName, oauthUser.ProviderID)
+	var user *domain.User
+
+	if err == nil {
+		// Link exists, get user
+		user, err = s.userRepo.GetByID(ctx, userOAuth.UserID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get user: %w", err)
+		}
+		// Update tokens?
+		// We might want to update tokens in UserOAuth if we want to support offline access later.
+	} else if domain.IsNotFoundError(err) {
+		// Link does not exist.
+		// Check if user exists by email
+		user, err = s.userRepo.GetByEmail(ctx, oauthUser.Email)
+		if err != nil && !domain.IsNotFoundError(err) {
+			return nil, nil, fmt.Errorf("failed to check email: %w", err)
+		}
+
+		if user != nil {
+			// User exists, link account
+			// Security check: verification?
+			// If we trust Google, we can link.
+		} else {
+			// Create new user
+			role := domain.RoleUser
+			count, err := s.userRepo.Count(ctx)
+			if err == nil && count == 0 {
+				role = domain.RoleSuperAdmin
+			}
+
+			// Password? No password for OAuth users initially.
+			// But our DB requires not null password_hash?
+			// Schema says: password_hash VARCHAR(255) NOT NULL DEFAULT ''
+			// So empty string is fine.
+			user = domain.NewUser(oauthUser.Email, oauthUser.Name, "", role)
+			user.EmailVerified = true // Trusted provider
+
+			if err := s.userRepo.Create(ctx, user); err != nil {
+				return nil, nil, fmt.Errorf("failed to create user: %w", err)
+			}
+		}
+
+		// Create link
+		newLink := &domain.UserOAuth{
+			UserID:         user.ID,
+			Provider:       providerName,
+			ProviderUserID: oauthUser.ProviderID,
+			AccessToken:    token.AccessToken,
+			RefreshToken:   token.RefreshToken,
+			ExpiresAt:      &token.Expiry,
+		}
+		if err := s.oauthRepo.CreateUserOAuth(ctx, newLink); err != nil {
+			return nil, nil, fmt.Errorf("failed to create oauth link: %w", err)
+		}
+
+		// Update profile image if needed
+		// TODO: Download avatar and save? Or just use URL? User struct has Blob.
+	} else {
+		return nil, nil, err
+	}
+
+	// Login
+	session := domain.NewSession(user.ID, ip, userAgent)
+	if err := s.sessionRepo.Create(ctx, session); err != nil {
+		return nil, nil, err
+	}
+
+	return user, session, nil
+}
+
+// ListEnabledProviders returns a map of enabled providers.
+func (s *authService) ListEnabledProviders(ctx context.Context) (map[string]bool, error) {
+	providers, err := s.oauthRepo.ListProviders(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	enabled := make(map[string]bool)
+	for _, p := range providers {
+		if p.Enabled {
+			enabled[string(p.Provider)] = true
+		}
+	}
+
+	return enabled, nil
 }

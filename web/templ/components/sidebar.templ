@@ -78,7 +78,13 @@ templ Sidebar(user *domain.User, title string) {
 					<li>
 						<a href="/a/activity" class={ templ.KV("active", title == "System Activity") }>
 							<i data-lucide="activity" class="w-5 h-5"></i>
-							System Activity
+					System Activity
+						</a>
+					</li>
+					<li>
+						<a href="/a/oauth" class={ templ.KV("active", title == "OAuth Settings") }>
+							<i data-lucide="key" class="w-5 h-5"></i>
+							OAuth Settings
 						</a>
 					</li>
 				}

@@ -57,6 +57,15 @@ type AuthService interface {
 
 	// SignOutAllDevices invalidates all sessions for a user.
 	SignOutAllDevices(ctx context.Context, userID uuid.UUID) error
+
+	// GetOAuthLoginURL generates a login URL for the specified provider.
+	GetOAuthLoginURL(ctx context.Context, provider domain.OAuthProviderType, state string) (string, error)
+
+	// LoginWithOAuth handles the OAuth callback and logs in the user.
+	LoginWithOAuth(ctx context.Context, provider domain.OAuthProviderType, code, state string, ip, userAgent string) (*domain.User, *domain.Session, error)
+
+	// ListEnabledProviders returns a map of enabled providers.
+	ListEnabledProviders(ctx context.Context) (map[string]bool, error)
 }
 
 // EmailService defines the interface for email operations.

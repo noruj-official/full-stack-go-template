@@ -60,11 +60,12 @@ func run() error {
 	activityRepo := postgres.NewActivityLogRepository(db)
 	auditRepo := postgres.NewAuditLogRepository(db)
 	featureRepo := postgres.NewFeatureRepository(db)
+	oauthRepo := postgres.NewOAuthRepository(db, cfg.Auth.Secret)
 
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
 	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, emailService)
+	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, cfg.App.URL)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
 	featureService := service.NewFeatureService(featureRepo)
@@ -102,6 +103,7 @@ func run() error {
 	analyticsHandler := handler.NewAnalyticsHandler(baseHandler, db)
 	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db)
 	featureHandler := handler.NewFeatureHandler(baseHandler, featureService, auditService)
+	adminOAuthHandler := handler.NewAdminOAuthHandler(baseHandler, oauthRepo, auditService, cfg.App.URL)
 
 	// Initialize auth middleware
 	authMiddleware := middleware.NewAuth(authService)
@@ -131,6 +133,10 @@ func run() error {
 	mux.Handle("POST /forgot-password", authLimiter(http.HandlerFunc(authHandler.ForgotPassword)))
 	mux.Handle("GET /reset-password", authLimiter(http.HandlerFunc(authHandler.ResetPasswordPage)))
 	mux.Handle("POST /reset-password", authLimiter(http.HandlerFunc(authHandler.ResetPassword)))
+
+	// OAuth routes
+	mux.Handle("GET /auth/{provider}", authLimiter(http.HandlerFunc(authHandler.HandleOAuthLogin)))
+	mux.Handle("GET /auth/{provider}/callback", authLimiter(http.HandlerFunc(authHandler.HandleOAuthCallback)))
 
 	// Backwards compatible redirect from /login to /signin
 	mux.HandleFunc("GET /login", authHandler.LoginRedirect)
@@ -170,6 +176,10 @@ func run() error {
 	// Feature Flags Admin
 	mux.Handle("GET /a/features", adminOnly(http.HandlerFunc(featureHandler.List)))
 	mux.Handle("POST /a/features/toggle", adminOnly(http.HandlerFunc(featureHandler.Toggle)))
+
+	// OAuth Settings
+	mux.Handle("GET /a/oauth", adminOnly(http.HandlerFunc(adminOAuthHandler.List)))
+	mux.Handle("POST /a/oauth/{provider}", adminOnly(http.HandlerFunc(adminOAuthHandler.Update)))
 
 	// Admin analytics and activity routes
 	mux.Handle("GET /a/analytics", adminOnly(http.HandlerFunc(analyticsHandler.AdminAnalytics)))

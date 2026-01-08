@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -78,6 +79,8 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		emailAuthEnabled = true // Default to true if check fails
 	}
 
+	oauthEnabled, _ := h.authService.ListEnabledProviders(r.Context())
+
 	props := auth.SigninPageProps{
 		Email:            email,
 		Error:            "",
@@ -86,6 +89,7 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		Theme:            theme,
 		ThemeEnabled:     themeEnabled,
 		EmailAuthEnabled: emailAuthEnabled,
+		OAuthEnabled:     oauthEnabled,
 	}
 	auth.SigninPage(props).Render(r.Context(), w)
 }
@@ -178,6 +182,12 @@ func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, 
 		Theme:            theme,
 		ThemeEnabled:     themeEnabled,
 		EmailAuthEnabled: true, // If we are here, we probably tried to sign in, so let's assume it was enabled or we want to show the form to show the error
+		OAuthEnabled:     nil,  // Error case, maybe don't need to load oauth providers again or fetch?
+	}
+
+	// Fetch oauth providers even in error for consistent UI
+	if oauthEnabled, err := h.authService.ListEnabledProviders(r.Context()); err == nil {
+		props.OAuthEnabled = oauthEnabled
 	}
 
 	if isHTMXRequest(r) {
@@ -210,7 +220,13 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 		Theme:            theme,
 		ThemeEnabled:     themeEnabled,
 		EmailAuthEnabled: emailAuthEnabled,
+		OAuthEnabled:     nil,
 	}
+
+	if oauthEnabled, err := h.authService.ListEnabledProviders(r.Context()); err == nil {
+		props.OAuthEnabled = oauthEnabled
+	}
+
 	auth.SignupPage(props).Render(r.Context(), w)
 }
 
@@ -278,6 +294,10 @@ func (h *AuthHandler) renderSignupError(w http.ResponseWriter, r *http.Request, 
 
 		ThemeEnabled:     themeEnabled,
 		EmailAuthEnabled: true,
+		OAuthEnabled:     nil,
+	}
+	if oauthEnabled, err := h.authService.ListEnabledProviders(r.Context()); err == nil {
+		props.OAuthEnabled = oauthEnabled
 	}
 
 	if isHTMXRequest(r) {
@@ -450,4 +470,80 @@ func (h *AuthHandler) VerifyEmailPage(w http.ResponseWriter, r *http.Request) {
 	props.Success = true
 	props.Message = "Your email has been successfully verified! You can now sign in to your account."
 	auth.VerifyEmailPage(props).Render(r.Context(), w)
+}
+
+// HandleOAuthLogin initiates the OAuth login flow.
+func (h *AuthHandler) HandleOAuthLogin(w http.ResponseWriter, r *http.Request) {
+	provider := r.URL.Query().Get("provider")
+	if provider == "" {
+		provider = r.PathValue("provider")
+	}
+
+	if provider == "" {
+		http.Error(w, "Provider is required", http.StatusBadRequest)
+		return
+	}
+
+	// Generate state (random string) to prevent CSRF
+	// In a real app, store this in session or cookie
+	state := "random_state_string" // TODO: Implement proper state handling
+
+	url, err := h.authService.GetOAuthLoginURL(r.Context(), domain.OAuthProviderType(provider), state)
+	if err != nil {
+		fmt.Printf("DEBUG: HandleOAuthLogin failed: %v\n", err)
+		log.Printf("Failed to get oauth login url: %v", err)
+		http.Redirect(w, r, "/signin?error=oauth_failed", http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusSeeOther)
+}
+
+// HandleOAuthCallback handles the OAuth callback.
+func (h *AuthHandler) HandleOAuthCallback(w http.ResponseWriter, r *http.Request) {
+	provider := r.URL.Query().Get("provider")
+	if provider == "" {
+		provider = r.PathValue("provider")
+	}
+
+	if provider == "" {
+		http.Error(w, "Provider is required", http.StatusBadRequest)
+		return
+	}
+
+	code := r.URL.Query().Get("code")
+	state := r.URL.Query().Get("state")
+
+	if code == "" {
+		http.Redirect(w, r, "/signin?error=oauth_failed", http.StatusSeeOther)
+		return
+	}
+
+	// Verify state...
+
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+
+	user, session, err := h.authService.LoginWithOAuth(r.Context(), domain.OAuthProviderType(provider), code, state, ip, ua)
+	if err != nil {
+		log.Printf("OAuth login failed for %s: %v", provider, err)
+		http.Redirect(w, r, "/signin?error=oauth_failed", http.StatusSeeOther)
+		return
+	}
+
+	// Set session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     middleware.SessionCookieName,
+		Value:    session.ID,
+		Path:     "/",
+		Expires:  session.ExpiresAt,
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, fmt.Sprintf("User signed in with %s", provider), &ip, &ua)
+
+	// Redirect
+	http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
 }

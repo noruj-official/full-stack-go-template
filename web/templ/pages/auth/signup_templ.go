@@ -22,6 +22,7 @@ type SignupPageProps struct {
 	Theme            string
 	ThemeEnabled     bool
 	EmailAuthEnabled bool
+	OAuthEnabled     map[string]bool
 }
 
 func SignupForm(props SignupPageProps) templ.Component {
@@ -57,7 +58,7 @@ func SignupForm(props SignupPageProps) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 28, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 29, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -98,7 +99,7 @@ func SignupForm(props SignupPageProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 38, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 39, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -127,7 +128,7 @@ func SignupForm(props SignupPageProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 63, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 64, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -150,7 +151,7 @@ func SignupForm(props SignupPageProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 86, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/pages/auth/signup.templ`, Line: 87, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -166,7 +167,29 @@ func SignupForm(props SignupPageProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Info Alert --><div class=\"alert bg-info/10 border border-info/20 mt-6\"><i data-lucide=\"info\" class=\"w-5 h-5 text-info shrink-0\"></i> <span class=\"text-sm text-base-content/80\">The first registered user will become <strong>Super Admin</strong> with full system access.</span></div><!-- Sign In Link --><p class=\"text-center text-base-content/60 mt-6\">Already have an account? <a href=\"/signin\" class=\"link link-primary font-semibold hover:link-secondary transition-colors\">Sign in</a></p><script>\r\n    lucide.createIcons();\r\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Info Alert --><div class=\"alert bg-info/10 border border-info/20 mt-6\"><i data-lucide=\"info\" class=\"w-5 h-5 text-info shrink-0\"></i> <span class=\"text-sm text-base-content/80\">The first registered user will become <strong>Super Admin</strong> with full system access.</span></div><!-- Divider --><div class=\"divider text-base-content/40 text-sm my-6\">or sign up with</div><!-- Social Login --><div class=\"space-y-3\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.OAuthEnabled["github"] {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a href=\"/auth/github\" hx-boost=\"false\" class=\"btn bg-black text-white border-black w-full gap-2 h-11 hover:bg-black/90 transition-all duration-200\"><svg aria-label=\"GitHub logo\" width=\"16\" height=\"16\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path fill=\"white\" d=\"M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z\"></path></svg> Sign up with GitHub</a> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.OAuthEnabled["google"] {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<a href=\"/auth/google\" hx-boost=\"false\" class=\"btn bg-white text-black border-[#e5e5e5] w-full gap-2 h-11 hover:shadow-primary/40 transition-all duration-200\"><svg aria-label=\"Google logo\" width=\"16\" height=\"16\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><g><path d=\"m0 0H512V512H0\" fill=\"#fff\"></path><path fill=\"#34a853\" d=\"M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341\"></path><path fill=\"#4285f4\" d=\"m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57\"></path><path fill=\"#fbbc02\" d=\"m90 341a208 200 0 010-171l63 49q-12 37 0 73\"></path><path fill=\"#ea4335\" d=\"m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55\"></path></g></svg> Sign up with Google</a> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.OAuthEnabled["linkedin"] {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<a href=\"/auth/linkedin\" hx-boost=\"false\" class=\"btn bg-[#0967C2] text-white border-[#0059b3] w-full gap-2 h-11 hover:bg-[#0059b3] transition-all duration-200\"><svg aria-label=\"LinkedIn logo\" width=\"16\" height=\"16\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><path fill=\"white\" d=\"M26.111,3H5.889c-1.595,0-2.889,1.293-2.889,2.889V26.111c0,1.595,1.293,2.889,2.889,2.889H26.111c1.595,0,2.889-1.293,2.889-2.889V5.889c0-1.595-1.293-2.889-2.889-2.889ZM10.861,25.389h-3.877V12.87h3.877v12.519Zm-1.957-14.158c-1.267,0-2.293-1.034-2.293-2.31s1.026-2.31,2.293-2.31,2.292,1.034,2.292,2.31-1.026,2.31-2.292,2.31Zm16.485,14.158h-3.858v-6.571c0-1.802-.685-2.809-2.111-2.809-1.551,0-2.362,1.048-2.362,2.809v6.571h-3.718V12.87h3.718v1.686s1.118-2.069,3.775-2.069,4.556,1.621,4.556,4.975v7.926Z\" fill-rule=\"evenodd\"></path></svg> Sign up with LinkedIn</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div><!-- Sign In Link --><p class=\"text-center text-base-content/60 mt-6\">Already have an account? <a href=\"/signin\" class=\"link link-primary font-semibold hover:link-secondary transition-colors\">Sign in</a></p><script>\r\n    lucide.createIcons();\r\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -207,7 +230,7 @@ func SignupPage(props SignupPageProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<style>\r\n    @keyframes float {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(30px, -30px) scale(1.05); }\r\n        66% { transform: translate(-20px, 20px) scale(0.95); }\r\n    }\r\n    @keyframes float-reverse {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(-40px, 20px) scale(1.1); }\r\n        66% { transform: translate(30px, -20px) scale(0.9); }\r\n    }\r\n    @keyframes pulse-glow {\r\n        0%, 100% { opacity: 0.4; }\r\n        50% { opacity: 0.7; }\r\n    }\r\n    .bg-blob-1 { animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite; }\r\n    .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }\r\n    .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }\r\n    </style> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<style>\r\n    @keyframes float {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(30px, -30px) scale(1.05); }\r\n        66% { transform: translate(-20px, 20px) scale(0.95); }\r\n    }\r\n    @keyframes float-reverse {\r\n        0%, 100% { transform: translate(0, 0) scale(1); }\r\n        33% { transform: translate(-40px, 20px) scale(1.1); }\r\n        66% { transform: translate(30px, -20px) scale(0.9); }\r\n    }\r\n    @keyframes pulse-glow {\r\n        0%, 100% { opacity: 0.4; }\r\n        50% { opacity: 0.7; }\r\n    }\r\n    .bg-blob-1 { animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite; }\r\n    .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }\r\n    .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }\r\n    </style> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -215,7 +238,7 @@ func SignupPage(props SignupPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " <div class=\"min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden\"><div class=\"relative w-full max-w-md z-10 py-8\"><!-- Main Card --><div class=\"card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-content/5\"><div class=\"card-body p-6 sm:p-8\" id=\"signup-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " <div class=\"min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden\"><div class=\"relative w-full max-w-md z-10 py-8\"><!-- Main Card --><div class=\"card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-content/5\"><div class=\"card-body p-6 sm:p-8\" id=\"signup-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -223,7 +246,7 @@ func SignupPage(props SignupPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -118,3 +118,47 @@ CREATE TABLE IF NOT EXISTS feature_flags (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- ============================================
+-- OAuth Providers Table
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS oauth_providers (
+    provider VARCHAR(50) PRIMARY KEY, -- e.g., 'google', 'github'
+    client_id VARCHAR(255) NOT NULL,
+    client_secret VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT false,
+    scopes TEXT[], -- array of scopes
+    auth_url VARCHAR(255), -- optional override
+    token_url VARCHAR(255), -- optional override
+    user_info_url VARCHAR(255), -- optional override
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
+-- User OAuth Links Table
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS user_oauths (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(50) NOT NULL REFERENCES oauth_providers(provider) ON DELETE CASCADE,
+    provider_user_id VARCHAR(255) NOT NULL, -- The user's ID from the provider
+    access_token TEXT, -- Store securely if needed, mostly for offline access
+    refresh_token TEXT,
+    expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(provider, provider_user_id),
+    UNIQUE(user_id, provider) -- One link per provider per user
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_oauths_user_id ON user_oauths(user_id);
+
+-- Seed defaults
+INSERT INTO oauth_providers (provider, client_id, client_secret, enabled, scopes, auth_url, token_url, user_info_url)
+VALUES 
+    ('google', '', '', false, ARRAY['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'], 'https://accounts.google.com/o/oauth2/auth', 'https://oauth2.googleapis.com/token', 'https://www.googleapis.com/oauth2/v2/userinfo'),
+    ('github', '', '', false, ARRAY['user:email'], 'https://github.com/login/oauth/authorize', 'https://github.com/login/oauth/access_token', 'https://api.github.com/user'),
+    ('linkedin', '', '', false, ARRAY['r_liteprofile', 'r_emailaddress'], 'https://www.linkedin.com/oauth/v2/authorization', 'https://www.linkedin.com/oauth/v2/accessToken', 'https://api.linkedin.com/v2/me')
+ON CONFLICT (provider) DO NOTHING;

@@ -3,6 +3,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
@@ -99,17 +100,28 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 
 // SystemActivity renders the system-wide activity feed.
 func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request) {
-	// Get recent activities from all users
+	// Parse offset parameter for pagination
+	offsetStr := r.URL.Query().Get("offset")
+	offset := 0
+	if offsetStr != "" {
+		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
+			offset = parsedOffset
+		}
+	}
+
+	const limit = 10 // TODO: Change back to 50 for production
+
+	// Get activities from all users with pagination
 	query := `
 		SELECT a.id, a.user_id, u.name as user_name, a.activity_type, a.description, 
 		       a.ip_address, a.created_at
 		FROM activity_logs a
 		JOIN users u ON a.user_id = u.id
 		ORDER BY a.created_at DESC
-		LIMIT 50
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := h.db.Pool.Query(r.Context(), query)
+	rows, err := h.db.Pool.Query(r.Context(), query, limit, offset)
 	if err != nil {
 		h.Error(w, r, http.StatusInternalServerError, "Failed to load activity feed")
 		return
@@ -136,11 +148,30 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 		})
 	}
 
+	// Check if there are more activities
+	hasMore := len(activities) == limit
+
 	theme, themeEnabled := h.GetTheme(r)
 
+	// If this is a partial request (offset provided), render activity items and button
+	if offset > 0 {
+		// Render the new activity items
+		err := admin.SystemActivityItems(activities, offset+len(activities), false).Render(r.Context(), w)
+		if err != nil {
+			h.Error(w, r, http.StatusInternalServerError, "Failed to render activities")
+			return
+		}
+		// Render the load more button
+		admin.LoadMoreButton(offset+len(activities), hasMore).Render(r.Context(), w)
+		return
+	}
+
+	// Otherwise, render the full page
 	props := admin.SystemActivityProps{
 		User:         middleware.GetUserFromContext(r.Context()),
 		Activities:   activities,
+		CurrentCount: len(activities),
+		HasMore:      hasMore,
 		Theme:        theme,
 		ThemeEnabled: themeEnabled,
 	}
