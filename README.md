@@ -56,17 +56,21 @@ A production-ready, full-stack Go web application template with modern frontend 
 │   ├── repository/      # Data access layer (PostgreSQL)
 │   └── service/         # Business logic layer
 ├── pkg/                 # Shared packages
-├── scripts/             # Development scripts
+├── scripts/
+│   └── dev.js           # Cross-platform development server script
 ├── web/
-│   ├── static/          # CSS, JS, vendor files
-│   └── templates/       # Go HTML templates
+│   ├── assets/
+│   │   ├── css/         # Tailwind CSS source and output
+│   │   └── vendor/      # Frontend dependencies (htmx, alpine, lucide)
+│   ├── static/          # Static assets served directly
+│   └── templ/           # Templ templates
 │       ├── components/  # Reusable UI components (navbar, sidebar, footer)
 │       ├── layouts/     # Base layouts (main, auth)
-│       ├── pages/       # Page templates (dashboards, users, activity, analytics)
-│       └── partials/    # Template partials (forms, rows)
+│       └── pages/       # Page templates (dashboards, users, activity, analytics)
+├── .air.toml            # Air hot-reload configuration
 ├── Dockerfile           # Multi-stage production build
-├── docker-compose.yml   # PostgreSQL service
-└── Makefile             # Build automation
+├── docker-compose.yml   # PostgreSQL + App services
+└── package.json         # NPM scripts and dependencies
 ```
 
 ## 🚀 Quick Start
@@ -96,26 +100,18 @@ docker-compose up -d
 # Or configure DATABASE_URL in .env for your existing PostgreSQL
 ```
 
-### 3. Install Frontend Dependencies
+### 3. Run the Application
 
 ```bash
-npm install
-npm run build
+# Development mode with hot-reload (cross-platform)
+npm run dev
 ```
 
-### 4. Run the Application
-
-```bash
-# Development mode
-go run ./cmd/server
-
-# Or use the development script (includes file watching)
-# Windows
-.\scripts\dev.bat
-
-# Linux/Mac
-./scripts/dev.sh
-```
+This single command will:
+1. Install npm dependencies
+2. Download Go modules  
+3. Start Air (Go hot-reload) and Tailwind CSS watcher
+4. Show timestamped, color-coded output for each process
 
 Visit [http://localhost:3000](http://localhost:3000)
 
@@ -138,9 +134,12 @@ make clean        # Clean build artifacts
 ### NPM Scripts
 
 ```bash
-npm run build       # Build CSS and copy vendor files
-npm run watch       # Watch CSS for changes
-npm run copy-vendor # Copy vendor files from node_modules
+npm run dev         # Start development server with hot-reload
+npm run build       # Build for production (templ + CSS + Go binary)
+npm run build:templ # Generate templ templates
+npm run build:css   # Build and minify Tailwind CSS
+npm run build:go    # Build Go binary
+npm run watch:css   # Watch CSS for changes
 ```
 
 ## 🔐 Authentication & Roles
@@ -211,7 +210,23 @@ Theme preference is:
 
 ## 🐳 Docker
 
-### Build and Run
+### Docker Compose (Recommended)
+
+```bash
+# Start database and app together
+docker-compose up --build
+
+# Start in background
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f app
+
+# Stop everything
+docker-compose down
+```
+
+### Build Manually
 
 ```bash
 # Build production image
@@ -220,15 +235,17 @@ docker build -t full-stack-go-template .
 # Run container
 docker run -p 3000:3000 \
   -e DATABASE_URL="postgres://..." \
+  -e AUTH_SECRET="your-secret" \
   full-stack-go-template
 ```
 
 ### Features
 
-- Multi-stage build for minimal image size
+- Multi-stage build for minimal image size (~20MB)
 - Non-root user for security
 - Built-in health check endpoint (`/health`)
 - Alpine-based for small footprint
+- App waits for healthy database before starting
 
 ## 🧪 API Endpoints
 

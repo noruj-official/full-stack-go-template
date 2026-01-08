@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "description": "Full-stack Go application with Tailwind CSS v4",
   "scripts": {
-    "build": "npx @tailwindcss/cli -i ./web/static/css/tailwind.css -o ./web/static/css/output.css --minify && npm run copy-vendor",
-    "watch": "npx @tailwindcss/cli -i ./web/static/css/tailwind.css -o ./web/static/css/output.css --watch",
-    "copy-vendor": "node scripts/copy-vendor.js"
+    "dev": "node scripts/dev.js",
+    "watch:css": "npx @tailwindcss/cli -i ./web/assets/css/app.css -o ./web/assets/css/output.css --watch",
+    "build": "npm run build:templ && npm run build:css && npm run build:go",
+    "build:templ": "go run github.com/a-h/templ/cmd/templ generate",
+    "build:css": "npx @tailwindcss/cli -i ./web/assets/css/app.css -o ./web/assets/css/output.css --minify",
+    "build:go": "go build -o tmp/main.exe cmd/server/main.go",
+    "db:push": "echo 'Run schema.sql manually for now'"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.0",
+    "concurrently": "^9.2.1",
     "daisyui": "^5.5.14",
+    "esbuild": "^0.27.2",
     "tailwindcss": "^4.0.0"
   },
   "dependencies": {

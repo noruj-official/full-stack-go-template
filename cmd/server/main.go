@@ -93,8 +93,8 @@ func run() error {
 	mux := http.NewServeMux()
 
 	// Static files
-	fileServer := http.FileServer(http.Dir("web/static"))
-	mux.Handle("GET /static/", http.StripPrefix("/static/", fileServer))
+	fileServer := http.FileServer(http.Dir("web/assets"))
+	mux.Handle("GET /assets/", http.StripPrefix("/assets/", fileServer))
 
 	// Public routes (no auth required)
 	mux.HandleFunc("GET /{$}", homeHandler.Index)

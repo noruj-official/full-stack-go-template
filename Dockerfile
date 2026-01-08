@@ -10,14 +10,16 @@ RUN apk add --no-cache git ca-certificates tzdata nodejs npm
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy package files for npm dependencies
+# Copy package files and scripts for npm dependencies
 COPY package.json ./
+COPY scripts/ ./scripts/
 RUN npm install
 
 # Copy source code
 COPY . .
 
-# Build CSS from source
+# Build assets (templ templates + CSS)
+# Uses: npm run build:templ && npm run build:css && npm run build:go
 RUN npm run build
 
 # Install templ

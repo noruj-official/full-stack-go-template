@@ -38,13 +38,13 @@ node_modules/
 package-lock.json
 
 # Generated CSS (built from tailwind.css)
-web/static/css/output.css
+web/assets/css/output.css
 
 # Build output
 /bin/
 /dist/
 /build/
-web/static/vendor/
+web/assets/vendor/
 
 # Temporary files
 /tmp/

@@ -5,9 +5,9 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "tmp\\main.exe"
-  cmd = "cmd /C scripts\\build.bat"
+  cmd = "cmd /C \"npm run build:templ && go build -o tmp/main.exe ./cmd/server/main.go\""
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata", "web/static", "node_modules"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_modules", "web/assets"]
   exclude_file = []
   exclude_regex = ["_test.go", "_templ.go"]
   exclude_unchanged = false
@@ -28,7 +28,8 @@ tmp_dir = "tmp"
   watcher = "cyan"
 
 [log]
-  time = false
+  time = true
+  main_only = false
 
 [misc]
   clean_on_exit = true

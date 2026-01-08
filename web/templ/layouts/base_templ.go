@@ -109,7 +109,7 @@ func Base(title string, description string, user *domain.User, showSidebar bool,
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " | Full Stack Go Template</title><link rel=\"stylesheet\" href=\"/static/css/output.css\"><script src=\"/static/vendor/htmx.min.js\"></script><script defer src=\"/static/vendor/alpine.min.js\"></script><script src=\"/static/vendor/lucide.min.js\"></script><style>\r\n\t\t\t\t[x-cloak] {\r\n\t\t\t\t\tdisplay: none !important;\r\n\t\t\t\t}\r\n\t\t\t</style></head><body class=\"min-h-screen\" hx-boost=\"true\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " | Full Stack Go Template</title><link rel=\"stylesheet\" href=\"/assets/css/output.css\"><script src=\"/assets/vendor/htmx.min.js\"></script><script defer src=\"/assets/vendor/alpine.min.js\"></script><script src=\"/assets/vendor/lucide.min.js\"></script><style>\r\n\t\t\t\t[x-cloak] {\r\n\t\t\t\t\tdisplay: none !important;\r\n\t\t\t\t}\r\n\t\t\t</style></head><body class=\"min-h-screen\" hx-boost=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
