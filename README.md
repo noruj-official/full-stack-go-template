@@ -55,23 +55,41 @@ A production-ready, full-stack Go web application template with modern frontend 
 │   ├── middleware/      # Auth, CORS, Logging, Recovery
 │   ├── repository/      # Data access layer (PostgreSQL)
 │   └── service/         # Business logic layer
-├── pkg/                 # Shared packages
 ├── scripts/
 │   └── dev.js           # Cross-platform development server script
 ├── web/
 │   ├── assets/
 │   │   ├── css/         # Tailwind CSS source and output
 │   │   └── vendor/      # Frontend dependencies (htmx, alpine, lucide)
-│   ├── static/          # Static assets served directly
 │   └── templ/           # Templ templates
 │       ├── components/  # Reusable UI components (navbar, sidebar, footer)
 │       ├── layouts/     # Base layouts (main, auth)
 │       └── pages/       # Page templates (dashboards, users, activity, analytics)
+├── docs/                # Architecture documentation
 ├── .air.toml            # Air hot-reload configuration
 ├── Dockerfile           # Multi-stage production build
 ├── docker-compose.yml   # PostgreSQL + App services
 └── package.json         # NPM scripts and dependencies
 ```
+
+> 📖 For detailed architecture documentation, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+## 🌍 For Developers from Other Languages
+
+New to Go? Here's how this project maps to patterns you already know:
+
+| This Project | Node.js/Express | Python/Flask | Java/Spring |
+|--------------|-----------------|--------------|-------------|
+| `cmd/server/main.go` | `app.js` | `app.py` | `Application.java` |
+| `internal/handler/` | Route handlers | Flask routes | `@Controller` |
+| `internal/service/` | Service classes | Service layer | `@Service` |
+| `internal/repository/` | Database models | SQLAlchemy | `@Repository` |
+| `internal/domain/` | TypeScript types | Pydantic models | Entity classes |
+| `web/templ/` | React/EJS | Jinja2 | Thymeleaf |
+
+**Quick Start Resources:**
+- 📖 [Architecture Guide](docs/ARCHITECTURE.md) - Full project walkthrough
+- 🚀 [Getting Started](docs/GETTING_STARTED.md) - Developer onboarding
 
 ## 🚀 Quick Start
 

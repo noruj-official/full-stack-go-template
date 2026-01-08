@@ -47,90 +47,12 @@ func (db *DB) Health(ctx context.Context) error {
 	return db.Pool.Ping(ctx)
 }
 
-// RunMigrations executes database migrations.
+// RunMigrations executes database migrations from embedded SQL files.
 // In a production app, consider using a proper migration tool like golang-migrate.
 func (db *DB) RunMigrations(ctx context.Context) error {
-	migrations := []string{
-		// Create users table
-		`CREATE TABLE IF NOT EXISTS users (
-			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			email VARCHAR(255) UNIQUE NOT NULL,
-			name VARCHAR(255) NOT NULL,
-			password_hash VARCHAR(255) NOT NULL DEFAULT '',
-			role VARCHAR(20) NOT NULL DEFAULT 'user',
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
-		`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`,
-
-		// Add profile image columns to users table
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image BYTEA`,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_type VARCHAR(50)`,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_size INTEGER DEFAULT 0`,
-
-		// Add email verification columns
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false`,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255)`,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMP WITH TIME ZONE`,
-		`CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token)`,
-
-		// Create sessions table
-		`CREATE TABLE IF NOT EXISTS sessions (
-			id VARCHAR(64) PRIMARY KEY,
-			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-			expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)`,
-
-		// Add session security columns
-		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45)`,
-		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS user_agent TEXT`,
-		`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()`,
-
-		// Create activity_logs table for user activities
-		`CREATE TABLE IF NOT EXISTS activity_logs (
-			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-			activity_type VARCHAR(50) NOT NULL,
-			description TEXT NOT NULL,
-			ip_address VARCHAR(45),
-			user_agent TEXT,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_activity_logs_type ON activity_logs(activity_type)`,
-
-		// Create audit_logs table for admin actions
-		`CREATE TABLE IF NOT EXISTS audit_logs (
-			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			admin_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-			action VARCHAR(100) NOT NULL,
-			resource_type VARCHAR(50) NOT NULL,
-			resource_id UUID,
-			old_values JSONB,
-			new_values JSONB,
-			ip_address VARCHAR(45),
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_audit_logs_admin_id ON audit_logs(admin_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action)`,
-		`CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource_type, resource_id)`,
-
-		// Create password_reset_tokens table
-		`CREATE TABLE IF NOT EXISTS password_reset_tokens (
-			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-			token_hash VARCHAR(255) NOT NULL,
-			expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash)`,
-		`CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)`,
+	migrations, err := GetMigrations()
+	if err != nil {
+		return fmt.Errorf("failed to load migrations: %w", err)
 	}
 
 	for _, migration := range migrations {

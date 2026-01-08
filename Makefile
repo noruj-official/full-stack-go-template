@@ -19,11 +19,11 @@ run:
 
 # Build Tailwind CSS
 css:
-	npx @tailwindcss/cli -i ./web/static/css/tailwind.css -o ./web/static/css/output.css --minify
+	npx @tailwindcss/cli -i ./web/assets/css/app.css -o ./web/assets/css/output.css --minify
 
 # Watch Tailwind CSS for changes
 css-watch:
-	npx @tailwindcss/cli -i ./web/static/css/tailwind.css -o ./web/static/css/output.css --watch
+	npx @tailwindcss/cli -i ./web/assets/css/app.css -o ./web/assets/css/output.css --watch
 
 # Start PostgreSQL container
 db-up:
