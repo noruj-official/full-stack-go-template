@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
 // PasswordResetRepository implements the repository.PasswordResetRepository interface.

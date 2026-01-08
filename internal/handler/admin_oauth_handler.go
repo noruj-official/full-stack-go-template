@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/repository"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	adminPage "github.com/shaik-noor/full-stack-go-template/web/templ/pages/admin"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/repository"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
+	adminPage "github.com/noruj-official/full-stack-go-template/web/templ/pages/admin"
 )
 
 type AdminOAuthHandler struct {

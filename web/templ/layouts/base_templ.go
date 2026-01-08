@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/components"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/web/templ/components"
 )
 
 func Base(title string, description string, user *domain.User, showSidebar bool, theme string, themeEnabled bool) templ.Component {

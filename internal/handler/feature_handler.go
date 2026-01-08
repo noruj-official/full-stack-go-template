@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	featuresPage "github.com/shaik-noor/full-stack-go-template/web/templ/pages/features"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
+	featuresPage "github.com/noruj-official/full-stack-go-template/web/templ/pages/features"
 )
 
 // FeatureHandler handles feature flag related requests.

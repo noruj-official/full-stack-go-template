@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	usersPage "github.com/shaik-noor/full-stack-go-template/web/templ/pages/users"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
+	usersPage "github.com/noruj-official/full-stack-go-template/web/templ/pages/users"
 )
 
 // UserHandler handles user-related HTTP requests.

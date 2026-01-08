@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/shaik-noor/full-stack-go-template/internal/domain"
+import "github.com/noruj-official/full-stack-go-template/internal/domain"
 
 func Navbar(user *domain.User, showSidebar bool, themeEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {

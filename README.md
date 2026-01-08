@@ -102,7 +102,7 @@ New to Go? Here's how this project maps to patterns you already know:
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/shaik-noor/full-stack-go-template.git
+git clone https://github.com/noruj-official/full-stack-go-template.git
 cd full-stack-go-template
 
 # Copy environment file

@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
 // UserRepository defines the interface for user data access operations.

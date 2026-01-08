@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
 )
 
 // featureService implements the FeatureService interface.

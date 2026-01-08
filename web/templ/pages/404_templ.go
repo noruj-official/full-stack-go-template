@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
 )
 
 func NotFound(title string, description string, user *domain.User, theme string, themeEnabled bool) templ.Component {

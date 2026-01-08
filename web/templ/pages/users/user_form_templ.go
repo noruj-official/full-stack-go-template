@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
 func UserForm(user *domain.User, formData *domain.CreateUserInput, err string) templ.Component {

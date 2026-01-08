@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/dashboards"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
+	"github.com/noruj-official/full-stack-go-template/web/templ/pages"
+	"github.com/noruj-official/full-stack-go-template/web/templ/pages/dashboards"
 )
 
 // HomeHandler handles home page requests.

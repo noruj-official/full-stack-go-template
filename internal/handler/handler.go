@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
 )
 
 // Handler is the base handler with shared utilities.

@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/internal/storage"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/profile"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
+	"github.com/noruj-official/full-stack-go-template/internal/storage"
+	"github.com/noruj-official/full-stack-go-template/web/templ/pages/profile"
 )
 
 // ProfileHandler handles user profile HTTP requests.

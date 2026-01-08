@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/auth"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
+	"github.com/noruj-official/full-stack-go-template/web/templ/pages/auth"
 )
 
 // AuthHandler handles authentication-related HTTP requests.

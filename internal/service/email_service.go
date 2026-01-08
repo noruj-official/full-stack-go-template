@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/templates/email"
+	"github.com/noruj-official/full-stack-go-template/internal/templates/email"
 )
 
 type resendEmailService struct {

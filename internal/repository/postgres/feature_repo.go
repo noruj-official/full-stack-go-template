@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
 // FeatureRepository implements the repository interface for Feature Flags.

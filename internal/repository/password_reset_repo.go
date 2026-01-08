@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
 // PasswordResetRepository defines the interface for password reset token storage.

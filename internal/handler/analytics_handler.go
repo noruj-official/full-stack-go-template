@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/pages/admin"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
+	"github.com/noruj-official/full-stack-go-template/web/templ/pages/admin"
 )
 
 // AnalyticsHandler handles analytics-related HTTP requests.

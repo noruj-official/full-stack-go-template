@@ -5,8 +5,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
 )
 
 // Context keys for request context values.

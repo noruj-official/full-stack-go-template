@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/shaik-noor/full-stack-go-template/web/templ/components"
-	"github.com/shaik-noor/full-stack-go-template/web/templ/layouts"
+	"github.com/noruj-official/full-stack-go-template/web/templ/components"
+	"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
 )
 
 func ResetPasswordForm(token string, theme string) templ.Component {

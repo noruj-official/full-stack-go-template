@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/shaik-noor/full-stack-go-template/internal/config"
+	"github.com/noruj-official/full-stack-go-template/internal/config"
 )
 
 // NewService creates a storage service based on the configuration.

@@ -11,13 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/shaik-noor/full-stack-go-template/internal/config"
-	"github.com/shaik-noor/full-stack-go-template/internal/domain"
-	"github.com/shaik-noor/full-stack-go-template/internal/handler"
-	"github.com/shaik-noor/full-stack-go-template/internal/middleware"
-	"github.com/shaik-noor/full-stack-go-template/internal/repository/postgres"
-	"github.com/shaik-noor/full-stack-go-template/internal/service"
-	"github.com/shaik-noor/full-stack-go-template/internal/storage"
+	"github.com/noruj-official/full-stack-go-template/internal/config"
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/handler"
+	"github.com/noruj-official/full-stack-go-template/internal/middleware"
+	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
+	"github.com/noruj-official/full-stack-go-template/internal/service"
+	"github.com/noruj-official/full-stack-go-template/internal/storage"
 )
 
 func main() {
