@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "feature/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25.x'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Node Dependencies
+      run: npm ci
+
+    - name: Install Templ
+      run: go install github.com/a-h/templ/cmd/templ@latest
+
+    - name: Generate Templ Content
+      run: go run github.com/a-h/templ/cmd/templ generate
+
+    - name: Build CSS
+      run: npm run build:css
+
+    - name: Verify Go Dependencies
+      run: go mod verify
+
+    - name: Build Go App
+      run: go build -v ./...
+
+    - name: Run Tests
+      run: go test -v ./...
