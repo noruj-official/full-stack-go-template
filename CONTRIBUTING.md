@@ -17,7 +17,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ## Code of Conduct
 
-We are committed to fostering a welcoming community. Please be respectful and considerate in all interactions.
+We are committed to fostering a welcoming community. Please read and follow our [Code of Conduct](./CODE_OF_CONDUCT.md) in all interactions.
 
 ## Getting Started
 
