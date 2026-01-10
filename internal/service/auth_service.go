@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/noruj-official/full-stack-go-template/internal/domain"
 	"github.com/noruj-official/full-stack-go-template/internal/repository"
@@ -25,10 +26,11 @@ type authService struct {
 	oauthRepo         repository.OAuthRepository
 	emailService      EmailService
 	appURL            string
+	authSecret        string
 }
 
 // NewAuthService creates a new auth service.
-func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, passwordResetRepo repository.PasswordResetRepository, oauthRepo repository.OAuthRepository, emailService EmailService, appURL string) AuthService {
+func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, passwordResetRepo repository.PasswordResetRepository, oauthRepo repository.OAuthRepository, emailService EmailService, appURL string, authSecret string) AuthService {
 	return &authService{
 		userRepo:          userRepo,
 		sessionRepo:       sessionRepo,
@@ -36,6 +38,7 @@ func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.S
 		oauthRepo:         oauthRepo,
 		emailService:      emailService,
 		appURL:            appURL,
+		authSecret:        authSecret,
 	}
 }
 
@@ -540,4 +543,97 @@ func (s *authService) ListEnabledProviders(ctx context.Context) (map[string]bool
 	}
 
 	return enabled, nil
+}
+
+// GenerateEmailAuthToken generates a signed JWT for email authentication.
+func (s *authService) GenerateEmailAuthToken(email string, purpose string) (string, error) {
+	claims := domain.EmailAuthClaims{
+		Email:   email,
+		Purpose: purpose,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)), // Short lived
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    s.appURL,
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(s.authSecret))
+}
+
+// VerifyEmailAuthToken verifies a signed JWT and returns the claims.
+func (s *authService) VerifyEmailAuthToken(tokenString string) (string, string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &domain.EmailAuthClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(s.authSecret), nil
+	})
+
+	if err != nil {
+		return "", "", err
+	}
+
+	if claims, ok := token.Claims.(*domain.EmailAuthClaims); ok && token.Valid {
+		return claims.Email, claims.Purpose, nil
+	}
+
+	return "", "", fmt.Errorf("invalid token claims")
+}
+
+// LoginWithEmailToken authenticates a user using a magic link token.
+func (s *authService) LoginWithEmailToken(ctx context.Context, token string, ip, userAgent string) (*domain.User, *domain.Session, error) {
+	email, purpose, err := s.VerifyEmailAuthToken(token)
+	if err != nil {
+		return nil, nil, domain.ErrInvalidToken
+	}
+
+	if purpose != domain.TokenPurposeEmailAuth {
+		return nil, nil, domain.ErrInvalidToken
+	}
+
+	// Find or create user
+	user, err := s.userRepo.GetByEmail(ctx, email)
+	if err != nil && !domain.IsNotFoundError(err) {
+		return nil, nil, err
+	}
+
+	if user == nil {
+		// Create new user
+		role := domain.RoleUser
+		count, err := s.userRepo.Count(ctx)
+		if err == nil && count == 0 {
+			role = domain.RoleSuperAdmin
+		}
+
+		user = domain.NewUser(email, "", "", role)
+		user.EmailVerified = true // Verified via email link
+
+		if err := s.userRepo.Create(ctx, user); err != nil {
+			return nil, nil, err
+		}
+	} else {
+		// User exists, ensure email is verified
+		if !user.EmailVerified {
+			user.EmailVerified = true
+			user.VerificationToken = nil
+			user.VerificationTokenExpiresAt = nil
+			if err := s.userRepo.Update(ctx, user); err != nil {
+				return nil, nil, err
+			}
+		}
+	}
+
+	// Create session
+	session := domain.NewSession(user.ID, ip, userAgent)
+	if err := s.sessionRepo.Create(ctx, session); err != nil {
+		return nil, nil, err
+	}
+
+	return user, session, nil
+}
+
+// SendEmailAuthLink sends a magic link email to the user.
+func (s *authService) SendEmailAuthLink(ctx context.Context, emailAddr, token string) error {
+	return s.emailService.SendEmailAuthLink(ctx, emailAddr, token)
 }

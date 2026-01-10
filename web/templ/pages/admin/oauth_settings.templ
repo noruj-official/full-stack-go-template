@@ -25,7 +25,7 @@ templ OAuthSettings(user *domain.User, theme string, themeEnabled bool, provider
 }
 
 templ OAuthProviderCard(provider *domain.OAuthProvider, appURL string) {
-	<div class="collapse collapse-arrow bg-base-100 shadow-sm border border-base-300 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-md">
+	<div id={ fmt.Sprintf("oauth-card-%s", provider.Provider) } class="collapse collapse-arrow bg-base-100 shadow-sm border border-base-300 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-md">
 		<input type="checkbox" name={ fmt.Sprintf("accordion-%s", provider.Provider) } /> 
 		
 		<div class="collapse-title flex flex-wrap justify-between items-center gap-4 py-4 pr-12">
@@ -67,7 +67,7 @@ templ OAuthProviderCard(provider *domain.OAuthProvider, appURL string) {
 
 		<div class="collapse-content">
 			<div class="pt-2 pb-6 px-1">
-				<form hx-post={ fmt.Sprintf("/a/oauth/%s", provider.Provider) } hx-swap="outerHTML" class="space-y-6">
+				<form hx-post={ fmt.Sprintf("/a/oauth/%s", provider.Provider) } hx-target={ fmt.Sprintf("#oauth-card-%s", provider.Provider) } hx-swap="outerHTML" class="space-y-6">
 					
 					// Credentials Section
 					<div class="bg-base-200 p-4 rounded-lg border border-base-300/50 space-y-4">

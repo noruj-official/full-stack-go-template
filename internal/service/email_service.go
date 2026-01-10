@@ -121,3 +121,50 @@ func (s *resendEmailService) SendPasswordResetEmail(ctx context.Context, emailAd
 
 	return nil
 }
+
+// SendEmailAuthLink sends a magic link email to the user.
+func (s *resendEmailService) SendEmailAuthLink(ctx context.Context, emailAddr, token string) error {
+	link := fmt.Sprintf("%s/auth/email/verify?token=%s", s.appURL, token)
+	appName := "Go Template"
+
+	htmlContent := email.GetEmailAuthEmailContent(appName, link)
+
+	if s.apiKey == "" {
+		fmt.Printf("[MOCK EMAIL] Email Auth -> To: %s, Link: %s\n", emailAddr, link)
+		return nil
+	}
+
+	url := "https://api.resend.com/emails"
+
+	payload := map[string]interface{}{
+		"from":    s.fromEmail,
+		"to":      []string{emailAddr},
+		"subject": fmt.Sprintf("Sign in to %s", appName),
+		"html":    htmlContent,
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+s.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return errors.New("failed to send email via Resend")
+	}
+	return nil
+}

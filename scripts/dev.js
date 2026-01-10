@@ -117,6 +117,39 @@ async function main() {
         process.exit(1);
     }
 
+    // Step 3: Copy vendor assets
+    logSystem('Copying vendor assets...');
+    const vendorDir = path.join('web', 'assets', 'vendor');
+    
+    // Create vendor directory if it doesn't exist
+    if (require('fs').existsSync(vendorDir) === false) {
+        require('fs').mkdirSync(vendorDir, { recursive: true });
+    }
+
+    // Copy HTMX
+    if (!runSync(process.platform === 'win32' ? 
+        'copy node_modules\\htmx.org\\dist\\htmx.min.js web\\assets\\vendor\\' : 
+        'cp node_modules/htmx.org/dist/htmx.min.js web/assets/vendor/', 
+        'Copying HTMX')) {
+        process.exit(1);
+    }
+
+    // Copy Alpine.js
+    if (!runSync(process.platform === 'win32' ? 
+        'copy node_modules\\alpinejs\\dist\\cdn.min.js web\\assets\\vendor\\alpine.min.js' : 
+        'cp node_modules/alpinejs/dist/cdn.min.js web/assets/vendor/alpine.min.js', 
+        'Copying Alpine.js')) {
+        process.exit(1);
+    }
+
+    // Copy Lucide
+    if (!runSync(process.platform === 'win32' ? 
+        'copy node_modules\\lucide\\dist\\umd\\lucide.min.js web\\assets\\vendor\\' : 
+        'cp node_modules/lucide/dist/umd/lucide.min.js web/assets/vendor/', 
+        'Copying Lucide values')) {
+        process.exit(1);
+    }
+
     logSystem('Starting development watchers...');
     console.log(`${colors.dim}Press Ctrl+C to stop all processes${colors.reset}\n`);
 

@@ -2,9 +2,11 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/noruj-official/full-stack-go-template/internal/domain"
 	"github.com/noruj-official/full-stack-go-template/internal/middleware"
@@ -16,14 +18,16 @@ import (
 type AuthHandler struct {
 	*Handler
 	authService     service.AuthService
+	userService     service.UserService
 	activityService service.ActivityService
 }
 
 // NewAuthHandler creates a new auth handler.
-func NewAuthHandler(base *Handler, authService service.AuthService, activityService service.ActivityService) *AuthHandler {
+func NewAuthHandler(base *Handler, authService service.AuthService, userService service.UserService, activityService service.ActivityService) *AuthHandler {
 	return &AuthHandler{
 		Handler:         base,
 		authService:     authService,
+		userService:     userService,
 		activityService: activityService,
 	}
 }
@@ -71,6 +75,11 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		msg = "Account created! Please check your email to verify your account."
 	}
 
+	if r.URL.Query().Get("success") == "email_sent" {
+		msgType = "success"
+		msg = fmt.Sprintf("Magic Sign-in link sent to %s. Please check your inbox.", email)
+	}
+
 	theme, themeEnabled := h.GetTheme(r)
 
 	// Check email auth feature
@@ -79,27 +88,34 @@ func (h *AuthHandler) SignInPage(w http.ResponseWriter, r *http.Request) {
 		emailAuthEnabled = true // Default to true if check fails
 	}
 
+	// Check password auth feature
+	emailPasswordAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailPasswordAuth)
+	if err != nil {
+		emailPasswordAuthEnabled = true // Default to true if check fails
+	}
+
 	oauthEnabled, _ := h.authService.ListEnabledProviders(r.Context())
 
 	props := auth.SigninPageProps{
-		Email:            email,
-		Error:            "",
-		Message:          msg,
-		MessageType:      msgType,
-		Theme:            theme,
-		ThemeEnabled:     themeEnabled,
-		EmailAuthEnabled: emailAuthEnabled,
-		OAuthEnabled:     oauthEnabled,
+		Email:                    email,
+		Error:                    "",
+		Message:                  msg,
+		MessageType:              msgType,
+		Theme:                    theme,
+		ThemeEnabled:             themeEnabled,
+		EmailAuthEnabled:         emailAuthEnabled,
+		EmailPasswordAuthEnabled: emailPasswordAuthEnabled,
+		OAuthEnabled:             oauthEnabled,
 	}
 	auth.SigninPage(props).Render(r.Context(), w)
 }
 
 // SignIn handles user sign in.
 func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
-	// Check feature flag
-	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	// Check feature flag for password auth
+	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailPasswordAuth)
 	if err == nil && !enabled {
-		h.Error(w, r, http.StatusForbidden, "Email sign in is currently disabled")
+		h.Error(w, r, http.StatusForbidden, "Email/Password sign in is currently disabled")
 		return
 	}
 
@@ -176,13 +192,26 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) renderSignInError(w http.ResponseWriter, r *http.Request, email, errMsg string) {
 	theme, themeEnabled := h.GetTheme(r)
+
+	// Check feature flags
+	emailAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err != nil {
+		emailAuthEnabled = true
+	}
+
+	emailPasswordAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailPasswordAuth)
+	if err != nil {
+		emailPasswordAuthEnabled = true
+	}
+
 	props := auth.SigninPageProps{
-		Email:            email,
-		Error:            errMsg,
-		Theme:            theme,
-		ThemeEnabled:     themeEnabled,
-		EmailAuthEnabled: true, // If we are here, we probably tried to sign in, so let's assume it was enabled or we want to show the form to show the error
-		OAuthEnabled:     nil,  // Error case, maybe don't need to load oauth providers again or fetch?
+		Email:                    email,
+		Error:                    errMsg,
+		Theme:                    theme,
+		ThemeEnabled:             themeEnabled,
+		EmailAuthEnabled:         emailAuthEnabled,
+		EmailPasswordAuthEnabled: emailPasswordAuthEnabled,
+		OAuthEnabled:             nil,
 	}
 
 	// Fetch oauth providers even in error for consistent UI
@@ -208,19 +237,25 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 
 	theme, themeEnabled := h.GetTheme(r)
 
-	// Check email auth feature
+	// Check feature flags
 	emailAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
 	if err != nil {
 		emailAuthEnabled = true
 	}
 
+	emailPasswordAuthEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailPasswordAuth)
+	if err != nil {
+		emailPasswordAuthEnabled = true
+	}
+
 	props := auth.SignupPageProps{
-		Form:             nil,
-		Error:            "",
-		Theme:            theme,
-		ThemeEnabled:     themeEnabled,
-		EmailAuthEnabled: emailAuthEnabled,
-		OAuthEnabled:     nil,
+		Form:                     nil,
+		Error:                    "",
+		Theme:                    theme,
+		ThemeEnabled:             themeEnabled,
+		EmailAuthEnabled:         emailAuthEnabled,
+		EmailPasswordAuthEnabled: emailPasswordAuthEnabled,
+		OAuthEnabled:             nil,
 	}
 
 	if oauthEnabled, err := h.authService.ListEnabledProviders(r.Context()); err == nil {
@@ -233,7 +268,7 @@ func (h *AuthHandler) SignupPage(w http.ResponseWriter, r *http.Request) {
 // Signup handles user registration.
 func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	// Check feature flag
-	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailPasswordAuth)
 	if err == nil && !enabled {
 		h.Error(w, r, http.StatusForbidden, "Sign up is currently disabled")
 		return
@@ -546,4 +581,195 @@ func (h *AuthHandler) HandleOAuthCallback(w http.ResponseWriter, r *http.Request
 
 	// Redirect
 	http.Redirect(w, r, getDashboardURLForRole(user), http.StatusSeeOther)
+}
+
+// HandleEmailAuthRequest handles the request to sign in/up with email.
+func (h *AuthHandler) HandleEmailAuthRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check feature flag
+	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err == nil && !enabled {
+		h.Error(w, r, http.StatusForbidden, "Email authentication is disabled")
+		return
+	}
+
+	email := r.FormValue("email")
+	if email == "" {
+		// Render error on signin page
+		h.renderSignInError(w, r, "", "Email is required")
+		return
+	}
+
+	// 1. Generate Token
+	token, err := h.authService.GenerateEmailAuthToken(email, domain.TokenPurposeEmailAuth)
+	if err != nil {
+		log.Printf("Failed to generate email auth token: %v", err)
+		h.renderSignInError(w, r, email, "An error occurred")
+		return
+	}
+
+	// 2. Send Email
+	// Use goroutine to not block response
+	go func() {
+		sendCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := h.authService.SendEmailAuthLink(sendCtx, email, token); err != nil {
+			log.Printf("Failed to send email auth link to %s: %v", email, err)
+		}
+	}()
+
+	// 3. Render Success Page or Message
+	// We should probably redirect to a "Check your email" page or show a success message on the signin page.
+	// Let's redirect to signin with a success message query param.
+	redirectURL := "/signin?success=email_sent&email=" + email
+
+	if isHTMXRequest(r) {
+		w.Header().Set("HX-Redirect", redirectURL)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+}
+
+// HandleEmailAuthVerify handles the verification of the email auth token.
+func (h *AuthHandler) HandleEmailAuthVerify(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		http.Redirect(w, r, "/signin?error=invalid_token", http.StatusSeeOther)
+		return
+	}
+
+	// Check feature flag
+	enabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+	if err == nil && !enabled {
+		h.Error(w, r, http.StatusForbidden, "Email authentication is disabled")
+		return
+	}
+
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+
+	// Verify and Login
+	user, session, err := h.authService.LoginWithEmailToken(r.Context(), token, ip, ua)
+	if err != nil {
+		log.Printf("Email auth login failed: %v", err)
+		if err == domain.ErrInvalidToken || err == domain.ErrTokenExpired {
+			http.Redirect(w, r, "/signin?error=invalid_token", http.StatusSeeOther)
+		} else {
+			http.Redirect(w, r, "/signin?error=server_error", http.StatusSeeOther)
+		}
+		return
+	}
+
+	// Set session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     middleware.SessionCookieName,
+		Value:    session.ID,
+		Path:     "/",
+		Expires:  session.ExpiresAt,
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityLogin, "User signed in via email", &ip, &ua)
+
+	// Check if user has a name (for signup flow)
+	if user.Name == "" {
+		redirectURL := "/auth/complete-profile"
+		if isHTMXRequest(r) {
+			w.Header().Set("HX-Redirect", redirectURL)
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+		return
+	}
+
+	// Redirect to dashboard
+	redirectURL := getDashboardURLForRole(user)
+	if isHTMXRequest(r) {
+		w.Header().Set("HX-Redirect", redirectURL)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+}
+
+// CompleteProfilePage renders the profile completion page.
+func (h *AuthHandler) CompleteProfilePage(w http.ResponseWriter, r *http.Request) {
+	theme, themeEnabled := h.GetTheme(r)
+	props := auth.CompleteProfilePageProps{
+		Theme:        theme,
+		ThemeEnabled: themeEnabled,
+	}
+	h.RenderTempl(w, r, auth.CompleteProfilePage(props))
+}
+
+// CompleteProfile handles the profile completion submission.
+func (h *AuthHandler) CompleteProfile(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+		return
+	}
+
+	name := r.FormValue("name")
+	if name == "" {
+		theme, themeEnabled := h.GetTheme(r)
+		props := auth.CompleteProfilePageProps{
+			Error:        "Name is required",
+			Theme:        theme,
+			ThemeEnabled: themeEnabled,
+		}
+		if isHTMXRequest(r) {
+			h.RenderTempl(w, r, auth.CompleteProfileForm(props))
+			return
+		}
+		h.RenderTempl(w, r, auth.CompleteProfilePage(props))
+		return
+	}
+
+	// Update user name
+	updateInput := &domain.UpdateUserInput{
+		Name: &name,
+	}
+
+	_, err := h.userService.UpdateUser(r.Context(), user.ID, updateInput)
+	if err != nil {
+		log.Printf("Failed to update user profile: %v", err)
+		theme, themeEnabled := h.GetTheme(r)
+		props := auth.CompleteProfilePageProps{
+			Error:        "Failed to update profile",
+			Theme:        theme,
+			ThemeEnabled: themeEnabled,
+		}
+		if isHTMXRequest(r) {
+			h.RenderTempl(w, r, auth.CompleteProfileForm(props))
+			return
+		}
+		h.RenderTempl(w, r, auth.CompleteProfilePage(props))
+		return
+	}
+
+	// Log activity
+	ip := getIPAddress(r)
+	ua := r.UserAgent()
+	_ = h.activityService.LogActivity(r.Context(), user.ID, domain.ActivityProfileUpdate, "User completed profile", &ip, &ua)
+
+	// Redirect to dashboard
+	redirectURL := getDashboardURLForRole(user)
+	if isHTMXRequest(r) {
+		w.Header().Set("HX-Redirect", redirectURL)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }

@@ -71,3 +71,6 @@ tmp/
 # Misc
 *.bak
 *.backup
+
+# Templ
+*_templ.go

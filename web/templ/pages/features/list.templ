@@ -1,64 +1,111 @@
 package features
 
 import (
-	"fmt"
-	"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
-	"github.com/noruj-official/full-stack-go-template/internal/domain"
+"fmt"
+"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
+"github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
 templ List(title string, description string, user *domain.User, showSidebar bool, theme string, themeEnabled bool, features []*domain.FeatureFlag) {
-	@layouts.Base(title, description, user, showSidebar, theme, themeEnabled) {
-		<div class="mb-8">
-			<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Feature Flags</h1>
-			<p class="text-slate-500 dark:text-slate-400">Manage application feature toggles.</p>
-		</div>
+    @layouts.Base(title, description, user, showSidebar, theme, themeEnabled) {
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Feature Flags</h1>
+                <p class="text-slate-500 dark:text-slate-400">Manage application feature toggles.</p>
+                </div>
 
-		<div class="card overflow-hidden">
-			<div class="overflow-x-auto">
-				<table class="table table-zebra w-full">
-					<thead>
-						<tr>
-							<th class="bg-slate-50 dark:bg-slate-800/50">Feature</th>
-							<th class="bg-slate-50 dark:bg-slate-800/50">Description</th>
-							<th class="bg-slate-50 dark:bg-slate-800/50">State</th>
-							<th class="bg-slate-50 dark:bg-slate-800/50 text-right">Last Updated</th>
-						</tr>
-					</thead>
-					<tbody>
-						if len(features) > 0 {
-							for _, f := range features {
-								<tr>
-									<td class="font-medium text-slate-900 dark:text-white">{ f.Name }</td>
-									<td class="text-slate-500 dark:text-slate-400">{ f.Description }</td>
-									<td>
-										<label class="relative inline-flex items-center cursor-pointer">
-											<input type="checkbox" class="sr-only peer" 
-												checked?={ f.Enabled }
-												hx-post={ fmt.Sprintf("/a/features/toggle?name=%s&enabled=%t", f.Name, !f.Enabled) }
-												hx-swap="none"
-												hx-on:click="this.checked = !this.checked; setTimeout(() => window.location.reload(), 100)"
-											/>
-											<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-										</label>
-									</td>
-									<td class="text-right text-slate-500 dark:text-slate-400 text-sm">
-										{ f.UpdatedAt.Format("Jan 02, 15:04") }
-									</td>
-								</tr>
-							}
-						} else {
-							<tr>
-								<td colspan="4" class="text-center py-8 text-slate-500">
-									No feature flags found.
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-		</div>
-		<script>
-			lucide.createIcons();
-		</script>
-	}
-}
+                <div class="card bg-base-100 shadow-xl border border-base-200">
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra w-full">
+                            <thead>
+                                <tr class="bg-base-200/50">
+                                    <th class="w-1/3">Feature</th>
+                                        <th class="w-1/3">Description</th>
+                                            <th class="w-1/6 text-center">State</th>
+                                                <th class="w-1/6 text-right">Last Updated</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                if len(features) > 0 {
+                                                    for _, f := range features {
+                                                        <tr class="hover">
+                                                            <td>
+                                                                <div class="flex items-center gap-3">
+                                                                    <div class={"p-2 rounded-lg",
+                                                                    templ.KV("bg-primary/10 text-primary", f.Enabled),
+                                                                    templ.KV("bg-base-200 text-base-content/50", !f.Enabled)}>
+                                                                    if f.Name == "email_auth" {
+                                                                        <i data-lucide="mail" class="w-5 h-5"></i>
+                                                                        } else if f.Name == "email_password_auth" {
+                                                                            <i data-lucide="lock" class="w-5 h-5"></i>
+                                                                            } else if f.Name == "theme_management" {
+                                                                                <i data-lucide="palette" class="w-5 h-5"></i>
+                                                                                } else {
+                                                                                    <i data-lucide="toggle-left" class="w-5 h-5"></i>
+                                                                                    }
+                                                                                </div>
+                                                                                <div>
+                                                                                    <div class="font-bold">
+                                                                                        if f.Name == "email_auth" {
+                                                                                            Magic Link Authentication
+                                                                                        } else if f.Name == "email_password_auth" {
+                                                                                            Email/Password Authentication
+                                                                                        } else if f.Name == "theme_management" {
+                                                                                            Theme Management
+                                                                                        } else {
+                                                                                            { f.Name }
+                                                                                        }
+                                                                                    </div>
+                                                                                    <div class="text-xs opacity-50 font-mono">{ f.Name }</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td class="text-base-content/70 whitespace-normal">
+                                                                                { f.Description }
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <label class="relative inline-flex items-center cursor-pointer">
+                                                                                    <input type="checkbox" class="sr-only peer"
+                                                                                    checked?={ f.Enabled }
+                                                                                    hx-post={ fmt.Sprintf("/a/features/toggle?name=%s&enabled=%t", f.Name, !f.Enabled) }
+                                                                                    hx-swap="none"
+                                                                                    hx-on:click="this.checked = !this.checked; setTimeout(() => window.location.reload(), 100)"
+                                                                                    />
+                                                                                    <div class="w-11 h-6 bg-base-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                                                                    </label>
+                                                                                    <div class="text-[10px] mt-1 font-medium uppercase tracking-wider">
+                                                                                        if f.Enabled {
+                                                                                            <span class="text-success">Enabled</span>
+                                                                                            } else {
+                                                                                                <span class="text-base-content/40">Disabled</span>
+                                                                                                }
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td class="text-right text-sm">
+                                                                                            <div class="flex flex-col items-end">
+                                                                                                <span class="font-medium">{ f.UpdatedAt.Format("Jan 02, 2006") }</span>
+                                                                                                    <span class="text-xs opacity-50">{ f.UpdatedAt.Format("15:04 PM") }</span>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        }
+                                                                                    } else {
+                                                                                        <tr>
+                                                                                            <td colspan="4" class="text-center py-12">
+                                                                                                <div class="flex flex-col items-center justify-center gap-3">
+                                                                                                    <div class="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center">
+                                                                                                        <i data-lucide="alert-circle" class="w-6 h-6 text-base-content/30"></i>
+                                                                                                        </div>
+                                                                                                        <p class="text-base-content/60 font-medium">No feature flags found.</p>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                            <script>
+                                                                                lucide.createIcons();
+                                                                            </script>
+                                                                        }
+                                                                    }

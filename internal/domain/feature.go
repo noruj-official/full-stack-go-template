@@ -12,8 +12,9 @@ type FeatureFlag struct {
 }
 
 const (
-	FeatureThemeManagement = "theme_management"
-	FeatureEmailAuth       = "email_auth"
+	FeatureThemeManagement   = "theme_management"
+	FeatureEmailAuth         = "email_auth"
+	FeatureEmailPasswordAuth = "email_password_auth"
 )
 
 // FeatureConfig represents the initial configuration for a feature flag.

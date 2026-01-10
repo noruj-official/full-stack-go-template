@@ -65,7 +65,7 @@ func run() error {
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
 	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, cfg.App.URL)
+	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, cfg.App.URL, cfg.Auth.Secret)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
 	featureService := service.NewFeatureService(featureRepo)
@@ -77,7 +77,11 @@ func run() error {
 			DefaultEnabled: true,
 		},
 		domain.FeatureEmailAuth: {
-			Description:    "Enables email-based sign-in and sign-up",
+			Description:    "Enables email-based sign-in and sign-up (Magic Link)",
+			DefaultEnabled: true,
+		},
+		domain.FeatureEmailPasswordAuth: {
+			Description:    "Enables standard email and password authentication",
 			DefaultEnabled: true,
 		},
 	})
@@ -96,7 +100,7 @@ func run() error {
 
 	homeHandler := handler.NewHomeHandler(baseHandler, db)
 	userHandler := handler.NewUserHandler(baseHandler, userService, auditService)
-	authHandler := handler.NewAuthHandler(baseHandler, authService, activityService)
+	authHandler := handler.NewAuthHandler(baseHandler, authService, userService, activityService)
 	activityHandler := handler.NewActivityHandler(baseHandler, activityService)
 	profileHandler := handler.NewProfileHandler(baseHandler, userService, activityService, storageService)
 	settingsHandler := handler.NewSettingsHandler(baseHandler, userService, activityService)
@@ -133,6 +137,12 @@ func run() error {
 	mux.Handle("POST /forgot-password", authLimiter(http.HandlerFunc(authHandler.ForgotPassword)))
 	mux.Handle("GET /reset-password", authLimiter(http.HandlerFunc(authHandler.ResetPasswordPage)))
 	mux.Handle("POST /reset-password", authLimiter(http.HandlerFunc(authHandler.ResetPassword)))
+
+	// Email Auth routes
+	mux.Handle("POST /auth/email/request", authLimiter(http.HandlerFunc(authHandler.HandleEmailAuthRequest)))
+	mux.Handle("GET /auth/email/verify", authLimiter(http.HandlerFunc(authHandler.HandleEmailAuthVerify)))
+	mux.Handle("GET /auth/complete-profile", middleware.RequireAuth(http.HandlerFunc(authHandler.CompleteProfilePage)))
+	mux.Handle("POST /auth/complete-profile", middleware.RequireAuth(http.HandlerFunc(authHandler.CompleteProfile)))
 
 	// OAuth routes
 	mux.Handle("GET /auth/{provider}", authLimiter(http.HandlerFunc(authHandler.HandleOAuthLogin)))

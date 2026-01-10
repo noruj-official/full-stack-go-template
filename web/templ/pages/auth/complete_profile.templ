@@ -1,0 +1,94 @@
+package auth
+
+import (
+"github.com/noruj-official/full-stack-go-template/web/templ/components"
+"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
+)
+
+type CompleteProfilePageProps struct {
+    Error        string
+    Theme        string
+    ThemeEnabled bool
+}
+
+templ CompleteProfileForm(props CompleteProfilePageProps) {
+    <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-base-content">Complete your profile</h1>
+                <p class="text-base-content/60 mt-1">Please enter your full name to continue.</p>
+                </div>
+
+                if props.Error != "" {
+                    <div class="alert alert-error mb-6 animate-scale-in">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                            <span>{ props.Error }</span>
+                            </div>
+                        }
+
+                        <form hx-post="/auth/complete-profile" hx-target="#complete-profile-content" hx-swap="innerHTML" class="space-y-4">
+                            <!-- Name Field -->
+                                <div class="form-control w-full">
+                                    <label class="label pb-1" for="name">
+                                        <span class="label-text font-medium text-base-content">Full name</span>
+                                        </label>
+                                        <label class="input input-bordered w-full flex items-center gap-3 focus-within:input-primary transition-all duration-200">
+                                            <i data-lucide="user" class="w-5 h-5 text-base-content/40 shrink-0"></i>
+                                                <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                class="grow bg-transparent border-none focus:outline-none min-w-0"
+                                                placeholder="John Doe"
+                                                required
+                                                autocomplete="name"
+                                                autofocus
+                                                />
+                                            </label>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-full gap-2 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 mt-2">
+                                            <span class="htmx-indicator loading loading-spinner loading-sm"></span>
+                                                <i data-lucide="check" class="w-5 h-5"></i>
+                                                    Complete Signup
+                                                </button>
+                                            </form>
+    
+                                            <script>
+                                                lucide.createIcons();
+                                            </script>
+                                        }
+
+                                        templ CompleteProfilePage(props CompleteProfilePageProps) {
+                                            @layouts.Auth("Complete Profile", "Complete your profile", props.Theme, props.ThemeEnabled) {
+                                                <style>
+                                                    @keyframes float {
+                                                        0%, 100% { transform: translate(0, 0) scale(1); }
+                                                        33% { transform: translate(30px, -30px) scale(1.05); }
+                                                        66% { transform: translate(-20px, 20px) scale(0.95); }
+                                                    }
+                                                    @keyframes float-reverse {
+                                                        0%, 100% { transform: translate(0, 0) scale(1); }
+                                                        33% { transform: translate(-40px, 20px) scale(1.1); }
+                                                        66% { transform: translate(30px, -20px) scale(0.9); }
+                                                    }
+                                                    @keyframes pulse-glow {
+                                                        0%, 100% { opacity: 0.4; }
+                                                        50% { opacity: 0.7; }
+                                                    }
+                                                    .bg-blob-1 { animation: float 12s ease-in-out infinite, pulse-glow 4s ease-in-out infinite; }
+                                                    .bg-blob-2 { animation: float-reverse 15s ease-in-out infinite, pulse-glow 5s ease-in-out infinite 1s; }
+                                                    .bg-blob-3 { animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s; }
+                                                </style>
+                                                @components.Navbar(nil, false, props.ThemeEnabled)
+                                                <div class="min-h-screen flex items-center justify-center p-4 pt-20 relative overflow-hidden">
+                                                    <div class="relative w-full max-w-md z-10 py-8">
+                                                        <!-- Main Card -->
+                                                            <div class="card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-content/5">
+                                                                <div class="card-body p-6 sm:p-8" id="complete-profile-content">
+                                                                    @CompleteProfileForm(props)
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }

@@ -66,6 +66,18 @@ type AuthService interface {
 
 	// ListEnabledProviders returns a map of enabled providers.
 	ListEnabledProviders(ctx context.Context) (map[string]bool, error)
+
+	// GenerateEmailAuthToken generates a signed JWT for email authentication.
+	GenerateEmailAuthToken(email string, purpose string) (string, error)
+
+	// VerifyEmailAuthToken verifies a signed JWT and returns the claims.
+	VerifyEmailAuthToken(token string) (string, string, error)
+
+	// LoginWithEmailToken authenticates a user using a magic link token.
+	LoginWithEmailToken(ctx context.Context, token string, ip, userAgent string) (*domain.User, *domain.Session, error)
+
+	// SendEmailAuthLink sends a magic link email to the user.
+	SendEmailAuthLink(ctx context.Context, emailAddr, token string) error
 }
 
 // EmailService defines the interface for email operations.
@@ -75,6 +87,9 @@ type EmailService interface {
 
 	// SendPasswordResetEmail sends a password reset email to the user.
 	SendPasswordResetEmail(ctx context.Context, emailAddr, name, token string) error
+
+	// SendEmailAuthLink sends a magic link email to the user.
+	SendEmailAuthLink(ctx context.Context, emailAddr, token string) error
 }
 
 // FeatureService defines the interface for feature flag operations.
