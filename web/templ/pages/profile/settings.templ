@@ -5,8 +5,8 @@ import (
 "github.com/noruj-official/full-stack-go-template/web/templ/layouts"
 )
 
-templ Settings(title string, user *domain.User, theme string, themeEnabled bool, errStr string, hasPassword bool) {
-    @layouts.Base(title, "Manage your account preferences", user, true, theme, themeEnabled) {
+templ Settings(title string, user *domain.User, theme string, themeEnabled bool, oauthEnabled bool, errStr string, hasPassword bool) {
+    @layouts.Base(title, "Manage your account preferences", user, true, theme, themeEnabled, oauthEnabled) {
         <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div>

@@ -100,6 +100,9 @@ type FeatureService interface {
 	// IsEnabled checks if a feature flag is enabled.
 	IsEnabled(ctx context.Context, name string) (bool, error)
 
+	// Get retrieves a single feature flag by name.
+	Get(ctx context.Context, name string) (*domain.FeatureFlag, error)
+
 	// GetAll retrieves all feature flags.
 	GetAll(ctx context.Context) ([]*domain.FeatureFlag, error)
 

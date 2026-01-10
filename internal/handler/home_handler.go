@@ -9,6 +9,7 @@ import (
 	"github.com/noruj-official/full-stack-go-template/internal/domain"
 	"github.com/noruj-official/full-stack-go-template/internal/middleware"
 	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
+	"github.com/noruj-official/full-stack-go-template/web/templ/components"
 	"github.com/noruj-official/full-stack-go-template/web/templ/pages"
 	"github.com/noruj-official/full-stack-go-template/web/templ/pages/dashboards"
 )
@@ -31,8 +32,9 @@ func NewHomeHandler(base *Handler, db *postgres.DB) *HomeHandler {
 func (h *HomeHandler) Index(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
+	oauthEnabled := h.GetOAuthEnabled(r)
 
-	h.RenderTempl(w, r, pages.Home("Full Stack Go Template", "A professional full-stack Go application", user, theme, themeEnabled))
+	h.RenderTempl(w, r, pages.Home("Full Stack Go Template", "A professional full-stack Go application", user, theme, themeEnabled, oauthEnabled))
 }
 
 // DashboardRedirect redirects to the appropriate dashboard based on user role.
@@ -54,7 +56,8 @@ func (h *HomeHandler) DashboardRedirect(w http.ResponseWriter, r *http.Request) 
 func (h *HomeHandler) UserDashboard(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, dashboards.UserDashboard("Dashboard", user, theme, themeEnabled))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, dashboards.UserDashboard("Dashboard", user, theme, themeEnabled, oauthEnabled))
 }
 
 // AdminDashboard renders the admin dashboard page.
@@ -88,7 +91,8 @@ func (h *HomeHandler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, dashboards.AdminDashboard("Admin Dashboard", userCount, recent, user, theme, themeEnabled))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, dashboards.AdminDashboard("Admin Dashboard", userCount, recent, user, theme, themeEnabled, oauthEnabled))
 }
 
 // SuperAdminDashboard renders the super admin dashboard page.
@@ -145,7 +149,8 @@ func (h *HomeHandler) SuperAdminDashboard(w http.ResponseWriter, r *http.Request
 
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, dashboards.SuperAdminDashboard("Super Admin Dashboard", userCount, adminCount, activeSessions, recent, user, theme, themeEnabled))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, dashboards.SuperAdminDashboard("Super Admin Dashboard", userCount, adminCount, activeSessions, recent, user, theme, themeEnabled, oauthEnabled))
 }
 
 // HealthCheck returns the health status of the application.
@@ -189,5 +194,17 @@ func (h *HomeHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, pages.NotFound("Page Not Found", "The page you requested was not found.", user, theme, themeEnabled))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, pages.NotFound("Page Not Found", "The page you requested was not found.", user, theme, themeEnabled, oauthEnabled))
+}
+
+// Sidebar renders the sidebar component independently.
+func (h *HomeHandler) Sidebar(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	_ = user // user is used
+	// theme not needed for Sidebar component as per signature
+	oauthEnabled := h.GetOAuthEnabled(r)
+	path := r.URL.Query().Get("path") // Current path to highlight active item
+
+	h.RenderTempl(w, r, components.Sidebar(user, "", oauthEnabled, path))
 }

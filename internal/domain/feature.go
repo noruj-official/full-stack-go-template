@@ -16,6 +16,7 @@ const (
 	FeatureEmailAuth         = "email_auth"
 	FeatureEmailPasswordAuth = "email_password_auth"
 	FeatureEmailVerification = "email_verification"
+	FeatureOAuth             = "oauth"
 )
 
 // FeatureConfig represents the initial configuration for a feature flag.

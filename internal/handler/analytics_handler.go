@@ -84,6 +84,7 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 	}
 
 	theme, themeEnabled := h.GetTheme(r)
+	oauthEnabled := h.GetOAuthEnabled(r)
 
 	props := admin.AdminAnalyticsProps{
 		User:          middleware.GetUserFromContext(r.Context()),
@@ -93,6 +94,7 @@ func (h *AnalyticsHandler) AdminAnalytics(w http.ResponseWriter, r *http.Request
 		GrowthData:    growthData,
 		Theme:         theme,
 		ThemeEnabled:  themeEnabled,
+		OAuthEnabled:  oauthEnabled,
 	}
 
 	admin.AdminAnalytics(props).Render(r.Context(), w)
@@ -166,6 +168,7 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	oauthEnabled := h.GetOAuthEnabled(r)
 	// Otherwise, render the full page
 	props := admin.SystemActivityProps{
 		User:         middleware.GetUserFromContext(r.Context()),
@@ -174,6 +177,7 @@ func (h *AnalyticsHandler) SystemActivity(w http.ResponseWriter, r *http.Request
 		HasMore:      hasMore,
 		Theme:        theme,
 		ThemeEnabled: themeEnabled,
+		OAuthEnabled: oauthEnabled,
 	}
 
 	admin.SystemActivity(props).Render(r.Context(), w)

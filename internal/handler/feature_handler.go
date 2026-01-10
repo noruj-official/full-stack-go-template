@@ -34,9 +34,10 @@ func (h *FeatureHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
+	oauthEnabled := h.GetOAuthEnabled(r)
 	showSidebar := true
 
-	h.RenderTempl(w, r, featuresPage.List("Feature Flags", "Manage application feature flags", user, showSidebar, theme, themeEnabled, features))
+	h.RenderTempl(w, r, featuresPage.List("Feature Flags", "Manage application feature flags", user, showSidebar, theme, themeEnabled, oauthEnabled, features))
 }
 
 // Toggle handles the HTMX toggle of a feature flag.
@@ -65,21 +66,14 @@ func (h *FeatureHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Retrieve updated flag to render row
-	// Retrieve updated flag to render row
-	// feature, _ := h.featureService.IsEnabled(r.Context(), name)
-	// We might need the full object to render the row, but IsEnabled only returns bool.
-	// Let's refactor IsEnabled or just construct a temporary object or fetch via repository in service if needed.
-	// But wait, we have GetAll. We can fetch specific one if we exposed it.
-	// actually for a toggle, we usually just return the new switch HTML or row.
-	// For simplicity, let's just re-render the list or row if we had a Get(id) in service.
-	// IsEnabled does DB call. Let's add Get to service? No, IsEnabled is fine for logic.
-	// Let's just assume success and return success message or updated switch.
-
-	// Since we don't have Get(name) exposed in service interface publically (it is in repo),
-	// let's just rely on the fact we know the new state.
-
-	// Better yet, let's respond with the updated toggle switch component.
-	// But for now, let's just redirect or return OK if HTMX.
+	feature, err := h.featureService.Get(r.Context(), name)
+	if err != nil {
+		// Log error but we already toggled successfully so...
+		// Ideally we shouldn't fail here.
+		// If we can't get it, we could just return OK, but the UI might break.
+		http.Error(w, "Failed to retrieve updated feature", http.StatusInternalServerError)
+		return
+	}
 
 	// Log audit
 	if admin := middleware.GetUserFromContext(r.Context()); admin != nil {
@@ -91,5 +85,6 @@ func (h *FeatureHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("HX-Trigger", "featureToggled")
-	w.WriteHeader(http.StatusOK)
+	// Render the updated row
+	h.RenderTempl(w, r, featuresPage.FeatureRow(feature))
 }

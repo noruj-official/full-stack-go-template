@@ -37,8 +37,9 @@ func (h *AdminOAuthHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
+	oauthEnabled := h.GetOAuthEnabled(r)
 
-	h.RenderTempl(w, r, adminPage.OAuthSettings(user, theme, themeEnabled, providers, h.appURL))
+	h.RenderTempl(w, r, adminPage.OAuthSettings(user, theme, themeEnabled, oauthEnabled, providers, h.appURL))
 }
 
 // Update handles the update of an OAuth provider.

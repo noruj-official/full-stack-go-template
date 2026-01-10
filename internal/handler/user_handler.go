@@ -45,7 +45,9 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	theme, themeEnabled := h.GetTheme(r)
 	showSidebar := true
 
-	h.RenderTempl(w, r, usersPage.List("Users", "Manage your application users", user, showSidebar, theme, themeEnabled, users, total, page, int((total+9)/10)))
+	oauthEnabled := h.GetOAuthEnabled(r)
+
+	h.RenderTempl(w, r, usersPage.List("Users", "Manage your application users", user, showSidebar, theme, themeEnabled, oauthEnabled, users, total, page, int((total+9)/10)))
 }
 
 // Create handles user creation form display and submission.
@@ -53,7 +55,8 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		user := middleware.GetUserFromContext(r.Context())
 		theme, themeEnabled := h.GetTheme(r)
-		h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, themeEnabled, nil, ""))
+		oauthEnabled := h.GetOAuthEnabled(r)
+		h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, themeEnabled, oauthEnabled, nil, ""))
 		return
 	}
 
@@ -111,7 +114,8 @@ func (h *UserHandler) renderCreateForm(w http.ResponseWriter, r *http.Request, i
 	// Otherwise render the full create page
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, themeEnabled, input, errMsg))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, usersPage.Create("Create User", "Add a new user to your application", user, true, theme, themeEnabled, oauthEnabled, input, errMsg))
 }
 
 // Edit handles user edit form display and submission.
@@ -136,7 +140,8 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		currentUser := middleware.GetUserFromContext(r.Context())
 		theme, themeEnabled := h.GetTheme(r)
-		h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, themeEnabled, user, ""))
+		oauthEnabled := h.GetOAuthEnabled(r)
+		h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, themeEnabled, oauthEnabled, user, ""))
 		return
 	}
 
@@ -199,7 +204,8 @@ func (h *UserHandler) renderEditForm(w http.ResponseWriter, r *http.Request, tar
 
 	currentUser := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, themeEnabled, targetUser, errMsg))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, usersPage.Edit("Edit User", "Update user information", currentUser, true, theme, themeEnabled, oauthEnabled, targetUser, errMsg))
 }
 
 // Delete handles user deletion.

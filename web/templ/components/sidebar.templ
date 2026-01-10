@@ -2,10 +2,11 @@ package components
 
 import (
 "fmt"
+"strings"
 "github.com/noruj-official/full-stack-go-template/internal/domain"
 )
 
-templ Sidebar(user *domain.User, title string) {
+templ Sidebar(user *domain.User, title string, oauthEnabled bool, currentPath string) {
     <!-- Mobile sidebar overlay -->
         <div
         x-show="sidebarOpen"
@@ -21,6 +22,10 @@ templ Sidebar(user *domain.User, title string) {
         ></div>
         <!-- Sidebar -->
             <aside
+            hx-get="/components/sidebar"
+            hx-trigger="featureToggled from:body"
+            hx-swap="outerHTML"
+            hx-vals='js:{path: window.location.pathname}'
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             class="fixed inset-y-0 left-0 z-40 w-64 bg-base-100/90 backdrop-blur-xl border-r border-base-200/80 transform transition-transform duration-300 ease-out"
             >
@@ -36,13 +41,13 @@ templ Sidebar(user *domain.User, title string) {
                                 <!-- Main Section (Everyone) -->
                                     <li class="menu-title text-base-content/60 uppercase tracking-wider">Main</li>
                                         <li>
-                                            <a href="/" class={ templ.KV("active", title == "Full Stack Go Template") }>
+                                            <a href="/" class={ templ.KV("active", title == "Full Stack Go Template" || currentPath == "/") }>
                                                 <i data-lucide="home" class="w-5 h-5"></i>
                                                     Home
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="/dashboard" class={ templ.KV("active", title == "Dashboard" || title == "Admin Dashboard" || title == "Super Admin Dashboard") }>
+                                                <a href="/dashboard" class={ templ.KV("active", title == "Dashboard" || title == "Admin Dashboard" || title == "Super Admin Dashboard" || strings.HasSuffix(currentPath, "dashboard")) }>
                                                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                                                         Dashboard
                                                     </a>
@@ -51,13 +56,13 @@ templ Sidebar(user *domain.User, title string) {
                                                     if user != nil {
                                                         <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Personal</li>
                                                             <li>
-                                                                <a href="/u/activity" class={ templ.KV("active", title == "Activity Log") }>
+                                                                <a href="/u/activity" class={ templ.KV("active", title == "Activity Log" || currentPath == "/u/activity") }>
                                                                     <i data-lucide="history" class="w-5 h-5"></i>
                                                                         Activity Log
                                                                     </a>
                                                                 </li>
                                                                 <li>
-                                                                    <a href="/u/settings" class={ templ.KV("active", title == "Settings") }>
+                                                                    <a href="/u/settings" class={ templ.KV("active", title == "Settings" || currentPath == "/u/settings") }>
                                                                         <i data-lucide="settings" class="w-5 h-5"></i>
                                                                             Settings
                                                                         </a>
@@ -67,47 +72,49 @@ templ Sidebar(user *domain.User, title string) {
                                                                     if user != nil && user.IsAdmin() {
                                                                         <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Administration</li>
                                                                             <li>
-                                                                                <a href="/a/users" class={ templ.KV("active", title == "Users") }>
+                                                                                <a href="/a/users" class={ templ.KV("active", title == "Users" || strings.HasPrefix(currentPath, "/a/users")) }>
                                                                                     <i data-lucide="users" class="w-5 h-5"></i>
                                                                                         User Management
                                                                                     </a>
                                                                                 </li>
                                                                                 <li>
-                                                                                    <a href="/a/analytics" class={ templ.KV("active", title == "Analytics") }>
+                                                                                    <a href="/a/analytics" class={ templ.KV("active", title == "Analytics" || currentPath == "/a/analytics") }>
                                                                                         <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                                                                                             Analytics & Reports
                                                                                         </a>
                                                                                     </li>
                                                                                     <li>
-                                                                                        <a href="/a/activity" class={ templ.KV("active", title == "System Activity") }>
+                                                                                        <a href="/a/activity" class={ templ.KV("active", title == "System Activity" || currentPath == "/a/activity") }>
                                                                                             <i data-lucide="activity" class="w-5 h-5"></i>
                                                                                                 System Activity
                                                                                             </a>
                                                                                         </li>
-                                                                                        <li>
-                                                                                            <a href="/a/oauth" class={ templ.KV("active", title == "OAuth Settings") }>
-                                                                                                <i data-lucide="key" class="w-5 h-5"></i>
-                                                                                                    OAuth Settings
-                                                                                                </a>
-                                                                                            </li>
+                                                                                        if oauthEnabled {
+                                                                                            <li>
+                                                                                                <a href="/a/oauth" class={ templ.KV("active", title == "OAuth Settings" || currentPath == "/a/oauth") }>
+                                                                                                    <i data-lucide="key" class="w-5 h-5"></i>
+                                                                                                        OAuth Settings
+                                                                                                    </a>
+                                                                                                </li>
+                                                                                            }
                                                                                         }
                                                                                         <!-- Super Admin Section (Super Admin Only) -->
                                                                                             if user != nil && user.IsSuperAdmin() {
                                                                                                 <li class="menu-title mt-6 text-base-content/60 uppercase tracking-wider">Super Admin</li>
                                                                                                     <li>
-                                                                                                        <a href="/s/audit" class={ templ.KV("active", title == "Audit Logs") }>
+                                                                                                        <a href="/s/audit" class={ templ.KV("active", title == "Audit Logs" || currentPath == "/s/audit") }>
                                                                                                             <i data-lucide="file-text" class="w-5 h-5"></i>
                                                                                                                 Audit Logs
                                                                                                             </a>
                                                                                                         </li>
                                                                                                         <li>
-                                                                                                            <a href="/s/system" class={ templ.KV("active", title == "System Health") }>
+                                                                                                            <a href="/s/system" class={ templ.KV("active", title == "System Health" || currentPath == "/s/system") }>
                                                                                                                 <i data-lucide="server" class="w-5 h-5"></i>
                                                                                                                     System Health
                                                                                                                 </a>
                                                                                                             </li>
                                                                                                             <li>
-                                                                                                                <a href="/a/features" class={ templ.KV("active", title == "Feature Flags") }>
+                                                                                                                <a href="/a/features" class={ templ.KV("active", title == "Feature Flags" || currentPath == "/a/features") }>
                                                                                                                     <i data-lucide="toggle-left" class="w-5 h-5"></i>
                                                                                                                         Feature Flags
                                                                                                                     </a>

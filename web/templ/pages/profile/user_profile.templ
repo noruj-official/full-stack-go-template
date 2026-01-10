@@ -12,6 +12,7 @@ type UserProfileProps struct {
     Message     string // For success messages
     Theme       string
     ThemeEnabled bool
+    OAuthEnabled bool
 }
 
 templ ProfileSuccess(message string) {
@@ -64,7 +65,7 @@ templ ProfileSuccess(message string) {
                             }
 
                             templ UserProfile(props UserProfileProps) {
-                                @layouts.Base("Profile", "Manage your profile information and photo", props.User, true, props.Theme, props.ThemeEnabled) {
+                                @layouts.Base("Profile", "Manage your profile information and photo", props.User, true, props.Theme, props.ThemeEnabled, props.OAuthEnabled) {
                                     <!-- Profile Header -->
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                                             <div>

@@ -38,7 +38,8 @@ func (h *SettingsHandler) Settings(w http.ResponseWriter, r *http.Request) {
 	hasPassword := user.PasswordHash != ""
 
 	if r.Method == http.MethodGet {
-		h.RenderTempl(w, r, profile.Settings("Settings", user, theme, themeEnabled, "", hasPassword))
+		oauthEnabled := h.GetOAuthEnabled(r)
+		h.RenderTempl(w, r, profile.Settings("Settings", user, theme, themeEnabled, oauthEnabled, "", hasPassword))
 		return
 	}
 
@@ -94,7 +95,8 @@ func (h *SettingsHandler) renderSettingsError(w http.ResponseWriter, r *http.Req
 	// For HTMX requests, this will swap the target (e.g., body or form container)
 	// For full page loads, this renders the full HTML
 	hasPassword := user.PasswordHash != ""
-	h.RenderTempl(w, r, profile.Settings("Settings", user, theme, themeEnabled, errMsg, hasPassword))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, profile.Settings("Settings", user, theme, themeEnabled, oauthEnabled, errMsg, hasPassword))
 }
 
 // UpdatePassword handles password update requests.

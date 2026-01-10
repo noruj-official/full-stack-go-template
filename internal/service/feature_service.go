@@ -17,6 +17,18 @@ func NewFeatureService(repo *postgres.FeatureRepository) FeatureService {
 	return &featureService{repo: repo}
 }
 
+// Get retrieves a single feature flag by name.
+func (s *featureService) Get(ctx context.Context, name string) (*domain.FeatureFlag, error) {
+	feature, err := s.repo.Get(ctx, name)
+	if err != nil {
+		if err == domain.ErrNotFound {
+			return nil, err
+		}
+		return nil, err
+	}
+	return feature, nil
+}
+
 // IsEnabled checks if a feature flag is enabled.
 func (s *featureService) IsEnabled(ctx context.Context, name string) (bool, error) {
 	feature, err := s.repo.Get(ctx, name)

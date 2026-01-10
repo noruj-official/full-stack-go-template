@@ -1,135 +1,135 @@
 package dashboards
 
 import (
-	"fmt"
-	"github.com/noruj-official/full-stack-go-template/internal/domain"
-	"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
+"fmt"
+"github.com/noruj-official/full-stack-go-template/internal/domain"
+"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
 )
 
-templ AdminDashboard(title string, userCount int64, recentUsers []map[string]string, user *domain.User, theme string, themeEnabled bool) {
-	@layouts.Base(title, "Admin Dashboard", user, true, theme, themeEnabled) {
-		<!-- Admin Dashboard Header -->
-		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-			<div>
-				<h1 class="text-2xl font-bold text-base-content">Admin Dashboard</h1>
-				<p class="text-base-content/70">Manage users and monitor activity</p>
-			</div>
-			<div class="flex gap-3">
-				<a href="/a/users/create" class="btn btn-primary">
-					<i data-lucide="plus" class="w-4 h-4"></i>
-					New User
-				</a>
-			</div>
-		</div>
+templ AdminDashboard(title string, userCount int64, recentUsers []map[string]string, user *domain.User, theme string, themeEnabled bool, oauthEnabled bool) {
+    @layouts.Base(title, "Admin Dashboard", user, true, theme, themeEnabled, oauthEnabled) {
+        <!-- Admin Dashboard Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-base-content">Admin Dashboard</h1>
+                        <p class="text-base-content/70">Manage users and monitor activity</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="/a/users/create" class="btn btn-primary">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                    New User
+                                </a>
+                            </div>
+                        </div>
 
-		<!-- Stats Cards -->
-		<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-			<div class="card p-6 bg-base-100 shadow-sm border border-base-200">
-				<div class="flex items-center justify-between mb-4">
-					<div class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
-						<i data-lucide="users" class="w-5 h-5 text-info"></i>
-					</div>
-				</div>
-				<p class="text-2xl font-bold text-base-content">{ fmt.Sprintf("%d", userCount) }</p>
-				<p class="text-sm text-base-content/70">Total Users</p>
-			</div>
+                        <!-- Stats Cards -->
+                            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+                                            <i data-lucide="users" class="w-5 h-5 text-info"></i>
+                                            </div>
+                                        </div>
+                                        <p class="text-2xl font-bold text-base-content">{ fmt.Sprintf("%d", userCount) }</p>
+                                            <p class="text-sm text-base-content/70">Total Users</p>
+                                            </div>
 
-			<div class="card p-6 bg-base-100 shadow-sm border border-base-200">
-				<div class="flex items-center justify-between mb-4">
-					<div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-						<i data-lucide="trending-up" class="w-5 h-5 text-success"></i>
-					</div>
-				</div>
-				<p class="text-2xl font-bold text-base-content">-</p>
-				<p class="text-sm text-base-content/70">Active Users</p>
-			</div>
-		</div>
+                                            <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+                                                <div class="flex items-center justify-between mb-4">
+                                                    <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                                                        <i data-lucide="trending-up" class="w-5 h-5 text-success"></i>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-2xl font-bold text-base-content">-</p>
+                                                        <p class="text-sm text-base-content/70">Active Users</p>
+                                                        </div>
+                                                    </div>
 
-		<!-- Content Grid -->
-		<div class="grid lg:grid-cols-3 gap-6">
-			<!-- Recent Activity -->
-			<div class="lg:col-span-2 card bg-base-100 shadow-sm border border-base-200">
-				<div class="card-header flex items-center justify-between border-b border-base-200 p-4">
-					<h2 class="text-lg font-semibold text-base-content">Recent Activity</h2>
-					<a href="/a/users" class="btn btn-ghost btn-sm text-sm">View All</a>
-				</div>
-				<div class="card-body p-0">
-					<div class="divide-y divide-base-200">
-						if len(recentUsers) > 0 {
-							for _, u := range recentUsers {
-								<div class="flex items-center gap-4 p-4 hover:bg-base-200/50 transition-colors">
-									<div
-										class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium">
-										{ string(u["Name"][0]) }
-									</div>
-									<div class="flex-1 min-w-0">
-										<p class="text-sm font-medium text-base-content">{ u["Name"] } signed up</p>
-										<p class="text-xs text-base-content/70">{ u["CreatedAgo"] }</p>
-									</div>
-									<span class="badge badge-success badge-sm">New</span>
-								</div>
-							}
-						} else {
-							<div class="p-4 text-sm text-base-content/70">No recent activity yet.</div>
-						}
-					</div>
-				</div>
-			</div>
+                                                    <!-- Content Grid -->
+                                                        <div class="grid lg:grid-cols-3 gap-6">
+                                                            <!-- Recent Activity -->
+                                                                <div class="lg:col-span-2 card bg-base-100 shadow-sm border border-base-200">
+                                                                    <div class="card-header flex items-center justify-between border-b border-base-200 p-4">
+                                                                        <h2 class="text-lg font-semibold text-base-content">Recent Activity</h2>
+                                                                            <a href="/a/users" class="btn btn-ghost btn-sm text-sm">View All</a>
+                                                                            </div>
+                                                                            <div class="card-body p-0">
+                                                                                <div class="divide-y divide-base-200">
+                                                                                    if len(recentUsers) > 0 {
+                                                                                        for _, u := range recentUsers {
+                                                                                            <div class="flex items-center gap-4 p-4 hover:bg-base-200/50 transition-colors">
+                                                                                                <div
+                                                                                                class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium">
+                                                                                                { string(u["Name"][0]) }
+                                                                                            </div>
+                                                                                            <div class="flex-1 min-w-0">
+                                                                                                <p class="text-sm font-medium text-base-content">{ u["Name"] } signed up</p>
+                                                                                                    <p class="text-xs text-base-content/70">{ u["CreatedAgo"] }</p>
+                                                                                                    </div>
+                                                                                                    <span class="badge badge-success badge-sm">New</span>
+                                                                                                    </div>
+                                                                                                }
+                                                                                            } else {
+                                                                                                <div class="p-4 text-sm text-base-content/70">No recent activity yet.</div>
+                                                                                                }
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
 
-			<!-- Quick Actions -->
-			<div class="card bg-base-100 shadow-sm border border-base-200">
-				<div class="card-header border-b border-base-200 p-4">
-					<h2 class="text-lg font-semibold text-base-content">Quick Actions</h2>
-				</div>
-				<div class="card-body p-4 space-y-3">
-					<a href="/a/users/create"
-						class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
-						<div
-							class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-							<i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>
-						</div>
-						<div>
-							<p class="font-medium text-base-content">Add User</p>
-							<p class="text-xs text-base-content/70">Create new account</p>
-						</div>
-					</a>
+                                                                                    <!-- Quick Actions -->
+                                                                                        <div class="card bg-base-100 shadow-sm border border-base-200">
+                                                                                            <div class="card-header border-b border-base-200 p-4">
+                                                                                                <h2 class="text-lg font-semibold text-base-content">Quick Actions</h2>
+                                                                                                </div>
+                                                                                                <div class="card-body p-4 space-y-3">
+                                                                                                    <a href="/a/users/create"
+                                                                                                    class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                                                                                                    <div
+                                                                                                    class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                                                                    <i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>
+                                                                                                    </div>
+                                                                                                    <div>
+                                                                                                        <p class="font-medium text-base-content">Add User</p>
+                                                                                                            <p class="text-xs text-base-content/70">Create new account</p>
+                                                                                                            </div>
+                                                                                                        </a>
 
-					<a href="/a/users" class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
-						<div
-							class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-							<i data-lucide="list" class="w-5 h-5 text-success"></i>
-						</div>
-						<div>
-							<p class="font-medium text-base-content">View Users</p>
-							<p class="text-xs text-base-content/70">Manage accounts</p>
-						</div>
-					</a>
+                                                                                                        <a href="/a/users" class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                                                                                                            <div
+                                                                                                            class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                                                                            <i data-lucide="list" class="w-5 h-5 text-success"></i>
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <p class="font-medium text-base-content">View Users</p>
+                                                                                                                    <p class="text-xs text-base-content/70">Manage accounts</p>
+                                                                                                                    </div>
+                                                                                                                </a>
 
-					<a href="/a/analytics"
-						class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
-						<div
-							class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-							<i data-lucide="bar-chart-2" class="w-5 h-5 text-info"></i>
-						</div>
-						<div>
-							<p class="font-medium text-base-content">Analytics</p>
-							<p class="text-xs text-base-content/70">View detailed reports</p>
-						</div>
-					</a>
+                                                                                                                <a href="/a/analytics"
+                                                                                                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                                                                                                                <div
+                                                                                                                class="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                                                                                <i data-lucide="bar-chart-2" class="w-5 h-5 text-info"></i>
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    <p class="font-medium text-base-content">Analytics</p>
+                                                                                                                        <p class="text-xs text-base-content/70">View detailed reports</p>
+                                                                                                                        </div>
+                                                                                                                    </a>
 
-					<a href="/a/activity"
-						class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
-						<div
-							class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-							<i data-lucide="activity" class="w-5 h-5 text-warning"></i>
-						</div>
-						<div>
-							<p class="font-medium text-base-content">System Activity</p>
-							<p class="text-xs text-base-content/70">Monitor all activities</p>
-						</div>
-					</a>
-				</div>
-			</div>
-		</div>
-	}
-}
+                                                                                                                    <a href="/a/activity"
+                                                                                                                    class="flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors group">
+                                                                                                                    <div
+                                                                                                                    class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                                                                                    <i data-lucide="activity" class="w-5 h-5 text-warning"></i>
+                                                                                                                    </div>
+                                                                                                                    <div>
+                                                                                                                        <p class="font-medium text-base-content">System Activity</p>
+                                                                                                                            <p class="text-xs text-base-content/70">Monitor all activities</p>
+                                                                                                                            </div>
+                                                                                                                        </a>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        }
+                                                                                                    }

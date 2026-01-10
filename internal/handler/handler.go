@@ -59,6 +59,15 @@ func (h *Handler) GetTheme(r *http.Request) (string, bool) {
 	return theme, true
 }
 
+// GetOAuthEnabled checks if the OAuth feature is enabled.
+func (h *Handler) GetOAuthEnabled(r *http.Request) bool {
+	enabled, err := h.featureService.IsEnabled(r.Context(), "oauth")
+	if err != nil {
+		return false // Default to disabled if check fails
+	}
+	return enabled
+}
+
 // JSON sends a JSON response.
 func (h *Handler) JSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")

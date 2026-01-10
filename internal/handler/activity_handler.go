@@ -57,7 +57,8 @@ func (h *ActivityHandler) UserActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	theme, themeEnabled := h.GetTheme(r)
-	h.RenderTempl(w, r, profile.UserActivity("Activity Log", formattedActivities, user, theme, themeEnabled))
+	oauthEnabled := h.GetOAuthEnabled(r)
+	h.RenderTempl(w, r, profile.UserActivity("Activity Log", formattedActivities, user, theme, themeEnabled, oauthEnabled))
 }
 
 // formatTimeAgo formats a time as a relative time string.

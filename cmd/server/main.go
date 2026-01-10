@@ -88,6 +88,10 @@ func run() error {
 			Description:    "Enables email verification for new signups",
 			DefaultEnabled: true,
 		},
+		domain.FeatureOAuth: {
+			Description:    "Enables OAuth authentication with third-party providers",
+			DefaultEnabled: true,
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to sync feature flags: %w", err)
@@ -165,6 +169,7 @@ func run() error {
 
 	// User routes (authenticated users)
 	userOnly := middleware.RequireAuth
+	mux.Handle("GET /components/sidebar", userOnly(http.HandlerFunc(homeHandler.Sidebar)))
 	mux.Handle("GET /u/activity", userOnly(http.HandlerFunc(activityHandler.UserActivity)))
 	mux.Handle("GET /u/profile", userOnly(http.HandlerFunc(profileHandler.ProfilePage)))
 	mux.Handle("POST /u/profile", userOnly(http.HandlerFunc(profileHandler.UpdateProfile)))

@@ -378,6 +378,12 @@ func generateToken() (string, error) {
 
 // GetOAuthLoginURL generates a login URL for the specified provider.
 func (s *authService) GetOAuthLoginURL(ctx context.Context, providerName domain.OAuthProviderType, state string) (string, error) {
+	// Check global OAuth feature flag
+	oauthEnabled, err := s.featureService.IsEnabled(ctx, domain.FeatureOAuth)
+	if err == nil && !oauthEnabled {
+		return "", fmt.Errorf("OAuth authentication is currently disabled")
+	}
+
 	provider, err := s.oauthRepo.GetProvider(ctx, providerName)
 	if err != nil {
 		return "", err
@@ -405,6 +411,12 @@ func (s *authService) GetOAuthLoginURL(ctx context.Context, providerName domain.
 
 // LoginWithOAuth handles the OAuth callback and logs in the user.
 func (s *authService) LoginWithOAuth(ctx context.Context, providerName domain.OAuthProviderType, code, state string, ip, userAgent string) (*domain.User, *domain.Session, error) {
+	// Check global OAuth feature flag
+	oauthEnabled, err := s.featureService.IsEnabled(ctx, domain.FeatureOAuth)
+	if err == nil && !oauthEnabled {
+		return nil, nil, fmt.Errorf("OAuth authentication is currently disabled")
+	}
+
 	provider, err := s.oauthRepo.GetProvider(ctx, providerName)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get provider: %w", err)
@@ -550,6 +562,12 @@ func (s *authService) LoginWithOAuth(ctx context.Context, providerName domain.OA
 
 // ListEnabledProviders returns a map of enabled providers.
 func (s *authService) ListEnabledProviders(ctx context.Context) (map[string]bool, error) {
+	// Check global OAuth feature flag
+	oauthEnabled, err := s.featureService.IsEnabled(ctx, domain.FeatureOAuth)
+	if err != nil || !oauthEnabled {
+		return make(map[string]bool), nil // Return empty map if OAuth is disabled
+	}
+
 	providers, err := s.oauthRepo.ListProviders(ctx)
 	if err != nil {
 		return nil, err

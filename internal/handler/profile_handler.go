@@ -40,10 +40,12 @@ func (h *ProfileHandler) ProfilePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	theme, themeEnabled := h.GetTheme(r)
+	oauthEnabled := h.GetOAuthEnabled(r)
 	props := profile.UserProfileProps{
 		User:         user,
 		Theme:        theme,
 		ThemeEnabled: themeEnabled,
+		OAuthEnabled: oauthEnabled,
 	}
 
 	profile.UserProfile(props).Render(r.Context(), w)
@@ -228,11 +230,13 @@ func (h *ProfileHandler) serveProfileImage(w http.ResponseWriter, r *http.Reques
 func (h *ProfileHandler) renderProfileError(w http.ResponseWriter, r *http.Request, errMsg string) {
 	user := middleware.GetUserFromContext(r.Context())
 	theme, themeEnabled := h.GetTheme(r)
+	oauthEnabled := h.GetOAuthEnabled(r)
 	props := profile.UserProfileProps{
 		User:         user,
 		Error:        errMsg,
 		Theme:        theme,
 		ThemeEnabled: themeEnabled,
+		OAuthEnabled: oauthEnabled,
 	}
 
 	if isHTMXRequest(r) {
