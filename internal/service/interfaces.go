@@ -25,6 +25,9 @@ type UserService interface {
 	// UpdateStatus updates the status of a user.
 	UpdateStatus(ctx context.Context, id uuid.UUID, status domain.UserStatus) error
 
+	// UpdatePassword updates the user's password.
+	UpdatePassword(ctx context.Context, id uuid.UUID, input *domain.UpdatePasswordInput) error
+
 	// DeleteUser removes a user.
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 }

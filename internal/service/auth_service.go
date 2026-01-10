@@ -25,18 +25,20 @@ type authService struct {
 	passwordResetRepo repository.PasswordResetRepository
 	oauthRepo         repository.OAuthRepository
 	emailService      EmailService
+	featureService    FeatureService
 	appURL            string
 	authSecret        string
 }
 
 // NewAuthService creates a new auth service.
-func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, passwordResetRepo repository.PasswordResetRepository, oauthRepo repository.OAuthRepository, emailService EmailService, appURL string, authSecret string) AuthService {
+func NewAuthService(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, passwordResetRepo repository.PasswordResetRepository, oauthRepo repository.OAuthRepository, emailService EmailService, featureService FeatureService, appURL string, authSecret string) AuthService {
 	return &authService{
 		userRepo:          userRepo,
 		sessionRepo:       sessionRepo,
 		passwordResetRepo: passwordResetRepo,
 		oauthRepo:         oauthRepo,
 		emailService:      emailService,
+		featureService:    featureService,
 		appURL:            appURL,
 		authSecret:        authSecret,
 	}
@@ -72,26 +74,36 @@ func (s *authService) Register(ctx context.Context, input *domain.RegisterInput,
 	user := domain.NewUser(input.Email, input.Name, passwordHash, role)
 
 	// Generate verification token
-	token, err := generateToken()
-	if err != nil {
-		return nil, err
+	var token string
+	emailVerificationEnabled, _ := s.featureService.IsEnabled(ctx, domain.FeatureEmailVerification)
+
+	if emailVerificationEnabled {
+		token, err = generateToken()
+		if err != nil {
+			return nil, err
+		}
+		user.VerificationToken = &token
+		expiresAt := time.Now().Add(24 * time.Hour)
+		user.VerificationTokenExpiresAt = &expiresAt
+	} else {
+		// Auto-verify if validation is disabled
+		user.EmailVerified = true
 	}
-	user.VerificationToken = &token
-	expiresAt := time.Now().Add(24 * time.Hour)
-	user.VerificationTokenExpiresAt = &expiresAt
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
-	// Send verification email
-	go func() {
-		sendCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		if err := s.emailService.SendVerificationEmail(sendCtx, user.Email, user.Name, *user.VerificationToken); err != nil {
-			fmt.Printf("Failed to send verification email: %v\n", err)
-		}
-	}()
+	// Send verification email only if enabled
+	if emailVerificationEnabled {
+		go func() {
+			sendCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			if err := s.emailService.SendVerificationEmail(sendCtx, user.Email, user.Name, *user.VerificationToken); err != nil {
+				fmt.Printf("Failed to send verification email: %v\n", err)
+			}
+		}()
+	}
 
 	return user, nil
 }
@@ -119,32 +131,40 @@ func (s *authService) Login(ctx context.Context, input *domain.LoginInput, ip, u
 
 	// Check if email is verified
 	if !user.EmailVerified {
-		// Generate new verification token
-		token, err := generateToken()
-		if err != nil {
-			return nil, nil, err
-		}
-		user.VerificationToken = &token
-		expiresAt := time.Now().Add(24 * time.Hour)
-		user.VerificationTokenExpiresAt = &expiresAt
-
-		// Update user with new token
-		if err := s.userRepo.Update(ctx, user); err != nil {
-			return nil, nil, err
-		}
-
-		// Send verification email
-		// Use a goroutine so we don't block the login response
-		go func() {
-			sendCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-			if err := s.emailService.SendVerificationEmail(sendCtx, user.Email, user.Name, token); err != nil {
-				// Log error (in a real app, use a logger)
-				fmt.Printf("Failed to send verification email: %v\n", err)
+		// Check if verification is enforced
+		emailVerificationEnabled, err := s.featureService.IsEnabled(ctx, domain.FeatureEmailVerification)
+		if err == nil && !emailVerificationEnabled {
+			// Verification is disabled, allow login by continuing
+			// We don't return an error here, just continue to create the session
+		} else if err != nil || emailVerificationEnabled {
+			// Verification is enabled or we couldn't check the feature flag
+			// Generate new verification token
+			token, err := generateToken()
+			if err != nil {
+				return nil, nil, err
 			}
-		}()
+			user.VerificationToken = &token
+			expiresAt := time.Now().Add(24 * time.Hour)
+			user.VerificationTokenExpiresAt = &expiresAt
 
-		return nil, nil, domain.ErrEmailNotVerified
+			// Update user with new token
+			if err := s.userRepo.Update(ctx, user); err != nil {
+				return nil, nil, err
+			}
+
+			// Send verification email
+			// Use a goroutine so we don't block the login response
+			go func() {
+				sendCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				if err := s.emailService.SendVerificationEmail(sendCtx, user.Email, user.Name, token); err != nil {
+					// Log error (in a real app, use a logger)
+					fmt.Printf("Failed to send verification email: %v\n", err)
+				}
+			}()
+
+			return nil, nil, domain.ErrEmailNotVerified
+		}
 	}
 
 	// Create session

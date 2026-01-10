@@ -128,3 +128,36 @@ func (s *userService) UpdateStatus(ctx context.Context, id uuid.UUID, status dom
 func (s *userService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return s.userRepo.Delete(ctx, id)
 }
+
+// UpdatePassword updates the user's password.
+func (s *userService) UpdatePassword(ctx context.Context, id uuid.UUID, input *domain.UpdatePasswordInput) error {
+	// Validate new password fields
+	if err := input.ValidateNewPassword(); err != nil {
+		return err
+	}
+
+	user, err := s.userRepo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Verify current password only if user has one set
+	if user.PasswordHash != "" {
+		if input.CurrentPassword == "" {
+			return domain.ErrValidation{Field: "current_password", Message: "current password is required"}
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.CurrentPassword)); err != nil {
+			return domain.ErrInvalidCredentials
+		}
+	}
+
+	// Hash new password
+	newHash, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordHash = string(newHash)
+
+	return s.userRepo.Update(ctx, user)
+}

@@ -65,10 +65,10 @@ func run() error {
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
 	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, cfg.App.URL, cfg.Auth.Secret)
+	featureService := service.NewFeatureService(featureRepo)
+	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, featureService, cfg.App.URL, cfg.Auth.Secret)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
-	featureService := service.NewFeatureService(featureRepo)
 
 	// SyncFeatures feature flags
 	err = featureService.SyncFeatures(context.Background(), map[string]domain.FeatureConfig{
@@ -82,6 +82,10 @@ func run() error {
 		},
 		domain.FeatureEmailPasswordAuth: {
 			Description:    "Enables standard email and password authentication",
+			DefaultEnabled: true,
+		},
+		domain.FeatureEmailVerification: {
+			Description:    "Enables email verification for new signups",
 			DefaultEnabled: true,
 		},
 	})
@@ -168,6 +172,7 @@ func run() error {
 	mux.Handle("GET /u/profile/image", userOnly(http.HandlerFunc(profileHandler.GetMyProfileImage)))
 	mux.Handle("GET /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
 	mux.Handle("POST /u/settings", userOnly(http.HandlerFunc(settingsHandler.Settings)))
+	mux.Handle("POST /u/settings/password", userOnly(http.HandlerFunc(settingsHandler.UpdatePassword)))
 	mux.Handle("POST /u/signout-all", userOnly(http.HandlerFunc(authHandler.SignOutAllDevices)))
 
 	// API routes for retrieving user profile images (accessible to authenticated users)

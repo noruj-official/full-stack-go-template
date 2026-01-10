@@ -213,9 +213,12 @@ func (h *ProfileHandler) serveProfileImage(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Set headers
+	// Set headers for user-specific content
+	// CRITICAL: Use "private" to prevent shared caching across users
+	// "public" would allow browsers/proxies to serve the same image to different users!
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=86400") // Cache for 1 day
+	w.Header().Set("Cache-Control", "private, max-age=3600")
+	w.Header().Set("Vary", "Cookie") // Responses vary based on session cookie
 
 	// Write image data
 	w.WriteHeader(http.StatusOK)

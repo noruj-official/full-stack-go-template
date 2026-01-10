@@ -193,3 +193,24 @@ func (i *UpdateProfileImageInput) Validate() error {
 
 	return nil
 }
+
+// UpdatePasswordInput represents the input for updating a user's password.
+type UpdatePasswordInput struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
+
+// ValidateNewPassword checks if the new password fields are valid.
+func (i *UpdatePasswordInput) ValidateNewPassword() error {
+	if i.NewPassword == "" {
+		return ErrValidation{Field: "new_password", Message: "new password is required"}
+	}
+	if len(i.NewPassword) < 8 {
+		return ErrValidation{Field: "new_password", Message: "password must be at least 8 characters"}
+	}
+	if i.NewPassword != i.ConfirmPassword {
+		return ErrValidation{Field: "confirm_password", Message: "passwords do not match"}
+	}
+	return nil
+}
