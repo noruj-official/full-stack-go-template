@@ -63,6 +63,42 @@ func (h *AdminOAuthHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userInfoURL := r.FormValue("user_info_url")
 	enabled := r.FormValue("enabled") == "on"
 
+	// Prevent disabling the last active OAuth provider if OAuth is the only auth method enabled
+	if !enabled {
+		// 1. Check if OAuth feature is enabled
+		oauthFeatureEnabled, err := h.featureService.IsEnabled(r.Context(), domain.FeatureOAuth)
+		if err == nil && oauthFeatureEnabled {
+			// 2. Check if other auth methods are disabled
+			emailAuthEnabled, _ := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailAuth)
+			passwordAuthEnabled, _ := h.featureService.IsEnabled(r.Context(), domain.FeatureEmailPasswordAuth)
+
+			if !emailAuthEnabled && !passwordAuthEnabled {
+				// 3. OAuth is the only method. Check if this is the last provider.
+				providers, err := h.oauthRepo.ListProviders(r.Context())
+				if err == nil {
+					activeCount := 0
+					for _, p := range providers {
+						if p.Enabled && string(p.Provider) != providerName {
+							activeCount++
+						}
+					}
+					if activeCount == 0 {
+						// This is the last one!
+						// Trigger error toast and return current state (re-render card as is, effectively reverting)
+						existing, err := h.oauthRepo.GetProvider(r.Context(), domain.OAuthProviderType(providerName))
+						if err != nil {
+							http.Error(w, "Provider not found", http.StatusNotFound)
+							return
+						}
+						w.Header().Set("HX-Trigger", `{"error-toast": "At least one OAuth provider must be enabled when OAuth is the only authentication method"}`)
+						h.RenderTempl(w, r, adminPage.OAuthProviderCard(existing, h.appURL))
+						return
+					}
+				}
+			}
+		}
+	}
+
 	// Fetch existing to keep urls and secret if empty?
 	existing, err := h.oauthRepo.GetProvider(r.Context(), domain.OAuthProviderType(providerName))
 	if err != nil {

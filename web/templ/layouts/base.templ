@@ -87,9 +87,13 @@ templ Base(title string, description string, user *domain.User, showSidebar bool
                                         setTimeout(() => toast.remove(), 300);
                                     }, 5000);
                                 }
-                                document.body.addEventListener('userCreated', () => showToast('User created successfully!'));
-                                document.body.addEventListener('userUpdated', () => showToast('User updated successfully!'));
-                                document.body.addEventListener('userDeleted', () => showToast('User deleted successfully!'));
+                                if (!window.customEventListenersAttached) {
+                                    document.body.addEventListener('userCreated', () => showToast('User created successfully!'));
+                                    document.body.addEventListener('userUpdated', () => showToast('User updated successfully!'));
+                                    document.body.addEventListener('userDeleted', () => showToast('User deleted successfully!'));
+                                    document.body.addEventListener('error-toast', (e) => showToast(e.detail.value, 'error'));
+                                    window.customEventListenersAttached = true;
+                                }
                             </script>
                         </body>
                     </html>

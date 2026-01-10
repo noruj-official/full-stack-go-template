@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/noruj-official/full-stack-go-template/internal/domain"
 	"github.com/noruj-official/full-stack-go-template/internal/middleware"
 	"github.com/noruj-official/full-stack-go-template/internal/service"
 	featuresPage "github.com/noruj-official/full-stack-go-template/web/templ/pages/features"
@@ -61,6 +62,20 @@ func (h *FeatureHandler) Toggle(w http.ResponseWriter, r *http.Request) {
 	enabled := enabledStr == "true"
 
 	if err := h.featureService.Toggle(r.Context(), name, enabled); err != nil {
+		if err == domain.ErrAtLeastOneAuthMethodRequired {
+			// Fetch the current feature state (which should be unchanged)
+			feature, getErr := h.featureService.Get(r.Context(), name)
+			if getErr != nil {
+				http.Error(w, "Failed to retrieve feature", http.StatusInternalServerError)
+				return
+			}
+
+			// Trigger an error toast and re-render the row
+			w.Header().Set("HX-Trigger", `{"error-toast": "At least one authentication method must be enabled"}`)
+			h.RenderTempl(w, r, featuresPage.FeatureRow(feature))
+			return
+		}
+
 		http.Error(w, "Failed to toggle feature", http.StatusInternalServerError)
 		return
 	}

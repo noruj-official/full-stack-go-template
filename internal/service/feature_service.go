@@ -4,17 +4,22 @@ import (
 	"context"
 
 	"github.com/noruj-official/full-stack-go-template/internal/domain"
+	"github.com/noruj-official/full-stack-go-template/internal/repository"
 	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
 )
 
 // featureService implements the FeatureService interface.
 type featureService struct {
-	repo *postgres.FeatureRepository
+	repo      *postgres.FeatureRepository
+	oauthRepo repository.OAuthRepository
 }
 
 // NewFeatureService creates a new feature service.
-func NewFeatureService(repo *postgres.FeatureRepository) FeatureService {
-	return &featureService{repo: repo}
+func NewFeatureService(repo *postgres.FeatureRepository, oauthRepo repository.OAuthRepository) FeatureService {
+	return &featureService{
+		repo:      repo,
+		oauthRepo: oauthRepo,
+	}
 }
 
 // Get retrieves a single feature flag by name.
@@ -48,6 +53,57 @@ func (s *featureService) GetAll(ctx context.Context) ([]*domain.FeatureFlag, err
 
 // Toggle enables or disables a feature flag.
 func (s *featureService) Toggle(ctx context.Context, name string, enabled bool) error {
+	// Prevent disabling all authentication methods
+	if !enabled {
+		authFeatures := map[string]bool{
+			domain.FeatureEmailAuth:         true,
+			domain.FeatureEmailPasswordAuth: true,
+			domain.FeatureOAuth:             true,
+		}
+
+		if authFeatures[name] {
+			// Check if any OTHER auth feature is enabled
+			anyOtherEnabled := false
+			for featureName := range authFeatures {
+				if featureName == name {
+					continue
+				}
+				isEnabled, err := s.IsEnabled(ctx, featureName)
+				if err != nil {
+					return err
+				}
+				if isEnabled {
+					// If the other enabled feature is OAuth, ensure there is at least one active provider
+					if featureName == domain.FeatureOAuth {
+						providers, err := s.oauthRepo.ListProviders(ctx)
+						if err != nil {
+							return err
+						}
+						hasActiveProvider := false
+						for _, p := range providers {
+							if p.Enabled {
+								hasActiveProvider = true
+								break
+							}
+						}
+						// Only count OAuth as "enabled" if it has active providers
+						if hasActiveProvider {
+							anyOtherEnabled = true
+							break
+						}
+					} else {
+						// For non-OAuth features (Email/Pass, Magic Link), just being enabled is enough
+						anyOtherEnabled = true
+						break
+					}
+				}
+			}
+			if !anyOtherEnabled {
+				return domain.ErrAtLeastOneAuthMethodRequired
+			}
+		}
+	}
+
 	feature, err := s.repo.Get(ctx, name)
 	if err != nil {
 		if err == domain.ErrNotFound {

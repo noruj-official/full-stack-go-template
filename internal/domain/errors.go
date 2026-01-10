@@ -8,15 +8,16 @@ import (
 
 // Sentinel errors for common domain error cases.
 var (
-	ErrNotFound           = errors.New("resource not found")
-	ErrConflict           = errors.New("resource already exists")
-	ErrUnauthorized       = errors.New("unauthorized access")
-	ErrForbidden          = errors.New("access forbidden")
-	ErrInvalidCredentials = errors.New("invalid email or password")
-	ErrSessionExpired     = errors.New("session has expired")
-	ErrInvalidToken       = errors.New("invalid or malformed token")
-	ErrTokenExpired       = errors.New("token has expired")
-	ErrEmailNotVerified   = errors.New("email not verified")
+	ErrNotFound                     = errors.New("resource not found")
+	ErrConflict                     = errors.New("resource already exists")
+	ErrUnauthorized                 = errors.New("unauthorized access")
+	ErrForbidden                    = errors.New("access forbidden")
+	ErrInvalidCredentials           = errors.New("invalid email or password")
+	ErrSessionExpired               = errors.New("session has expired")
+	ErrInvalidToken                 = errors.New("invalid or malformed token")
+	ErrTokenExpired                 = errors.New("token has expired")
+	ErrEmailNotVerified             = errors.New("email not verified")
+	ErrAtLeastOneAuthMethodRequired = errors.New("at least one authentication method must be enabled")
 )
 
 // ErrValidation represents a validation error for a specific field.
