@@ -4,17 +4,25 @@ A production-ready, full-stack Go web application template with modern frontend 
 
 ## Screenshots
 
-**Home**
+**Modern Landing Page**
 
-![Home](screenshots/home.png)
+![Home Page](screenshots/home-light.png)
 
-**Admin Analytics**
+**Admin Dashboard with Analytics**
 
-![Admin Analytics](screenshots/admin-analytics.png)
+![Admin Dashboard](screenshots/admin-dashboard.png)
 
-**Super Admin Dashboard**
+**Feature Management & Control**
 
-![Super Admin Dashboard](screenshots/super-admin-dashboard.png)
+![Feature Flags](screenshots/feature-flags.png)
+
+**System Health Monitoring**
+
+![System Health](screenshots/system-health.png)
+
+**Secure Authentication (Dark Mode)**
+
+![Sign In](screenshots/signin-dark.png)
 
 ## ✨ Features
 
@@ -23,6 +31,10 @@ A production-ready, full-stack Go web application template with modern frontend 
 - **PostgreSQL** database with automatic migrations
 - **Clean Architecture** with handlers, services, and repositories
 - **Role-Based Access Control** (User, Admin, Super Admin)
+- **Flexible Authentication**:
+  - Email & Password (toggleable)
+  - Magic Link (Passwordless)
+  - OAuth Providers (Google, GitHub, etc.) - fully configurable via Admin UI
 - **Session-based authentication** with secure cookie management
 - **Activity Logging** - Track user logins, profile updates with IP addresses
 - **Audit Trail** - Complete logging of administrative actions for compliance
@@ -162,7 +174,13 @@ npm run watch:css   # Watch CSS for changes
 
 ## 🔐 Authentication & Roles
 
-The application includes a comprehensive authentication system with three roles and role-specific features:
+The application includes a comprehensive authentication system with three roles and role-specific features. Authentication methods can be dynamically enabled/disabled by admins.
+
+### Supported Authentication Methods
+
+- **Email & Password**: Traditional sign-in with password.
+- **Magic Link**: Passwordless sign-in via email link.
+- **OAuth**: Social sign-in (Google, GitHub, etc.) with dynamic provider configuration.
 
 ### Role Hierarchy
 
@@ -186,6 +204,8 @@ The application includes a comprehensive authentication system with three roles 
 
 - **Admin Dashboard** (`/a/dashboard`) - User statistics and recent activity overview
 - **User Management** (`/a/users`) - Create, edit, and view all user accounts
+- **Feature Management** (`/a/features`) - Dynamically enable/disable system features (e.g., Email Auth, Password Auth)
+- **OAuth Management** (`/a/oauth`) - Configure and manage OAuth providers (Client IDs, Secrets, Scopes) without redeployments
 - **Analytics** (`/a/analytics`) - User growth charts, role distribution, and detailed statistics
 - **System Activity** (`/a/activity`) - Real-time feed of all user activities across the system
 
