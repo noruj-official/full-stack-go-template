@@ -29,7 +29,7 @@ templ Sidebar(user *domain.User, title string, oauthEnabled bool, currentPath st
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             class="fixed inset-y-0 left-0 z-40 w-64 bg-base-100/90 backdrop-blur-xl border-r border-base-200/80 transform transition-transform duration-300 ease-out"
             >
-            <div class="flex flex-col h-full">
+            <div class="flex flex-col h-full" hx-disinherit="hx-vals">
                 <!-- Close button (mobile + desktop) -->
                     <div class="flex items-center justify-end px-4 py-3 border-b border-base-200/80">
                         <button @click="sidebarOpen = false" class="btn btn-ghost p-1.5" title="Close Sidebar">
@@ -37,7 +37,7 @@ templ Sidebar(user *domain.User, title string, oauthEnabled bool, currentPath st
                             </button>
                         </div>
                         <!-- Navigation -->
-                            <ul class="menu flex-1 px-4 py-6 overflow-y-auto w-full block" style="display: block; overflow-y: auto;">
+                            <ul class="menu flex-1 px-4 py-6 overflow-y-auto w-full block" style="display: block; overflow-y: auto;" hx-params="none">
                                 <!-- Main Section (Everyone) -->
                                     <li class="menu-title text-base-content/60 uppercase tracking-wider">Main</li>
                                         <li>

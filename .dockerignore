@@ -8,10 +8,12 @@
 !go.mod
 !go.sum
 
+# Include Node.js build files
+!package.json
+!scripts/
+
 # Include web assets
-!web/templates/
-!web/static/css/output.css
-!web/static/js/
+!web/
 
 # Ignore node_modules and source CSS
 web/static/css/tailwind.css

@@ -17,13 +17,16 @@ type DatabaseHealth struct {
 }
 
 type AppHealth struct {
-    Name         string
-    Environment  string
-    GoVersion    string
-    GOOS         string
-    GOARCH       string
-    NumGoroutine int
-    NumCPU       int
+    Name            string
+    Environment     string
+    GoVersion       string
+    GOOS            string
+    GOARCH          string
+    NumGoroutine    int
+    NumCPU          int
+    MemoryUsage     string
+    CPUUsage        float64
+    RAMUsagePercent float64
 }
 
 type ServerHealth struct {
@@ -33,166 +36,456 @@ type ServerHealth struct {
 }
 
 type SystemHealthProps struct {
-    User        *domain.User
-    Database    DatabaseHealth
-    Application AppHealth
-    Server      ServerHealth
-    Theme       string
+    User         *domain.User
+    Database     DatabaseHealth
+    Application  AppHealth
+    Server       ServerHealth
+    Theme        string
     ThemeEnabled bool
     OAuthEnabled bool
 }
 
-templ SystemHealth(props SystemHealthProps) {
-    @layouts.Base("System Health", "Monitor system status and performance", props.User, true, props.Theme, props.ThemeEnabled, props.OAuthEnabled) {
-        <!-- System Health Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-                <div>
-                    <h1 class="text-2xl font-bold text-base-content">System Health</h1>
-                        <p class="text-base-content/70">Monitor system status and performance</p>
+templ SystemMetricsUpdate(props SystemHealthProps) {
+    <script>
+        if (window.updateGauge) {
+            window.updateGauge('cpu-chart', { fmt.Sprintf("%.1f", props.Application.CPUUsage) });
+            window.updateGauge('ram-chart', { fmt.Sprintf("%.1f", props.Application.RAMUsagePercent) });
+        }
+        // Update resource card text
+        var cpuText = document.getElementById('cpu-text');
+        if (cpuText) cpuText.innerText = 'CPU: ' + { fmt.Sprintf("\"%.1f%%\"", props.Application.CPUUsage) } + ' | RAM: ' + { fmt.Sprintf("\"%.1f%%\"", props.Application.RAMUsagePercent) };
+        
+        // Update individual chart labels if they exist
+        var cpuLabel = document.getElementById('cpu-label-val');
+        if (cpuLabel) cpuLabel.innerText = { fmt.Sprintf("\"%.1f%%\"", props.Application.CPUUsage) };
+        var ramLabel = document.getElementById('ram-label-val');
+        if (ramLabel) ramLabel.innerText = { fmt.Sprintf("\"%.1f%%\"", props.Application.RAMUsagePercent) };
+    </script>
+}
+
+templ SystemResources(props SystemHealthProps) {
+    <div class="card bg-base-100 shadow-sm border border-base-200 w-full mb-8">
+        <div class="h-full">
+            <div class="card-header border-b border-base-200 p-4 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+                    <i data-lucide="activity" class="w-5 h-5"></i>
+                        Resource Usage
+                    </h2>
+                    <select class="select select-sm select-bordered w-32" onchange="window.switchChartType(this.value)">
+                        <option value="gauge" selected>Gauge</option>
+                            <option value="area">Area</option>
+                            </select>
                         </div>
-                        <a href="/s/dashboard" class="btn btn-ghost">
-                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                                Back to Dashboard
-                            </a>
-                        </div>
-                        <!-- Health Status Cards -->
-                            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                                <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                                            <i data-lucide="database" class="w-6 h-6 text-success"></i>
-                                            </div>
-                                            <span class="badge badge-success">Healthy</span>
-                                            </div>
-                                            <p class="text-xl font-bold text-base-content">Database</p>
-                                                <p class="text-sm text-base-content/70 mt-2">PostgreSQL connection active</p>
+                        <div class="card-body p-6">
+                            <!-- JavaScript Polling for Realtime Updates -->
+                                <script>
+                                    (function() {
+                                        window.startSystemHealthPolling = function() {
+                                            // Clear existing interval if any
+                                            if (window.systemHealthInterval) {
+                                                clearInterval(window.systemHealthInterval);
+                                            }
+
+                                            function pollMetrics() {
+                                                // 1. Check if the element exists in the DOM.
+                                                var chartElement = document.getElementById('cpu-chart');
+                                                if (!chartElement) {
+                                                    // Element missing (page navigation), clearing interval.
+                                                    if (window.systemHealthInterval) {
+                                                        clearInterval(window.systemHealthInterval);
+                                                        window.systemHealthInterval = undefined;
+                                                    }
+                                                    return;
+                                                }
+
+                                                // 2. Stop polling if the tab is hidden (unless we just restored)
+                                                if (document.hidden) {
+                                                    return;
+                                                }
+
+                                                fetch('/s/system/metrics', { credentials: 'same-origin' })
+                                                .then(function(res) {
+                                                    if (!res.ok) throw new Error("HTTP " + res.status);
+                                                    return res.json();
+                                                })
+                                                .then(function(data) {
+                                                    if (!document.getElementById('cpu-chart')) return;
+                                            
+                                                    // Update charts
+                                                    if (window.updateSystemCharts) {
+                                                        window.updateSystemCharts(data.cpu, data.ram);
+                                                    }
+                                                    // Update text
+                                                    var cpuText = document.getElementById('cpu-text');
+                                                    if (cpuText) {
+                                                        cpuText.innerText = 'CPU: ' + data.cpu.toFixed(1) + '% | RAM: ' + data.ram.toFixed(1) + '%';
+                                                    }
+                                                })
+                                                .catch(function(err) { console.error('Metrics poll error:', err); });
+                                            }
+                                    
+                                            // Start immediately
+                                            pollMetrics();
+                                            // Then interval
+                                            window.systemHealthInterval = setInterval(pollMetrics, 2000);
+                                        };
+
+                                        // Initial start
+                                        window.startSystemHealthPolling();
+
+                                        // Hook into HTMX history restore to restart polling
+                                        if (!window.systemHealthHistoryListener) {
+                                            document.body.addEventListener('htmx:historyRestore', function(evt) {
+                                                // Only restart if we are restoring THIS page (check for element)
+                                                setTimeout(function() {
+                                                    if (document.getElementById('cpu-chart') && window.startSystemHealthPolling) {
+                                                        console.log('Restoring system health polling...');
+                                                        window.startSystemHealthPolling();
+                                                        // Force Chart Resize/Re-init checks could go here if needed
+                                                        window.dispatchEvent(new Event('resize'));
+                                                    }
+                                                }, 100);
+                                            });
+                                            window.systemHealthHistoryListener = true;
+                                        }
+                                    })();
+                                </script>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="w-full">
+                                        <div class="text-sm font-medium text-base-content/70 mb-2 text-center">CPU Usage</div>
+                                            <div class="w-full relative overflow-hidden" style="height: 300px; min-height: 300px;" x-data x-init={ fmt.Sprintf("initSystemChart('cpu-chart', 'CPU', %.1f, '#3b82f6')", props.Application.CPUUsage) }>
+                                                <div id="cpu-chart" class="w-full h-full"></div>
                                                 </div>
-                                                <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
-                                                    <div class="flex items-center justify-between mb-4">
-                                                        <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                                                            <i data-lucide="server" class="w-6 h-6 text-success"></i>
+                                            </div>
+                                            <div class="w-full">
+                                                <div class="text-sm font-medium text-base-content/70 mb-2 text-center">RAM Usage</div>
+                                                    <div class="w-full relative overflow-hidden" style="height: 300px; min-height: 300px;" x-data x-init={ fmt.Sprintf("initSystemChart('ram-chart', 'RAM', %.1f, '#10b981')", props.Application.RAMUsagePercent) }>
+                                                        <div id="ram-chart" class="w-full h-full"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                templ SystemHealth(props SystemHealthProps) {
+                                    @layouts.Base("System Health", "Monitor system status and performance", props.User, true, props.Theme, props.ThemeEnabled, props.OAuthEnabled) {
+                                        <script src="/assets/vendor/echarts.min.js"></script>
+                                            <script>
+                                                // Global State
+                                                window.currentChartType = 'gauge';
+                                                window.chartHistory = { 'cpu-chart': [], 'ram-chart': [] };
+                                                window.chartConfigs = { 'cpu-chart': {}, 'ram-chart': {} };
+                                                const MAX_DATA_POINTS = 50;
+
+                                                window.initSystemChart = function(id, label, value, color) {
+                                                    // Check if already initialized to prevent overwriting history on simple redraws (though x-init runs once)
+                                                    if (window.chartHistory[id].length === 0) {
+                                                        for(let i=0; i<MAX_DATA_POINTS; i++) {
+                                                            window.chartHistory[id].push(value);
+                                                        }
+                                                    }
+                                                    window.chartConfigs[id] = { label, color };
+                                                    window.renderChart(id, value);
+                                                };
+
+                                                window.renderChart = function(id, value) {
+                                                    const dom = document.getElementById(id);
+                                                    if (!dom) return;
+            
+                                                    if (typeof echarts === 'undefined') {
+                                                        setTimeout(() => renderChart(id, value), 200);
+                                                        return;
+                                                    }
+
+                                                    try {
+                                                        let chart = echarts.getInstanceByDom(dom);
+                                                        if (chart) chart.dispose();
+
+                                                        chart = echarts.init(dom, null, { renderer: 'svg' });
+                                                        const config = window.chartConfigs[id];
+                                                        const color = config ? config.color : '#3b82f6';
+                
+                                                        let option;
+
+                                                        if (window.currentChartType === 'gauge') {
+                                                            const tickColor = '#374151';
+                                                            option = {
+                                                                series: [{
+                                                                    type: 'gauge',
+                                                                    startAngle: 180,
+                                                                    endAngle: 0,
+                                                                    min: 0,
+                                                                    max: 100,
+                                                                    splitNumber: 5,
+                                                                    itemStyle: { color: color },
+                                                                    progress: { show: true, roundCap: true, width: 14 },
+                                                                    pointer: { show: false },
+                                                                    axisLine: { roundCap: true, lineStyle: { width: 14, color: [[1, tickColor]] } },
+                                                                    axisTick: { show: false },
+                                                                    splitLine: { show: false },
+                                                                    axisLabel: { show: false },
+                                                                    title: { show: false },
+                                                                    detail: {
+                                                                        valueAnimation: true,
+                                                                        offsetCenter: [0, '20%'],
+                                                                        fontSize: 24,
+                                                                        fontWeight: 'bold',
+                                                                        formatter: '{value}%',
+                                                                        color: 'inherit'
+                                                                    },
+                                                                    data: [{ value: value }]
+                                                                }]
+                                                            };
+                                                        } else {
+                                                            // Area Chart
+                                                            option = {
+                                                                tooltip: {
+                                                                    show: true,
+                                                                    trigger: 'axis',
+                                                                    formatter: function (params) {
+                                                                        return config.label + ': ' + params[0].value.toFixed(1) + '%';
+                                                                    }
+                                                                },
+                                                                grid: { left: 0, right: 0, top: 10, bottom: 0 },
+                                                                xAxis: { type: 'category', show: false, boundaryGap: false },
+                                                                yAxis: { type: 'value', min: 0, max: 100, show: false },
+                                                                series: [{
+                                                                    data: window.chartHistory[id],
+                                                                    type: 'line',
+                                                                    smooth: true,
+                                                                    showSymbol: false,
+                                                                    areaStyle: {
+                                                                        opacity: 0.3,
+                                                                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                                                        { offset: 0, color: color },
+                                                                        { offset: 1, color: 'rgba(255, 255, 255, 0)' }
+                                                                        ])
+                                                                    },
+                                                                    lineStyle: { width: 2, color: color }
+                                                                }]
+                                                            };
+                                                        }
+                
+                                                        chart.setOption(option);
+
+                                                        if (!dom.hasAttribute('data-resize-attached')) {
+                                                            window.addEventListener('resize', () => chart.resize());
+                                                            dom.setAttribute('data-resize-attached', 'true');
+                                                        }
+                                                    } catch (e) {
+                                                        console.error('Error init chart', e);
+                                                    }
+                                                };
+
+                                                window.switchChartType = function(type) {
+                                                    window.currentChartType = type;
+                                                    // Re-render both
+                                                    const cpuVal = window.chartHistory['cpu-chart'][window.chartHistory['cpu-chart'].length - 1];
+                                                    const ramVal = window.chartHistory['ram-chart'][window.chartHistory['ram-chart'].length - 1];
+                                                    window.renderChart('cpu-chart', cpuVal);
+                                                    window.renderChart('ram-chart', ramVal);
+                                                };
+
+                                                window.updateSystemCharts = function(cpu, ram) {
+                                                    // Update History
+                                                    window.chartHistory['cpu-chart'].push(cpu);
+                                                    if(window.chartHistory['cpu-chart'].length > MAX_DATA_POINTS) window.chartHistory['cpu-chart'].shift();
+            
+                                                    window.chartHistory['ram-chart'].push(ram);
+                                                    if(window.chartHistory['ram-chart'].length > MAX_DATA_POINTS) window.chartHistory['ram-chart'].shift();
+
+                                                    // Check if charts update-able
+                                                    const cpuDom = document.getElementById('cpu-chart');
+                                                    const ramDom = document.getElementById('ram-chart');
+                                                    if(!cpuDom || !ramDom || typeof echarts === 'undefined') return;
+
+                                                    const updateInfo = [
+                                                    { id: 'cpu-chart', val: cpu, hist: window.chartHistory['cpu-chart'] },
+                                                    { id: 'ram-chart', val: ram, hist: window.chartHistory['ram-chart'] }
+                                                    ];
+
+                                                    updateInfo.forEach(info => {
+                                                        const chart = echarts.getInstanceByDom(document.getElementById(info.id));
+                                                        if (chart) {
+                                                            if (window.currentChartType === 'gauge') {
+                                                                chart.setOption({ series: [{ data: [{ value: info.val }] }] });
+                                                            } else {
+                                                                chart.setOption({ series: [{ data: info.hist }] });
+                                                            }
+                                                        }
+                                                    });
+                                                };
+                                            </script>
+
+                                            <!-- System Health Header -->
+                                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                                                    <div>
+                                                        <h1 class="text-2xl font-bold text-base-content">System Health</h1>
+                                                            <p class="text-base-content/70">Monitor system status and performance</p>
                                                             </div>
-                                                            <span class="badge badge-success">Running</span>
+                                                            <a href="/s/dashboard" class="btn btn-ghost">
+                                                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                                                    Back to Dashboard
+                                                                </a>
                                                             </div>
-                                                            <p class="text-xl font-bold text-base-content">Web Server</p>
-                                                                <p class="text-sm text-base-content/70 mt-2">HTTP server operational</p>
-                                                                </div>
-                                                                <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
-                                                                    <div class="flex items-center justify-between mb-4">
-                                                                        <div class="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
-                                                                            <i data-lucide="clock" class="w-6 h-6 text-info"></i>
-                                                                            </div>
-                                                                            <span class="badge badge-info">Active</span>
-                                                                            </div>
-                                                                            <p class="text-xl font-bold text-base-content">Uptime</p>
-                                                                                <p class="text-sm text-base-content/70 mt-2">System running smoothly</p>
+
+                                                            <!-- Health Status Cards -->
+                                                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                                                                    <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+                                                                        <div class="flex items-center justify-between mb-4">
+                                                                            <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                                                                                <i data-lucide="database" class="w-6 h-6 text-success"></i>
                                                                                 </div>
-                                                                            </div>
-                                                                            <!-- System Information -->
-                                                                                <div class="grid lg:grid-cols-2 gap-6">
-                                                                                    <!-- Database Info -->
-                                                                                        <div class="card bg-base-100 shadow-sm border border-base-200">
-                                                                                            <div class="card-header border-b border-base-200 p-4">
-                                                                                                <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
-                                                                                                    <i data-lucide="database" class="w-5 h-5"></i>
-                                                                                                        Database Information
-                                                                                                    </h2>
-                                                                                                </div>
-                                                                                                <div class="card-body p-6">
-                                                                                                    <div class="space-y-4">
-                                                                                                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                            <span class="text-sm text-base-content/70">Connection Status</span>
-                                                                                                                if props.Database.Status == "Connected" {
-                                                                                                                    <span class="text-sm font-medium text-success">{ props.Database.Status }</span>
-                                                                                                                    } else {
-                                                                                                                        <span class="text-sm font-medium text-error">{ props.Database.Status }</span>
-                                                                                                                        }
+                                                                                if props.Database.Status == "Connected" {
+                                                                                    <span class="badge badge-success">Healthy</span>
+                                                                                    } else {
+                                                                                        <span class="badge badge-error">Error</span>
+                                                                                        }
+                                                                                    </div>
+                                                                                    <p class="text-xl font-bold text-base-content">Database</p>
+                                                                                        <p class="text-sm text-base-content/70 mt-2">PostgreSQL connection active</p>
+                                                                                        </div>
+
+                                                                                        <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+                                                                                            <div class="flex items-center justify-between mb-4">
+                                                                                                <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                                                                                                    <i data-lucide="server" class="w-6 h-6 text-success"></i>
+                                                                                                    </div>
+                                                                                                    <span class="badge badge-success">Running</span>
+                                                                                                    </div>
+                                                                                                    <p class="text-xl font-bold text-base-content">Web Server</p>
+                                                                                                        <p class="text-sm text-base-content/70 mt-2">HTTP server operational</p>
+                                                                                                        </div>
+
+                                                                                                        <div class="card p-6 bg-base-100 shadow-sm border border-base-200">
+                                                                                                            <div class="flex items-center justify-between mb-4">
+                                                                                                                <div class="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
+                                                                                                                    <i data-lucide="cpu" class="w-6 h-6 text-info"></i>
                                                                                                                     </div>
-                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                        <span class="text-sm text-base-content/70">Database Type</span>
-                                                                                                                            <span class="text-sm font-medium">{ props.Database.Type }</span>
-                                                                                                                            </div>
-                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                <span class="text-sm text-base-content/70">Active Connections</span>
-                                                                                                                                    <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.AcquiredConns) }</span>
-                                                                                                                                    </div>
-                                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                        <span class="text-sm text-base-content/70">Idle Connections</span>
-                                                                                                                                            <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.IdleConns) }</span>
+                                                                                                                    <span class="badge badge-info">Monitoring</span>
+                                                                                                                    </div>
+                                                                                                                    <p class="text-xl font-bold text-base-content">Resources</p>
+                                                                                                                        <p id="cpu-text" class="text-sm text-base-content/70 mt-2">CPU: { fmt.Sprintf("%.1f%%", props.Application.CPUUsage) } | RAM: { fmt.Sprintf("%.1f%%", props.Application.RAMUsagePercent) }</p>
+                                                                                                                        </div>
+                                                                                                                    </div>
+
+                                                                                                                    <!-- System Monitors Chart (Moved Here) -->
+                                                                                                                        @SystemResources(props)
+
+                                                                                                                        <!-- System Information -->
+                                                                                                                            <div class="grid lg:grid-cols-2 gap-6 mb-8">
+                                                                                                                                <!-- Database Info -->
+                                                                                                                                    <div class="card bg-base-100 shadow-sm border border-base-200">
+                                                                                                                                        <div class="card-header border-b border-base-200 p-4">
+                                                                                                                                            <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+                                                                                                                                                <i data-lucide="database" class="w-5 h-5"></i>
+                                                                                                                                                    Database Information
+                                                                                                                                                </h2>
                                                                                                                                             </div>
-                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                <span class="text-sm text-base-content/70">Max Connections</span>
-                                                                                                                                                    <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.MaxConnections) }</span>
-                                                                                                                                                    </div>
+                                                                                                                                            <div class="card-body p-6">
+                                                                                                                                                <div class="space-y-4">
                                                                                                                                                     <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                        <span class="text-sm text-base-content/70">Total Connections</span>
-                                                                                                                                                            <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.TotalConns) }</span>
-                                                                                                                                                            </div>
-                                                                                                                                                        </div>
-                                                                                                                                                    </div>
-                                                                                                                                                </div>
-                                                                                                                                                <!-- Application Info -->
-                                                                                                                                                    <div class="card bg-base-100 shadow-sm border border-base-200">
-                                                                                                                                                        <div class="card-header border-b border-base-200 p-4">
-                                                                                                                                                            <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
-                                                                                                                                                                <i data-lucide="server" class="w-5 h-5"></i>
-                                                                                                                                                                    Application Information
-                                                                                                                                                                </h2>
-                                                                                                                                                            </div>
-                                                                                                                                                            <div class="card-body p-6">
-                                                                                                                                                                <div class="space-y-4">
-                                                                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                        <span class="text-sm text-base-content/70">Application</span>
-                                                                                                                                                                            <span class="text-sm font-medium">{ props.Application.Name }</span>
-                                                                                                                                                                            </div>
-                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                <span class="text-sm text-base-content/70">Environment</span>
-                                                                                                                                                                                    <span class="text-sm font-medium">{ props.Application.Environment }</span>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                        <span class="text-sm text-base-content/70">Go Version</span>
-                                                                                                                                                                                            <span class="text-sm font-medium">{ props.Application.GoVersion }</span>
-                                                                                                                                                                                            </div>
-                                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                                <span class="text-sm text-base-content/70">Platform</span>
-                                                                                                                                                                                                    <span class="text-sm font-medium">{ props.Application.GOOS }/{ props.Application.GOARCH }</span>
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                                        <span class="text-sm text-base-content/70">Goroutines</span>
-                                                                                                                                                                                                            <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Application.NumGoroutine) }</span>
-                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                                                <span class="text-sm text-base-content/70">CPU Cores</span>
-                                                                                                                                                                                                                    <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Application.NumCPU) }</span>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                            </div>
+                                                                                                                                                        <span class="text-sm text-base-content/70">Connection Status</span>
+                                                                                                                                                            if props.Database.Status == "Connected" {
+                                                                                                                                                                <span class="text-sm font-medium text-success">{ props.Database.Status }</span>
+                                                                                                                                                                } else {
+                                                                                                                                                                    <span class="text-sm font-medium text-error">{ props.Database.Status }</span>
+                                                                                                                                                                    }
+                                                                                                                                                                </div>
+                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                    <span class="text-sm text-base-content/70">Database Type</span>
+                                                                                                                                                                        <span class="text-sm font-medium truncate max-w-[200px]" title={ props.Database.Type }>{ props.Database.Type }</span>
+                                                                                                                                                                        </div>
+                                                                                                                                                                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                            <span class="text-sm text-base-content/70">Active Connections</span>
+                                                                                                                                                                                <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.AcquiredConns) }</span>
+                                                                                                                                                                                </div>
+                                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                    <span class="text-sm text-base-content/70">Idle Connections</span>
+                                                                                                                                                                                        <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.IdleConns) }</span>
+                                                                                                                                                                                        </div>
+                                                                                                                                                                                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                            <span class="text-sm text-base-content/70">Max Connections</span>
+                                                                                                                                                                                                <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.MaxConnections) }</span>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                    <span class="text-sm text-base-content/70">Total Connections</span>
+                                                                                                                                                                                                        <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Database.TotalConns) }</span>
                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                        <!-- Server Configuration -->
-                                                                                                                                                                                                            <div class="card bg-base-100 shadow-sm border border-base-200 lg:col-span-2">
-                                                                                                                                                                                                                <div class="card-header border-b border-base-200 p-4">
-                                                                                                                                                                                                                    <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
-                                                                                                                                                                                                                        <i data-lucide="settings" class="w-5 h-5"></i>
-                                                                                                                                                                                                                            Server Configuration
-                                                                                                                                                                                                                        </h2>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    <div class="card-body p-6">
-                                                                                                                                                                                                                        <div class="grid md:grid-cols-3 gap-4">
-                                                                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                                                                <span class="text-sm text-base-content/70">Read Timeout</span>
-                                                                                                                                                                                                                                    <span class="text-sm font-medium">{ props.Server.ReadTimeout }</span>
-                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                                                                        <span class="text-sm text-base-content/70">Write Timeout</span>
-                                                                                                                                                                                                                                            <span class="text-sm font-medium">{ props.Server.WriteTimeout }</span>
-                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
-                                                                                                                                                                                                                                                <span class="text-sm text-base-content/70">Idle Timeout</span>
-                                                                                                                                                                                                                                                    <span class="text-sm font-medium">{ props.Server.IdleTimeout }</span>
-                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                            </div>
+
+                                                                                                                                                                                            <!-- Application Info -->
+                                                                                                                                                                                                <div class="card bg-base-100 shadow-sm border border-base-200">
+                                                                                                                                                                                                    <div class="card-header border-b border-base-200 p-4">
+                                                                                                                                                                                                        <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+                                                                                                                                                                                                            <i data-lucide="server" class="w-5 h-5"></i>
+                                                                                                                                                                                                                Application Information
+                                                                                                                                                                                                            </h2>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                        <div class="card-body p-6">
+                                                                                                                                                                                                            <div class="space-y-4">
+                                                                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                    <span class="text-sm text-base-content/70">Application</span>
+                                                                                                                                                                                                                        <span class="text-sm font-medium">{ props.Application.Name }</span>
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                            <span class="text-sm text-base-content/70">Environment</span>
+                                                                                                                                                                                                                                <span class="text-sm font-medium">{ props.Application.Environment }</span>
+                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                    <span class="text-sm text-base-content/70">Go Version</span>
+                                                                                                                                                                                                                                        <span class="text-sm font-medium">{ props.Application.GoVersion }</span>
                                                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                            <span class="text-sm text-base-content/70">Platform</span>
+                                                                                                                                                                                                                                                <span class="text-sm font-medium">{ props.Application.GOOS }/{ props.Application.GOARCH }</span>
+                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                                    <span class="text-sm text-base-content/70">Goroutines</span>
+                                                                                                                                                                                                                                                        <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Application.NumGoroutine) }</span>
+                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                                            <span class="text-sm text-base-content/70">Memory Usage</span>
+                                                                                                                                                                                                                                                                <span class="text-sm font-medium">{ props.Application.MemoryUsage }</span>
+                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                                                    <span class="text-sm text-base-content/70">CPU Cores</span>
+                                                                                                                                                                                                                                                                        <span class="text-sm font-medium">{ fmt.Sprintf("%d", props.Application.NumCPU) }</span>
+                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                        </div>
+
+                                                                                                                                                                                                                                                        <!-- Server Configuration (Bottom) -->
+                                                                                                                                                                                                                                                            <div class="card bg-base-100 shadow-sm border border-base-200 mb-8">
+                                                                                                                                                                                                                                                                <div class="card-header border-b border-base-200 p-4">
+                                                                                                                                                                                                                                                                    <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+                                                                                                                                                                                                                                                                        <i data-lucide="settings" class="w-5 h-5"></i>
+                                                                                                                                                                                                                                                                            Server Configuration
+                                                                                                                                                                                                                                                                        </h2>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                    <div class="card-body p-6">
+                                                                                                                                                                                                                                                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                                                                                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                                                                <span class="text-sm text-base-content/70">Read Timeout</span>
+                                                                                                                                                                                                                                                                                    <span class="text-sm font-medium">{ props.Server.ReadTimeout }</span>
+                                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                                    <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                                                                        <span class="text-sm text-base-content/70">Write Timeout</span>
+                                                                                                                                                                                                                                                                                            <span class="text-sm font-medium">{ props.Server.WriteTimeout }</span>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <div class="flex items-center justify-between p-3 bg-base-200 rounded-xl">
+                                                                                                                                                                                                                                                                                                <span class="text-sm text-base-content/70">Idle Timeout</span>
+                                                                                                                                                                                                                                                                                                    <span class="text-sm font-medium">{ props.Server.IdleTimeout }</span>
+                                                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                }

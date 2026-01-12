@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "alpinejs": "^3.14.8",
+    "echarts": "^6.0.0",
     "htmx.org": "^2.0.4",
     "lucide": "^0.468.0"
   }

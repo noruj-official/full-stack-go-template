@@ -2,30 +2,84 @@
 package handler
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"runtime"
 	"strconv"
+	"sync"
+	"time"
 
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/mem"
+
+	"github.com/noruj-official/full-stack-go-template/internal/config"
 	"github.com/noruj-official/full-stack-go-template/internal/middleware"
 	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
 	"github.com/noruj-official/full-stack-go-template/internal/service"
 	"github.com/noruj-official/full-stack-go-template/web/templ/pages/admin"
 )
 
+// SystemStats holds realtime system statistics
+type SystemStats struct {
+	CPUUsage       float64
+	RAMUsage       float64
+	RAMTotal       float64
+	RAMUsedPercent float64
+	mu             sync.RWMutex
+}
+
 // AuditHandler handles audit log HTTP requests.
 type AuditHandler struct {
 	*Handler
 	auditService service.AuditService
 	db           *postgres.DB
+	cfg          *config.Config
+	stats        *SystemStats
 }
 
 // NewAuditHandler creates a new audit handler.
-func NewAuditHandler(base *Handler, auditService service.AuditService, db *postgres.DB) *AuditHandler {
+func NewAuditHandler(base *Handler, auditService service.AuditService, db *postgres.DB, cfg *config.Config) *AuditHandler {
 	return &AuditHandler{
 		Handler:      base,
 		auditService: auditService,
 		db:           db,
+		cfg:          cfg,
+		stats:        &SystemStats{},
 	}
+}
+
+// StartMonitoring starts the background system monitoring
+func (h *AuditHandler) StartMonitoring(ctx context.Context) {
+	// Initialize CPU counter to avoid first-call garbage/error
+	_, _ = cpu.Percent(0, false)
+
+	ticker := time.NewTicker(1 * time.Second)
+	go func() {
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				v, _ := mem.VirtualMemory()
+				// Interval 0 means "calculate since last call"
+				// Since we prefer accurate "since last tick" measurement without blocking the goroutine
+				c, _ := cpu.Percent(0, false)
+
+				h.stats.mu.Lock()
+				if len(c) > 0 {
+					h.stats.CPUUsage = c[0]
+				}
+				if v != nil {
+					h.stats.RAMUsage = float64(v.Used) / 1024 / 1024 / 1024
+					h.stats.RAMTotal = float64(v.Total) / 1024 / 1024 / 1024
+					h.stats.RAMUsedPercent = v.UsedPercent
+				}
+				h.stats.mu.Unlock()
+			}
+		}
+	}()
 }
 
 // AuditLogs renders the audit logs page.
@@ -82,8 +136,34 @@ func (h *AuditHandler) AuditLogs(w http.ResponseWriter, r *http.Request) {
 	admin.AuditLogs(props).Render(r.Context(), w)
 }
 
+// SystemMetricsJSON returns system metrics as JSON for client-side polling
+func (h *AuditHandler) SystemMetricsJSON(w http.ResponseWriter, r *http.Request) {
+	h.stats.mu.RLock()
+	cpuUsage := h.stats.CPUUsage
+	ramPercent := h.stats.RAMUsedPercent
+	h.stats.mu.RUnlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, `{"cpu":%.1f,"ram":%.1f}`, cpuUsage, ramPercent)
+}
+
 // SystemHealth renders the system health monitoring page.
 func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
+	// Fast path for polling: check cached stats immediately
+	if isHTMXRequest(r) && r.Header.Get("HX-Target-Component") == "SystemMetricsUpdate" {
+		h.stats.mu.RLock()
+		props := admin.SystemHealthProps{
+			Application: admin.AppHealth{
+				CPUUsage:        h.stats.CPUUsage,
+				RAMUsagePercent: h.stats.RAMUsedPercent,
+			},
+		}
+		h.stats.mu.RUnlock()
+		admin.SystemMetricsUpdate(props).Render(r.Context(), w)
+		return
+	}
+
 	// Check database health
 	dbStatus := "Connected"
 	dbError := ""
@@ -95,13 +175,33 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 	// Get database pool stats
 	poolStats := h.db.Pool.Stat()
 
-	// Get system uptime (calculate from start time - would need to be tracked)
-	// For now, we'll show the current server status
+	// Get real Postgres version
+	var pgVersion string
+	err := h.db.Pool.QueryRow(r.Context(), "SELECT version()").Scan(&pgVersion)
+	if err != nil {
+		pgVersion = "Unknown"
+	}
 
-	// Get environment from config or default
-	environment := "Development"
-	if appEnv := r.Context().Value("app_env"); appEnv != nil {
-		environment = appEnv.(string)
+	// Get system usage stats from cache or fallback
+	h.stats.mu.RLock()
+	cpuUsage := h.stats.CPUUsage
+	ramUsage := h.stats.RAMUsage
+	ramTotal := h.stats.RAMTotal
+	ramPercent := h.stats.RAMUsedPercent
+	h.stats.mu.RUnlock()
+
+	// If stats are empty (start up), fetch once synchronously (calls might block but better than showing 0)
+	if cpuUsage == 0 && ramTotal == 0 {
+		v, _ := mem.VirtualMemory()
+		c, _ := cpu.Percent(time.Second, false)
+		if len(c) > 0 {
+			cpuUsage = c[0]
+		}
+		if v != nil {
+			ramUsage = float64(v.Used) / 1024 / 1024 / 1024
+			ramTotal = float64(v.Total) / 1024 / 1024 / 1024
+			ramPercent = v.UsedPercent
+		}
 	}
 
 	theme, themeEnabled := h.GetTheme(r)
@@ -112,30 +212,40 @@ func (h *AuditHandler) SystemHealth(w http.ResponseWriter, r *http.Request) {
 		Database: admin.DatabaseHealth{
 			Status:         dbStatus,
 			Error:          dbError,
-			Type:           "PostgreSQL",
+			Type:           pgVersion, // Using full version string
 			MaxConnections: poolStats.MaxConns(),
 			IdleConns:      poolStats.IdleConns(),
 			AcquiredConns:  poolStats.AcquiredConns(),
 			TotalConns:     poolStats.TotalConns(),
 		},
 		Application: admin.AppHealth{
-			Name:         "Full Stack Go Template",
-			Environment:  environment,
-			GoVersion:    runtime.Version(),
-			GOOS:         runtime.GOOS,
-			GOARCH:       runtime.GOARCH,
-			NumGoroutine: runtime.NumGoroutine(),
-			NumCPU:       runtime.NumCPU(),
+			Name:            h.cfg.App.Name,
+			Environment:     h.cfg.App.Env,
+			GoVersion:       runtime.Version(),
+			GOOS:            runtime.GOOS,
+			GOARCH:          runtime.GOARCH,
+			NumGoroutine:    runtime.NumGoroutine(),
+			NumCPU:          runtime.NumCPU(),
+			MemoryUsage:     fmt.Sprintf("%.2f GB / %.2f GB", ramUsage, ramTotal),
+			CPUUsage:        cpuUsage,
+			RAMUsagePercent: ramPercent,
 		},
 		Server: admin.ServerHealth{
-			ReadTimeout:  "15s",
-			WriteTimeout: "15s",
-			IdleTimeout:  "60s",
+			ReadTimeout:  h.cfg.Server.ReadTimeout,
+			WriteTimeout: h.cfg.Server.WriteTimeout,
+			IdleTimeout:  h.cfg.Server.IdleTimeout,
 		},
 
 		Theme:        theme,
 		ThemeEnabled: themeEnabled,
 		OAuthEnabled: oauthEnabled,
+	}
+
+	if isHTMXRequest(r) {
+		if r.Header.Get("HX-Target") == "system-charts-container" {
+			admin.SystemResources(props).Render(r.Context(), w)
+			return
+		}
 	}
 
 	admin.SystemHealth(props).Render(r.Context(), w)

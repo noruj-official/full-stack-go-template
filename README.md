@@ -72,7 +72,7 @@ A production-ready, full-stack Go web application template with modern frontend 
 ├── web/
 │   ├── assets/
 │   │   ├── css/         # Tailwind CSS source and output
-│   │   └── vendor/      # Frontend dependencies (htmx, alpine, lucide)
+│   │   └── vendor/      # Frontend dependencies (htmx, alpine, lucide, echarts)
 │   └── templ/           # Templ templates
 │       ├── components/  # Reusable UI components (navbar, sidebar, footer)
 │       ├── layouts/     # Base layouts (main, auth)
@@ -215,7 +215,7 @@ The application includes a comprehensive authentication system with three roles 
 
 - **Super Admin Dashboard** (`/s/dashboard`) - System-wide overview with advanced statistics
 - **Audit Logs** (`/s/audit`) - Complete trail of administrative actions for compliance
-- **System Health** (`/s/system`) - Database status, server health, and configuration monitoring
+- **System Health** (`/s/system`) - Real-time CPU and RAM monitoring with interactive charts (ECharts), database status, and server health metrics.
 - **Admin Management** - Promote/demote admin roles (accessible through user edit)
 
 ### Route Protection
@@ -346,6 +346,7 @@ docker run -p 3000:3000 \
 | **CSS Framework** | Tailwind CSS v4 |
 | **UI Components** | DaisyUI v5 |
 | **Interactivity** | HTMX + Alpine.js |
+| **Charts** | Apache ECharts |
 | **Icons** | Lucide |
 | **Containerization** | Docker |
 

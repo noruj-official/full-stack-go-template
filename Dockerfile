@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
@@ -19,8 +19,8 @@ RUN npm install
 COPY . .
 
 # Build assets (templ templates + CSS)
-# Uses: npm run build:templ && npm run build:css && npm run build:go
-RUN npm run build
+# Skip build:go since the binary is built later via go build
+RUN npm run build:templ && npm run build:css
 
 # Install templ
 RUN go install github.com/a-h/templ/cmd/templ@latest

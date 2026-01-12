@@ -113,7 +113,8 @@ func run() error {
 	profileHandler := handler.NewProfileHandler(baseHandler, userService, activityService, storageService)
 	settingsHandler := handler.NewSettingsHandler(baseHandler, userService, activityService)
 	analyticsHandler := handler.NewAnalyticsHandler(baseHandler, db)
-	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db)
+	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db, cfg)
+	auditHandler.StartMonitoring(ctx)
 	featureHandler := handler.NewFeatureHandler(baseHandler, featureService, auditService)
 	adminOAuthHandler := handler.NewAdminOAuthHandler(baseHandler, oauthRepo, auditService, cfg.App.URL)
 
@@ -209,6 +210,7 @@ func run() error {
 	superAdminOnly := middleware.RequireRole(domain.RoleSuperAdmin)
 	mux.Handle("GET /s/audit", superAdminOnly(http.HandlerFunc(auditHandler.AuditLogs)))
 	mux.Handle("GET /s/system", superAdminOnly(http.HandlerFunc(auditHandler.SystemHealth)))
+	mux.Handle("GET /s/system/metrics", superAdminOnly(http.HandlerFunc(auditHandler.SystemMetricsJSON)))
 
 	// Catch-all for 404s (must be added last if using patterns that might overlap, but "/" is most general)
 	mux.HandleFunc("/", homeHandler.NotFound)

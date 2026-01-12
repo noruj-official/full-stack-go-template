@@ -32,8 +32,11 @@ type EmailConfig struct {
 
 // ServerConfig contains HTTP server settings.
 type ServerConfig struct {
-	Host string
-	Port int
+	Host         string
+	Port         int
+	ReadTimeout  string
+	WriteTimeout string
+	IdleTimeout  string
 }
 
 // DatabaseConfig contains database connection settings.
@@ -72,8 +75,11 @@ func Load() (*Config, error) {
 
 	return &Config{
 		Server: ServerConfig{
-			Host: getEnv("SERVER_HOST", "0.0.0.0"),
-			Port: port,
+			Host:         getEnv("SERVER_HOST", "0.0.0.0"),
+			Port:         port,
+			ReadTimeout:  getEnv("SERVER_READ_TIMEOUT", "15s"),
+			WriteTimeout: getEnv("SERVER_WRITE_TIMEOUT", "15s"),
+			IdleTimeout:  getEnv("SERVER_IDLE_TIMEOUT", "60s"),
 		},
 		Database: DatabaseConfig{
 			URL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/app_db?sslmode=disable"),

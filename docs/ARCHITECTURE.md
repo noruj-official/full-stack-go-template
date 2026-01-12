@@ -83,7 +83,7 @@ go-starter/
 ├── web/                         # Frontend assets
 │   ├── assets/
 │   │   ├── css/                 # Tailwind CSS source
-│   │   └── vendor/              # Third-party JS (htmx, alpine)
+│   │   └── vendor/              # Third-party JS (htmx, alpine, echarts)
 │   └── templ/                   # 🎨 Templ templates
 │       ├── components/          # Reusable UI components
 │       │   ├── navbar.templ     # Navigation bar
@@ -229,6 +229,7 @@ Here's how to add a new resource (e.g., "Posts"):
 | **CSS** | Tailwind CSS v4 | Utility-first styling |
 | **Components** | DaisyUI v5 | Pre-built UI components |
 | **Interactivity** | HTMX + Alpine.js | Dynamic UX without heavy JS |
+| **Charts** | Apache ECharts | Interactive visualizations |
 | **Icons** | Lucide | Beautiful icon set |
 
 ## File Naming Conventions
