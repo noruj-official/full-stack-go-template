@@ -24,9 +24,8 @@ type User struct {
 	Name                       string     `json:"name"`
 	PasswordHash               string     `json:"-"` // Never expose in JSON
 	Role                       Role       `json:"role"`
-	ProfileImage               []byte     `json:"-"`                  // Binary image data (never expose in JSON)
-	ProfileImageType           string     `json:"profile_image_type"` // MIME type (e.g., "image/jpeg")
-	ProfileImageSize           int        `json:"profile_image_size"` // Size in bytes
+	ProfileMediaID             *uuid.UUID `json:"profile_media_id,omitempty"`
+	ProfileMedia               *Media     `json:"-"` // Loaded on demand
 	EmailVerified              bool       `json:"email_verified"`
 	VerificationToken          *string    `json:"-"`
 	VerificationTokenExpiresAt *time.Time `json:"-"`
@@ -154,9 +153,10 @@ func (i *CreateUserInput) Validate() error {
 
 // UpdateUserInput represents the input for updating a user.
 type UpdateUserInput struct {
-	Email *string `json:"email,omitempty"`
-	Name  *string `json:"name,omitempty"`
-	Role  *Role   `json:"role,omitempty"`
+	Email          *string    `json:"email,omitempty"`
+	Name           *string    `json:"name,omitempty"`
+	Role           *Role      `json:"role,omitempty"`
+	ProfileMediaID *uuid.UUID `json:"profile_media_id,omitempty"`
 }
 
 // UpdateProfileImageInput represents the input for updating a user's profile image.

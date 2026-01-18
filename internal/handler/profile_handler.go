@@ -9,7 +9,6 @@ import (
 	"github.com/noruj-official/full-stack-go-template/internal/domain"
 	"github.com/noruj-official/full-stack-go-template/internal/middleware"
 	"github.com/noruj-official/full-stack-go-template/internal/service"
-	"github.com/noruj-official/full-stack-go-template/internal/storage"
 	"github.com/noruj-official/full-stack-go-template/web/templ/pages/profile"
 )
 
@@ -18,16 +17,16 @@ type ProfileHandler struct {
 	*Handler
 	userService     service.UserService
 	activityService service.ActivityService
-	storageService  storage.Service
+	mediaService    *service.MediaService
 }
 
 // NewProfileHandler creates a new profile handler.
-func NewProfileHandler(base *Handler, userService service.UserService, activityService service.ActivityService, storageService storage.Service) *ProfileHandler {
+func NewProfileHandler(base *Handler, userService service.UserService, activityService service.ActivityService, mediaService *service.MediaService) *ProfileHandler {
 	return &ProfileHandler{
 		Handler:         base,
 		userService:     userService,
 		activityService: activityService,
-		storageService:  storageService,
+		mediaService:    mediaService,
 	}
 }
 
@@ -135,21 +134,30 @@ func (h *ProfileHandler) UploadProfileImage(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Create and validate input
-	input := &domain.UpdateProfileImageInput{
-		ImageData:   imageData,
+	// Create media input
+	mediaInput := domain.CreateMediaInput{
+		UserID:      &user.ID,
+		Filename:    header.Filename,
+		Data:        imageData,
 		ContentType: header.Header.Get("Content-Type"),
-		Size:        len(imageData),
+		SizeBytes:   len(imageData),
+		AltText:     "Profile Image",
 	}
 
-	if err := input.Validate(); err != nil {
-		h.renderProfileError(w, r, err.Error())
+	// Upload to MediaService
+	media, err := h.mediaService.Upload(r.Context(), mediaInput)
+	if err != nil {
+		h.renderProfileError(w, r, "Failed to upload profile image: "+err.Error())
 		return
 	}
 
-	// Store the image using the storage service
-	if err := h.storageService.StoreProfileImage(r.Context(), user.ID, imageData, input.ContentType, input.Size); err != nil {
-		h.renderProfileError(w, r, "Failed to save profile image")
+	// Update user profile with MediaID
+	updateInput := &domain.UpdateUserInput{
+		ProfileMediaID: &media.ID,
+	}
+	_, err = h.userService.UpdateUser(r.Context(), user.ID, updateInput)
+	if err != nil {
+		h.renderProfileError(w, r, "Failed to update profile image reference: "+err.Error())
 		return
 	}
 
@@ -185,7 +193,12 @@ func (h *ProfileHandler) GetMyProfileImage(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	h.serveProfileImage(w, r, user.ID)
+	if user.ProfileMediaID == nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	h.serveMedia(w, r, *user.ProfileMediaID)
 }
 
 // GetUserProfileImage retrieves any user's profile image by ID.
@@ -203,28 +216,32 @@ func (h *ProfileHandler) GetUserProfileImage(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	h.serveProfileImage(w, r, userID)
-}
-
-// serveProfileImage is a helper function to serve profile images.
-func (h *ProfileHandler) serveProfileImage(w http.ResponseWriter, r *http.Request, userID uuid.UUID) {
-	imageData, contentType, err := h.storageService.GetProfileImage(r.Context(), userID)
-	if err != nil {
-		// Return a 404 or default image
+	// Fetch user to get ProfileMediaID
+	user, err := h.userService.GetUser(r.Context(), userID)
+	if err != nil || user == nil || user.ProfileMediaID == nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	// Set headers for user-specific content
-	// CRITICAL: Use "private" to prevent shared caching across users
-	// "public" would allow browsers/proxies to serve the same image to different users!
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "private, max-age=3600")
-	w.Header().Set("Vary", "Cookie") // Responses vary based on session cookie
+	h.serveMedia(w, r, *user.ProfileMediaID)
+}
+
+// serveMedia is a helper function to serve media content.
+func (h *ProfileHandler) serveMedia(w http.ResponseWriter, r *http.Request, mediaID uuid.UUID) {
+	media, err := h.mediaService.GetByID(r.Context(), mediaID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Set headers for content
+	w.Header().Set("Content-Type", media.ContentType)
+	w.Header().Set("Cache-Control", "public, max-age=3600") // Media IDs are immutable (mostly), safe to cache
+	// w.Header().Set("Vary", "Cookie") // Not needed if serving by immutable ID associated with user
 
 	// Write image data
 	w.WriteHeader(http.StatusOK)
-	w.Write(imageData)
+	w.Write(media.Data)
 }
 
 func (h *ProfileHandler) renderProfileError(w http.ResponseWriter, r *http.Request, errMsg string) {

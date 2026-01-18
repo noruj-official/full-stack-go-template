@@ -100,6 +100,9 @@ func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, input *domai
 	if input.Role != nil {
 		user.Role = *input.Role
 	}
+	if input.ProfileMediaID != nil {
+		user.ProfileMediaID = input.ProfileMediaID
+	}
 
 	// Validate updated user
 	if err := user.Validate(); err != nil {

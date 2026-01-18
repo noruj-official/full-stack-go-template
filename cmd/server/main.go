@@ -17,7 +17,6 @@ import (
 	"github.com/noruj-official/full-stack-go-template/internal/middleware"
 	"github.com/noruj-official/full-stack-go-template/internal/repository/postgres"
 	"github.com/noruj-official/full-stack-go-template/internal/service"
-	"github.com/noruj-official/full-stack-go-template/internal/storage"
 )
 
 func main() {
@@ -62,6 +61,8 @@ func run() error {
 	featureRepo := postgres.NewFeatureRepository(db)
 	oauthRepo := postgres.NewOAuthRepository(db, cfg.Auth.Secret)
 	blogRepo := postgres.NewBlogRepository(db)
+	blogImageRepo := postgres.NewBlogImageRepository(db)
+	mediaRepo := postgres.NewMediaRepository(db)
 
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
@@ -70,7 +71,9 @@ func run() error {
 	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, featureService, cfg.App.URL, cfg.Auth.Secret)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
-	blogService := service.NewBlogService(blogRepo)
+	mediaService := service.NewMediaService(mediaRepo)
+	blogService := service.NewBlogService(blogRepo, mediaService)
+	blogImageService := service.NewBlogImageService(blogImageRepo, mediaService)
 
 	// SyncFeatures feature flags
 	err = featureService.SyncFeatures(context.Background(), map[string]domain.FeatureConfig{
@@ -99,12 +102,6 @@ func run() error {
 		return fmt.Errorf("failed to sync feature flags: %w", err)
 	}
 
-	// Initialize storage service
-	storageService, err := storage.NewService(cfg, db.Pool)
-	if err != nil {
-		return fmt.Errorf("failed to initialize storage service: %w", err)
-	}
-
 	// Initialize handlers
 	baseHandler := handler.NewHandler(cfg.App.Name, cfg.App.Logo, featureService)
 
@@ -112,14 +109,14 @@ func run() error {
 	userHandler := handler.NewUserHandler(baseHandler, userService, auditService)
 	authHandler := handler.NewAuthHandler(baseHandler, authService, userService, activityService)
 	activityHandler := handler.NewActivityHandler(baseHandler, activityService)
-	profileHandler := handler.NewProfileHandler(baseHandler, userService, activityService, storageService)
+	profileHandler := handler.NewProfileHandler(baseHandler, userService, activityService, mediaService)
 	settingsHandler := handler.NewSettingsHandler(baseHandler, userService, activityService)
 	analyticsHandler := handler.NewAnalyticsHandler(baseHandler, db)
 	auditHandler := handler.NewAuditHandler(baseHandler, auditService, db, cfg)
 	auditHandler.StartMonitoring(ctx)
 	featureHandler := handler.NewFeatureHandler(baseHandler, featureService, auditService)
 	adminOAuthHandler := handler.NewAdminOAuthHandler(baseHandler, oauthRepo, auditService, cfg.App.URL)
-	blogHandler := handler.NewBlogHandler(baseHandler, blogService)
+	blogHandler := handler.NewBlogHandler(baseHandler, blogService, blogImageService)
 
 	// Initialize auth middleware
 	authMiddleware := middleware.NewAuth(authService)
@@ -138,6 +135,9 @@ func run() error {
 	// Blog Public Routes
 	mux.HandleFunc("GET /blogs", blogHandler.List)
 	mux.HandleFunc("GET /blogs/{slug}", blogHandler.View)
+	mux.HandleFunc("GET /blogs/{slug}/cover", blogHandler.GetCoverImage)
+	mux.HandleFunc("GET /gallery/{imageId}", blogHandler.GetGalleryImage)
+	mux.HandleFunc("GET /media/{mediaId}", blogHandler.GetMediaImage)
 
 	// Rate limiter for auth routes (5 reqs/10s roughly, burst 5)
 	authLimiter := middleware.RateLimitMiddleware(0.5, 5)
@@ -219,7 +219,14 @@ func run() error {
 	mux.Handle("POST /a/blogs/create", adminOnly(http.HandlerFunc(blogHandler.Create)))
 	mux.Handle("GET /a/blogs/{id}/edit", adminOnly(http.HandlerFunc(blogHandler.EditPage)))
 	mux.Handle("POST /a/blogs/{id}/edit", adminOnly(http.HandlerFunc(blogHandler.Edit)))
+	mux.Handle("GET /a/blogs/{id}", adminOnly(http.HandlerFunc(blogHandler.GetBlogJSON)))
 	mux.Handle("DELETE /a/blogs/{id}", adminOnly(http.HandlerFunc(blogHandler.Delete)))
+
+	// Blog Gallery routes (admin only)
+	mux.Handle("POST /a/blogs/{id}/gallery", adminOnly(http.HandlerFunc(blogHandler.UploadGalleryImage)))
+	mux.Handle("GET /a/blogs/{id}/gallery", adminOnly(http.HandlerFunc(blogHandler.ListGalleryImages)))
+	mux.Handle("GET /a/blogs/{id}/gallery/{imageId}", adminOnly(http.HandlerFunc(blogHandler.GetGalleryImage)))
+	mux.Handle("DELETE /a/blogs/{id}/gallery/{imageId}", adminOnly(http.HandlerFunc(blogHandler.DeleteGalleryImage)))
 
 	// Super Admin routes (require super admin role)
 	superAdminOnly := middleware.RequireRole(domain.RoleSuperAdmin)

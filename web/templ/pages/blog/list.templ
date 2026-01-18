@@ -1,63 +1,68 @@
 package blog
 
 import (
-	"fmt"
-	"github.com/noruj-official/full-stack-go-template/internal/domain"
-	"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
+"fmt"
+"github.com/noruj-official/full-stack-go-template/internal/domain"
+"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
 )
 
 templ List(title string, blogs []*domain.Blog, total int, page int, limit int, user *domain.User, theme string, themeEnabled bool, oauthEnabled bool) {
-	@layouts.Base(title, "Read our latest articles", user, true, theme, themeEnabled, oauthEnabled) {
-		<div class="px-4 sm:px-6 lg:px-8 py-10">
-			<div class="max-w-4xl mx-auto">
-				<h1 class="text-3xl font-bold text-base-content mb-8">Latest Articles</h1>
+    @layouts.Base(title, "Read our latest articles", user, true, theme, themeEnabled, oauthEnabled) {
+        <div class="px-4 sm:px-6 lg:px-8 py-10">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-base-content mb-8">Latest Articles</h1>
 				
-				if len(blogs) == 0 {
-					<div class="text-center py-20 text-base-content/60">
-						<p>No articles found.</p>
-					</div>
-				} else {
-					<div class="grid gap-8">
-						for _, b := range blogs {
-							<article class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary/50 transition-colors">
-								<div class="card-body">
-									<h2 class="card-title text-2xl">
-										<a href={ templ.SafeURL("/blogs/" + b.Slug) } class="hover:text-primary transition-colors">
-											{ b.Title }
-										</a>
-									</h2>
-									<div class="text-sm text-base-content/60 mb-4 flex gap-2">
-										<span>{ b.PublishedAt.Format("Jan 02, 2006") }</span>
-										if b.Author != nil {
-											<span>•</span>
-											<span>{ b.Author.Name }</span>
-										}
-									</div>
-									<p class="text-base-content/80 mb-4">{ b.Excerpt }</p>
-									<div class="card-actions justify-end">
-										<a href={ templ.SafeURL("/blogs/" + b.Slug) } class="btn btn-primary btn-sm">Read More</a>
-									</div>
-								</div>
-							</article>
-						}
-					</div>
+                    if len(blogs) == 0 {
+                        <div class="text-center py-20 text-base-content/60">
+                            <p>No articles found.</p>
+                            </div>
+                        } else {
+                            <div class="grid gap-8">
+                                for _, b := range blogs {
+                                    <article class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary/50 transition-colors">
+                                        if b.CoverMediaID != nil {
+                                            <figure class="aspect-video bg-base-200">
+                                                <img src={ templ.SafeURL("/blogs/" + b.Slug + "/cover") } alt={ b.Title } class="w-full h-full object-cover"/>
+                                            </figure>
+                                        }
+                                        <div class="card-body">
+                                            <h2 class="card-title text-2xl">
+                                                <a href={ templ.SafeURL("/blogs/" + b.Slug) } class="hover:text-primary transition-colors">
+                                                    { b.Title }
+                                                </a>
+                                            </h2>
+                                            <div class="text-sm text-base-content/60 mb-4 flex gap-2">
+                                                <span>{ b.PublishedAt.Format("Jan 02, 2006") }</span>
+                                                    if b.Author != nil {
+                                                        <span>•</span>
+                                                            <span>{ b.Author.Name }</span>
+                                                            }
+                                                        </div>
+                                                        <p class="text-base-content/80 mb-4">{ b.Excerpt }</p>
+                                                            <div class="card-actions justify-end">
+                                                                <a href={ templ.SafeURL("/blogs/" + b.Slug) } class="btn btn-primary btn-sm">Read More</a>
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                    }
+                                                </div>
 
-					if total > limit {
-						<div class="join grid grid-cols-2 mt-8">
-							if page > 1 {
-								<a href={ templ.SafeURL(fmt.Sprintf("/blogs?page=%d", page-1)) } class="join-item btn btn-outline">Previous</a>
-							} else {
-								<button class="join-item btn btn-outline btn-disabled">Previous</button>
-							}
-							if (page * limit) < total {
-								<a href={ templ.SafeURL(fmt.Sprintf("/blogs?page=%d", page+1)) } class="join-item btn btn-outline">Next</a>
-							} else {
-								<button class="join-item btn btn-outline btn-disabled">Next</button>
-							}
-						</div>
-					}
-				}
-			</div>
-		</div>
-	}
-}
+                                                if total > limit {
+                                                    <div class="join grid grid-cols-2 mt-8">
+                                                        if page > 1 {
+                                                            <a href={ templ.SafeURL(fmt.Sprintf("/blogs?page=%d", page-1)) } class="join-item btn btn-outline">Previous</a>
+                                                            } else {
+                                                                <button class="join-item btn btn-outline btn-disabled">Previous</button>
+                                                                }
+                                                                if (page * limit) < total {
+                                                                    <a href={ templ.SafeURL(fmt.Sprintf("/blogs?page=%d", page+1)) } class="join-item btn btn-outline">Next</a>
+                                                                    } else {
+                                                                        <button class="join-item btn btn-outline btn-disabled">Next</button>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }

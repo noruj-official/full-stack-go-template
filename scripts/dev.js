@@ -193,6 +193,15 @@ async function main() {
         colors.yellow
     );
 
+    // Build Highlight.js (Single run, not watched as it rarely changes)
+    logSystem('Bundling Highlight.js...');
+    try {
+        execSync('npx esbuild web/assets/js/highlight_entry.js --bundle --minify --outfile=web/assets/vendor/highlight.js --format=iife', { stdio: 'inherit' });
+        logSuccess('Bundled Highlight.js');
+    } catch (e) {
+        logError('Failed to bundle Highlight.js');
+    }
+
     // Handle graceful shutdown
     const cleanup = () => {
         console.log(`\n${colors.yellow}Shutting down...${colors.reset}`);

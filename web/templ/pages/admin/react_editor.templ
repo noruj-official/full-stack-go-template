@@ -33,11 +33,16 @@ templ ReactBlogEditor(title string, blog *domain.Blog, user *domain.User, theme 
 
         if blog != nil {
             @templ.Raw(`<script id="editor-data" type="application/json">` + jsonString(map[string]interface{}{
-                "title":        blog.Title,
-                "slug":         blog.Slug,
-                "excerpt":      blog.Excerpt,
-                "content":      blog.Content,
-                "is_published": blog.IsPublished,
+                "id":               blog.ID,
+                "title":            blog.Title,
+                "slug":             blog.Slug,
+                "excerpt":          blog.Excerpt,
+                "content":          blog.Content,
+                "is_published":     blog.IsPublished,
+                "has_cover_image":  blog.CoverMediaID != nil,
+                "meta_title":       blog.MetaTitle,
+                "meta_description": blog.MetaDescription,
+                "meta_keywords":    blog.MetaKeywords,
             }) + `</script>`)
         }
 

@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "watch:css": "npx @tailwindcss/cli -i ./web/assets/css/app.css -o ./web/assets/css/output.css --watch",
-    "build": "npm run build:templ && npm run build:css && npm run build:go",
+    "build": "npm run build:vendor && npm run build:templ && npm run build:css && npm run build:js:react && npm run build:js:highlight && npm run build:go",
+    "build:vendor": "node scripts/copy-vendor.js",
+    "build:js:react": "npx esbuild web/assets/js/react/main.jsx --bundle --minify --outfile=web/assets/js/react.bundle.js --loader:.jsx=jsx --target=es2020",
+    "build:js:highlight": "npx esbuild web/assets/js/highlight_entry.js --bundle --minify --outfile=web/assets/vendor/highlight.js --format=iife",
     "build:templ": "go run github.com/a-h/templ/cmd/templ generate",
     "build:css": "npx @tailwindcss/cli -i ./web/assets/css/app.css -o ./web/assets/css/output.css --minify",
     "build:go": "go build -o tmp/main.exe cmd/server/main.go",

@@ -183,3 +183,42 @@ CREATE TABLE IF NOT EXISTS blogs (
 CREATE INDEX IF NOT EXISTS idx_blogs_slug ON blogs(slug);
 CREATE INDEX IF NOT EXISTS idx_blogs_author_id ON blogs(author_id);
 CREATE INDEX IF NOT EXISTS idx_blogs_published_at ON blogs(published_at);
+
+
+-- Cover image columns (DEPRECATED: Use cover_media_id instead)
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_image BYTEA;
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_image_type VARCHAR(50);
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_image_size INTEGER DEFAULT 0;
+
+-- New media-based cover image (PREFERRED)
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_media_id UUID REFERENCES media(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_blogs_cover_media ON blogs(cover_media_id);
+
+
+-- SEO metadata columns
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS meta_title VARCHAR(255);
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS meta_description TEXT;
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS meta_keywords TEXT;
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS og_image BYTEA;
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS og_image_type VARCHAR(50);
+ALTER TABLE blogs ADD COLUMN IF NOT EXISTS og_image_size INTEGER DEFAULT 0;
+
+-- ============================================
+-- Blog Images Table (Gallery)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS blog_images (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    blog_id UUID NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
+    image_data BYTEA NOT NULL,
+    image_type VARCHAR(50) NOT NULL,
+    image_size INTEGER NOT NULL,
+    alt_text TEXT,
+    caption TEXT,
+    position INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_blog_images_blog_id ON blog_images(blog_id);
+CREATE INDEX IF NOT EXISTS idx_blog_images_position ON blog_images(blog_id, position);

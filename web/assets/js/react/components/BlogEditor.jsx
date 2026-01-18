@@ -1,4 +1,6 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
+import GalleryManager from './GalleryManager'
+import ImagePicker from './ImagePicker'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -30,7 +32,9 @@ import {
 // Lowlight setup for syntax highlighting
 const lowlight = createLowlight(common)
 
-const MenuBar = ({ editor }) => {
+const MenuBar = ({ editor, blogId }) => {
+    const [showImagePicker, setShowImagePicker] = useState(false)
+
     if (!editor) {
         return null
     }
@@ -58,6 +62,12 @@ const MenuBar = ({ editor }) => {
         const url = window.prompt('Enter YouTube URL')
         if (url) {
             editor.commands.setYoutubeVideo({ src: url })
+        }
+    }, [editor])
+
+    const insertImageFromGallery = useCallback((imageUrl) => {
+        if (imageUrl) {
+            editor.chain().focus().setImage({ src: imageUrl }).run()
         }
     }, [editor])
 
@@ -134,12 +144,31 @@ const MenuBar = ({ editor }) => {
             <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} disabled={!editor.isActive('link')} className="btn btn-ghost btn-sm btn-square" title="Unlink">
                 <Unlink className="w-4 h-4" />
             </button>
-            <button type="button" onClick={addImage} className="btn btn-ghost btn-sm btn-square" title="Image">
+            <button type="button" onClick={addImage} className="btn btn-ghost btn-sm btn-square" title="Image URL">
                 <ImageIcon className="w-4 h-4" />
             </button>
+            {blogId && (
+                <button
+                    type="button"
+                    onClick={() => setShowImagePicker(true)}
+                    className="btn btn-ghost btn-sm"
+                    title="Insert from Gallery"
+                >
+                    <ImageIcon className="w-4 h-4" />
+                    <span className="text-xs ml-1">Gallery</span>
+                </button>
+            )}
             <button type="button" onClick={addYoutube} className="btn btn-ghost btn-sm btn-square" title="Youtube">
                 <YoutubeIcon className="w-4 h-4" />
             </button>
+
+            {showImagePicker && (
+                <ImagePicker
+                    blogId={blogId}
+                    onSelect={insertImageFromGallery}
+                    onClose={() => setShowImagePicker(false)}
+                />
+            )}
 
             <div className="divider divider-horizontal mx-0 w-px h-6 my-auto bg-base-300"></div>
 
@@ -244,6 +273,21 @@ const BlogEditor = ({ initialData, actionUrl }) => {
     const [content, setContent] = useState(initialData?.content || '')
     const [isPublished, setIsPublished] = useState(initialData?.is_published || false)
 
+    // SEO metadata states
+    const [metaTitle, setMetaTitle] = useState(initialData?.meta_title || '')
+    const [metaDescription, setMetaDescription] = useState(initialData?.meta_description || '')
+    const [metaKeywords, setMetaKeywords] = useState(initialData?.meta_keywords || '')
+
+    // Cover image state
+    const [coverImageFile, setCoverImageFile] = useState(null)
+    const [coverImagePreview, setCoverImagePreview] = useState(
+        initialData?.has_cover_image ? `/blogs/${initialData.slug}/cover` : null
+    )
+    const [removeCoverImageFlag, setRemoveCoverImageFlag] = useState(false)
+    const [showCoverImagePicker, setShowCoverImagePicker] = useState(false)
+    const [selectedGalleryImageId, setSelectedGalleryImageId] = useState(null)
+    const fileInputRef = useRef(null)
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -311,6 +355,57 @@ const BlogEditor = ({ initialData, actionUrl }) => {
         }
     }
 
+    const handleCoverImageChange = (e) => {
+        const file = e.target.files[0]
+        console.log("File selected:", file)
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file')
+                return
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size must not exceed 5MB')
+                return
+            }
+
+            setCoverImageFile(file)
+
+            // Create preview
+            const reader = new FileReader()
+            reader.onload = () => {
+                console.log("FileReader onload triggered")
+            }
+            reader.onloadend = () => {
+                console.log("FileReader onloadend triggered, result length:", reader.result?.length)
+                setCoverImagePreview(reader.result)
+            }
+            reader.onerror = (e) => {
+                console.error("FileReader error:", e)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
+    const removeCoverImage = () => {
+        setCoverImageFile(null)
+        setCoverImagePreview(null)
+        setRemoveCoverImageFlag(true)
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
+
+    const selectCoverFromGallery = (imageUrl) => {
+        // Extract image ID from URL (format: /gallery/{id})
+        const imageId = imageUrl.split('/').pop()
+        setCoverImagePreview(imageUrl)
+        setSelectedGalleryImageId(imageId)
+        setRemoveCoverImageFlag(false)
+    }
+
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
@@ -324,7 +419,76 @@ const BlogEditor = ({ initialData, actionUrl }) => {
             </div>
 
             <div className="bg-base-100 rounded-lg shadow-sm border border-base-200 p-6">
-                <form action={actionUrl} method="POST" className="space-y-6">
+                <form action={actionUrl} method="POST" encType="multipart/form-data" className="space-y-6">
+                    {/* Cover Image Upload */}
+                    <div className="form-control">
+                        <label className="label"><span className="label-text font-medium">Cover Image</span></label>
+
+                        {/* Preview Section */}
+                        {coverImagePreview && (
+                            <div className="relative mb-4">
+                                <img src={coverImagePreview} alt="Cover preview" className="w-full aspect-video object-cover rounded-lg border border-base-300" />
+                                <button
+                                    type="button"
+                                    onClick={removeCoverImage}
+                                    className="btn btn-sm btn-circle btn-error absolute top-2 right-2"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        )}
+
+                        {/* File Input - Always present but positioned off-screen when preview exists */}
+                        <div className={coverImagePreview ? 'absolute -left-[9999px]' : 'space-y-3'}>
+                            <div className="border-2 border-dashed border-base-300 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                                <input
+                                    type="file"
+                                    name="cover_image"
+                                    accept="image/*"
+                                    onChange={handleCoverImageChange}
+                                    className="file-input file-input-bordered w-full max-w-xs"
+                                    ref={fileInputRef}
+                                    id="cover_image_input"
+                                />
+                                <p className="text-sm text-base-content/60 mt-2">Upload a cover image (JPEG, PNG, GIF, WebP - Max 5MB)</p>
+                            </div>
+                            {initialData?.id && (
+                                <div className="text-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCoverImagePicker(true)}
+                                        className="btn btn-outline btn-sm"
+                                    >
+                                        <ImageIcon className="w-4 h-4 mr-1" />
+                                        Choose from Gallery
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Hidden input to signal cover image removal */}
+                        {removeCoverImageFlag && (
+                            <input type="hidden" name="remove_cover_image" value="true" />
+                        )}
+
+                        {/* Hidden input for selected gallery image ID */}
+                        {selectedGalleryImageId && (
+                            <input type="hidden" name="cover_image_gallery_id" value={selectedGalleryImageId} />
+                        )}
+                    </div>
+
+                    {/* Cover Image Picker Modal */}
+                    {showCoverImagePicker && (
+                        <ImagePicker
+                            blogId={initialData?.id}
+                            onSelect={selectCoverFromGallery}
+                            onClose={() => setShowCoverImagePicker(false)}
+                        />
+                    )}
+
+                    <div className="divider"></div>
+
+                    {/* Basic Fields */}
                     <div className="form-control">
                         <label className="label"><span className="label-text font-medium">Title</span></label>
                         <input type="text" name="title" value={title} onChange={handleTitleChange} placeholder="Enter blog title" className="input input-bordered w-full" required />
@@ -340,10 +504,67 @@ const BlogEditor = ({ initialData, actionUrl }) => {
                         <textarea name="excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} className="textarea textarea-bordered h-20" placeholder="Brief summary for listings..." />
                     </div>
 
+                    <div className="divider">SEO Metadata</div>
+
+                    {/* SEO Fields */}
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text font-medium">Meta Title</span>
+                            <span className="label-text-alt text-base-content/60">{metaTitle.length}/60</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="meta_title"
+                            value={metaTitle}
+                            onChange={(e) => setMetaTitle(e.target.value)}
+                            placeholder="SEO title (defaults to blog title)"
+                            className="input input-bordered w-full"
+                            maxLength={60}
+                        />
+                        <label className="label">
+                            <span className="label-text-alt text-base-content/60">Recommended: 50-60 characters</span>
+                        </label>
+                    </div>
+
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text font-medium">Meta Description</span>
+                            <span className="label-text-alt text-base-content/60">{metaDescription.length}/160</span>
+                        </label>
+                        <textarea
+                            name="meta_description"
+                            value={metaDescription}
+                            onChange={(e) => setMetaDescription(e.target.value)}
+                            className="textarea textarea-bordered h-24"
+                            placeholder="SEO description (defaults to excerpt)"
+                            maxLength={160}
+                        />
+                        <label className="label">
+                            <span className="label-text-alt text-base-content/60">Recommended: 150-160 characters</span>
+                        </label>
+                    </div>
+
+                    <div className="form-control">
+                        <label className="label"><span className="label-text font-medium">Meta Keywords</span></label>
+                        <input
+                            type="text"
+                            name="meta_keywords"
+                            value={metaKeywords}
+                            onChange={(e) => setMetaKeywords(e.target.value)}
+                            placeholder="keyword1, keyword2, keyword3"
+                            className="input input-bordered w-full"
+                        />
+                        <label className="label">
+                            <span className="label-text-alt text-base-content/60">Comma-separated keywords for search engines</span>
+                        </label>
+                    </div>
+
+                    <div className="divider">Content</div>
+
                     <div className="form-control">
                         <label className="label"><span className="label-text font-medium">Content</span></label>
                         <div className="border border-base-300 rounded-lg bg-base-100 overflow-hidden focus-within:ring-2 focus-within:ring-primary/20">
-                            <MenuBar editor={editor} />
+                            <MenuBar editor={editor} blogId={initialData?.id} />
                             <EditorContent editor={editor} className="min-h-[300px]" />
                         </div>
                         <input type="hidden" name="content" value={content} />
@@ -364,6 +585,13 @@ const BlogEditor = ({ initialData, actionUrl }) => {
                     </div>
                 </form>
             </div>
+
+            {/* Gallery Management Section */}
+            {initialData?.id && (
+                <div className="mt-8 bg-base-100 rounded-lg shadow-sm border border-base-200 p-6">
+                    <GalleryManager blogId={initialData.id} />
+                </div>
+            )}
         </div>
     )
 }

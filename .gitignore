@@ -45,6 +45,8 @@ web/assets/css/output.css
 /dist/
 /build/
 web/assets/vendor/
+web/assets/js/react.bundle.js
+web/assets/js/react.bundle.js.map
 
 # Temporary files
 /tmp/

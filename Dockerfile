@@ -18,9 +18,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build assets (templ templates + CSS)
+# Build assets (templ templates + CSS + JS bundles)
 # Skip build:go since the binary is built later via go build
-RUN npm run build:templ && npm run build:css
+RUN npm run build:vendor && npm run build:templ && npm run build:css && npm run build:js:react && npm run build:js:highlight
 
 # Install templ
 RUN go install github.com/a-h/templ/cmd/templ@latest
