@@ -126,19 +126,25 @@ func run() error {
 
 	// Static files
 	// Debug: Check if vendor files exist
-	if _, err := os.Stat("web/assets/vendor/htmx.min.js"); os.IsNotExist(err) {
-		log.Println("WARNING: web/assets/vendor/htmx.min.js does not exist!")
+	assetsPath := "web/assets"
+	if _, err := os.Stat("/app/web/assets"); err == nil {
+		assetsPath = "/app/web/assets"
+	}
+
+	if _, err := os.Stat(assetsPath + "/vendor/htmx.min.js"); os.IsNotExist(err) {
+		log.Printf("WARNING: %s/vendor/htmx.min.js does not exist!", assetsPath)
 		// List web/assets/vendor content
-		files, _ := os.ReadDir("web/assets/vendor")
-		log.Printf("web/assets/vendor content: %d files", len(files))
+		files, _ := os.ReadDir(assetsPath + "/vendor")
+		log.Printf("%s/vendor content: %d files", assetsPath, len(files))
 		for _, f := range files {
 			log.Printf(" - %s", f.Name())
 		}
 	} else {
-		log.Println("SUCCESS: web/assets/vendor/htmx.min.js found")
+		log.Printf("SUCCESS: %s/vendor/htmx.min.js found", assetsPath)
 	}
 
-	fileServer := http.FileServer(http.Dir("web/assets"))
+	log.Printf("Serving static files from: %s", assetsPath)
+	fileServer := http.FileServer(http.Dir(assetsPath))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
 
 	// Public routes (no auth required)

@@ -47,8 +47,9 @@ COPY --from=builder /app/server /app/server
 # Copy web assets (templates and static files)
 COPY --from=builder /app/web /app/web
 
-# Set ownership
-RUN chown -R appuser:appgroup /app
+# Set ownership and permissions
+RUN chown -R appuser:appgroup /app && \
+    chmod -R 755 /app/web
 
 # Switch to non-root user
 USER appuser

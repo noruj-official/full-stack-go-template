@@ -5,10 +5,25 @@ const copyFile = (src, dest) => {
     const srcPath = path.join(__dirname, '..', src);
     const destPath = path.join(__dirname, '..', dest);
 
+    console.log(`Copying from ${srcPath} to ${destPath}`);
+
     // Ensure destination directory exists
     const destDir = path.dirname(destPath);
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });
+        console.log(`Created directory ${destDir}`);
+    }
+
+    if (!fs.existsSync(srcPath)) {
+        console.error(`ERROR: Source file not found: ${srcPath}`);
+        // List directory content of parent to help debug
+        const parentDir = path.dirname(srcPath);
+        if (fs.existsSync(parentDir)) {
+            console.log(`Listing ${parentDir}:`, fs.readdirSync(parentDir));
+        } else {
+            console.error(`Parent directory ${parentDir} does not exist either.`);
+        }
+        process.exit(1);
     }
 
     fs.copyFileSync(srcPath, destPath);
