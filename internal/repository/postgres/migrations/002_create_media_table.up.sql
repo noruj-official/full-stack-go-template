@@ -17,6 +17,7 @@ CREATE INDEX IF NOT EXISTS idx_media_content_type ON media(content_type);
 -- Add reference columns
 ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_media_id UUID REFERENCES media(id) ON DELETE SET NULL;
 ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_media_id UUID REFERENCES media(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_blogs_cover_media ON blogs(cover_media_id);
 ALTER TABLE blog_images ADD COLUMN IF NOT EXISTS media_id UUID REFERENCES media(id) ON DELETE CASCADE;
 
 -- Migrate Data (This part is tricky in pure SQL without procedural extensions if we want to handle data movement perfectly, 

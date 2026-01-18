@@ -190,9 +190,7 @@ ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_image BYTEA;
 ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_image_type VARCHAR(50);
 ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_image_size INTEGER DEFAULT 0;
 
--- New media-based cover image (PREFERRED)
-ALTER TABLE blogs ADD COLUMN IF NOT EXISTS cover_media_id UUID REFERENCES media(id) ON DELETE SET NULL;
-CREATE INDEX IF NOT EXISTS idx_blogs_cover_media ON blogs(cover_media_id);
+
 
 
 -- SEO metadata columns
