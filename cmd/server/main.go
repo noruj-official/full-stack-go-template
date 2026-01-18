@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -143,9 +145,38 @@ func run() error {
 		log.Printf("SUCCESS: %s/vendor/htmx.min.js found", assetsPath)
 	}
 
+	// Static files debug handler
 	log.Printf("Serving static files from: %s", assetsPath)
-	fileServer := http.FileServer(http.Dir(assetsPath))
-	mux.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
+	mux.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+		// Log the raw request
+		path := r.URL.Path
+		// Strip prefix manually to be sure
+		cleanPath := strings.TrimPrefix(path, "/assets/")
+
+		// Construct full file path
+		fullPath := filepath.Join(assetsPath, cleanPath)
+
+		log.Printf("[DEBUG_ASSETS] Request: %s -> FilePath: %s", path, fullPath)
+
+		// Check if file exists
+		info, err := os.Stat(fullPath)
+		if err != nil {
+			log.Printf("[DEBUG_ASSETS] ERROR: os.Stat failed for %s: %v", fullPath, err)
+			http.Error(w, fmt.Sprintf("File not found: %s, Error: %v", cleanPath, err), http.StatusNotFound)
+			return
+		}
+
+		if info.IsDir() {
+			log.Printf("[DEBUG_ASSETS] ERROR: %s is a directory", fullPath)
+			http.Error(w, "Directory listing forbidden", http.StatusForbidden)
+			return
+		}
+
+		log.Printf("[DEBUG_ASSETS] Serving file: %s (Size: %d, Mode: %s)", fullPath, info.Size(), info.Mode())
+
+		// Serve the file
+		http.ServeFile(w, r, fullPath)
+	})
 
 	// Public routes (no auth required)
 	mux.HandleFunc("GET /{$}", homeHandler.Index)
