@@ -162,3 +162,24 @@ VALUES
     ('github', '', '', false, ARRAY['user:email'], 'https://github.com/login/oauth/authorize', 'https://github.com/login/oauth/access_token', 'https://api.github.com/user'),
     ('linkedin', '', '', false, ARRAY['r_liteprofile', 'r_emailaddress'], 'https://www.linkedin.com/oauth/v2/authorization', 'https://www.linkedin.com/oauth/v2/accessToken', 'https://api.linkedin.com/v2/me')
 ON CONFLICT (provider) DO NOTHING;
+
+-- ============================================
+-- Blogs Table
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS blogs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    excerpt TEXT,
+    author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    is_published BOOLEAN NOT NULL DEFAULT false,
+    published_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_blogs_slug ON blogs(slug);
+CREATE INDEX IF NOT EXISTS idx_blogs_author_id ON blogs(author_id);
+CREATE INDEX IF NOT EXISTS idx_blogs_published_at ON blogs(published_at);

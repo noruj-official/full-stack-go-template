@@ -177,11 +177,28 @@ async function main() {
         colors.blue
     );
 
+    // Start Esbuild for React (Watch mode)
+    const esbuildProc = spawnProcess(
+        'JS ',
+        'npx',
+        [
+            'esbuild',
+            'web/assets/js/react/main.jsx',
+            '--bundle',
+            '--outfile=web/assets/js/react.bundle.js',
+            '--loader:.jsx=jsx',
+            '--sourcemap',
+            '--watch'
+        ],
+        colors.yellow
+    );
+
     // Handle graceful shutdown
     const cleanup = () => {
         console.log(`\n${colors.yellow}Shutting down...${colors.reset}`);
         goProc.kill();
         cssProc.kill();
+        esbuildProc.kill();
         process.exit(0);
     };
 
@@ -191,6 +208,7 @@ async function main() {
     // Keep the script running
     goProc.on('exit', () => {
         cssProc.kill();
+        esbuildProc.kill();
         process.exit(1);
     });
 }

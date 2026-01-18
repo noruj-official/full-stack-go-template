@@ -1,9 +1,12 @@
 @import "tailwindcss";
+@import "highlight.js/styles/atom-one-dark.css";
 
 @plugin "daisyui" {
     themes: corporate, night, light, dark;
     components: btn, menu, dropdown, badge, tooltip, card, alert, avatar, input, select, textarea, checkbox, table, loading, progress;
 }
+
+@plugin "@tailwindcss/typography";
 
 
 @plugin "daisyui/theme" {
@@ -241,6 +244,39 @@
 
     .htmx-request .htmx-indicator,
     .htmx-request.htmx-indicator {
+        @apply opacity-100;
+    }
+
+    /* Code block styling - Fix double border issue */
+    .prose pre {
+        @apply relative rounded-lg border border-base-300 bg-base-200 p-0 my-4 overflow-hidden;
+    }
+
+    .prose pre code {
+        @apply block p-4 bg-transparent overflow-x-auto;
+    }
+
+    /* Code block copy button */
+    .code-block-wrapper {
+        @apply relative;
+    }
+
+    .copy-code-btn {
+        @apply absolute top-2 right-2 px-3 py-1.5 text-xs font-medium rounded-md;
+        @apply bg-base-300/80 hover:bg-base-300 text-base-content;
+        @apply transition-all duration-200 opacity-0 group-hover:opacity-100;
+        @apply border border-base-content/10;
+    }
+
+    .copy-code-btn:hover {
+        @apply scale-105;
+    }
+
+    .copy-code-btn.copied {
+        @apply bg-success/80 text-success-content;
+    }
+
+    .prose pre:hover .copy-code-btn {
         @apply opacity-100;
     }
 }

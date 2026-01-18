@@ -61,6 +61,7 @@ func run() error {
 	auditRepo := postgres.NewAuditLogRepository(db)
 	featureRepo := postgres.NewFeatureRepository(db)
 	oauthRepo := postgres.NewOAuthRepository(db, cfg.Auth.Secret)
+	blogRepo := postgres.NewBlogRepository(db)
 
 	// Initialize services
 	emailService := service.NewResendEmailService(cfg.Email.ResendAPIKey, cfg.Email.ResendFromEmail, cfg.App.URL)
@@ -69,6 +70,7 @@ func run() error {
 	authService := service.NewAuthService(userRepo, sessionRepo, passwordResetRepo, oauthRepo, emailService, featureService, cfg.App.URL, cfg.Auth.Secret)
 	activityService := service.NewActivityService(activityRepo)
 	auditService := service.NewAuditService(auditRepo)
+	blogService := service.NewBlogService(blogRepo)
 
 	// SyncFeatures feature flags
 	err = featureService.SyncFeatures(context.Background(), map[string]domain.FeatureConfig{
@@ -117,6 +119,7 @@ func run() error {
 	auditHandler.StartMonitoring(ctx)
 	featureHandler := handler.NewFeatureHandler(baseHandler, featureService, auditService)
 	adminOAuthHandler := handler.NewAdminOAuthHandler(baseHandler, oauthRepo, auditService, cfg.App.URL)
+	blogHandler := handler.NewBlogHandler(baseHandler, blogService)
 
 	// Initialize auth middleware
 	authMiddleware := middleware.NewAuth(authService)
@@ -131,6 +134,10 @@ func run() error {
 	// Public routes (no auth required)
 	mux.HandleFunc("GET /{$}", homeHandler.Index)
 	mux.HandleFunc("GET /health", homeHandler.HealthCheck)
+
+	// Blog Public Routes
+	mux.HandleFunc("GET /blogs", blogHandler.List)
+	mux.HandleFunc("GET /blogs/{slug}", blogHandler.View)
 
 	// Rate limiter for auth routes (5 reqs/10s roughly, burst 5)
 	authLimiter := middleware.RateLimitMiddleware(0.5, 5)
@@ -205,6 +212,14 @@ func run() error {
 	// Admin analytics and activity routes
 	mux.Handle("GET /a/analytics", adminOnly(http.HandlerFunc(analyticsHandler.AdminAnalytics)))
 	mux.Handle("GET /a/activity", adminOnly(http.HandlerFunc(analyticsHandler.SystemActivity)))
+
+	// Admin Blog routes
+	mux.Handle("GET /a/blogs", adminOnly(http.HandlerFunc(blogHandler.AdminList)))
+	mux.Handle("GET /a/blogs/create", adminOnly(http.HandlerFunc(blogHandler.CreatePage)))
+	mux.Handle("POST /a/blogs/create", adminOnly(http.HandlerFunc(blogHandler.Create)))
+	mux.Handle("GET /a/blogs/{id}/edit", adminOnly(http.HandlerFunc(blogHandler.EditPage)))
+	mux.Handle("POST /a/blogs/{id}/edit", adminOnly(http.HandlerFunc(blogHandler.Edit)))
+	mux.Handle("DELETE /a/blogs/{id}", adminOnly(http.HandlerFunc(blogHandler.Delete)))
 
 	// Super Admin routes (require super admin role)
 	superAdminOnly := middleware.RequireRole(domain.RoleSuperAdmin)

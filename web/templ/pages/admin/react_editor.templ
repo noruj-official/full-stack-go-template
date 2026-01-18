@@ -1,0 +1,47 @@
+package admin
+
+import (
+"encoding/json"
+"fmt"
+"github.com/noruj-official/full-stack-go-template/internal/domain"
+"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
+)
+
+// Helper to serialize simple structs to JSON for React props
+func jsonString(v interface{}) string {
+    b, err := json.Marshal(v)
+    if err != nil {
+        return "{}"
+    }
+    return string(b)
+}
+
+templ ReactBlogEditor(title string, blog *domain.Blog, user *domain.User, theme string, themeEnabled bool, oauthEnabled bool) {
+    @layouts.Base(title, "Create or edit blog post", user, true, theme, themeEnabled, oauthEnabled) {
+        <div
+        id="react-root"
+        if blog != nil {
+            data-action={ fmt.Sprintf("/a/blogs/%s/edit", blog.ID) }
+        } else {
+            data-action="/a/blogs/create"
+        }
+        >
+        <div class="flex items-center justify-center p-12">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        </div>
+
+        if blog != nil {
+            @templ.Raw(`<script id="editor-data" type="application/json">` + jsonString(map[string]interface{}{
+                "title":        blog.Title,
+                "slug":         blog.Slug,
+                "excerpt":      blog.Excerpt,
+                "content":      blog.Content,
+                "is_published": blog.IsPublished,
+            }) + `</script>`)
+        }
+
+        <!-- Load React Bundle -->
+            <script src="/assets/js/react.bundle.js"></script>
+            }
+        }

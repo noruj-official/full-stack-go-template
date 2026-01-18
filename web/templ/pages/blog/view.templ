@@ -1,0 +1,78 @@
+package blog
+
+import (
+"github.com/noruj-official/full-stack-go-template/internal/domain"
+"github.com/noruj-official/full-stack-go-template/web/templ/layouts"
+)
+
+templ View(title string, blog *domain.Blog, user *domain.User, theme string, themeEnabled bool, oauthEnabled bool) {
+    @layouts.Base(title, blog.Excerpt, user, true, theme, themeEnabled, oauthEnabled) {
+        <div class="px-4 sm:px-6 lg:px-8 py-10">
+            <article class="max-w-3xl mx-auto prose prose-lg lg:prose-xl">
+                <h1 class="mb-4">{ blog.Title }</h1>
+                    <div class="flex items-center text-sm text-base-content/60 mb-8 not-prose">
+                        <span>{ blog.PublishedAt.Format("Jan 02, 2006") }</span>
+                            if blog.Author != nil {
+                                <span class="mx-2">•</span>
+                                    <span>{ blog.Author.Name }</span>
+                                    }
+                                </div>
+				
+                                <div id="blog-content" class="mb-10">
+                                    @templ.Raw(blog.Content)
+                                </div>
+
+                                <div class="not-prose border-t border-base-content/10 pt-8 mt-12">
+                                    <a href="/a/blogs" class="btn btn-ghost gap-2">
+                                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                            Back to Blog
+                                        </a>
+                                    </div>
+                                </article>
+
+                                <!-- Syntax Highlighting -->
+                                    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+                                        <script>hljs.highlightAll();</script>
+                                            <script>
+                                                // Add copy buttons to code blocks
+                                                document.addEventListener('DOMContentLoaded', function() {
+                                                    const codeBlocks = document.querySelectorAll('pre code');
+                                
+                                                    codeBlocks.forEach((codeBlock) => {
+                                                        const pre = codeBlock.parentElement;
+                                    
+                                                        // Create copy button
+                                                        const copyBtn = document.createElement('button');
+                                                        copyBtn.className = 'copy-code-btn';
+                                                        copyBtn.innerHTML = 'Copy';
+                                                        copyBtn.setAttribute('aria-label', 'Copy code to clipboard');
+                                    
+                                                        // Add click event
+                                                        copyBtn.addEventListener('click', async () => {
+                                                            try {
+                                                                const code = codeBlock.textContent;
+                                                                await navigator.clipboard.writeText(code);
+                                            
+                                                                copyBtn.innerHTML = 'Copied!';
+                                                                copyBtn.classList.add('copied');
+                                            
+                                                                setTimeout(() => {
+                                                                    copyBtn.innerHTML = 'Copy';
+                                                                    copyBtn.classList.remove('copied');
+                                                                }, 2000);
+                                                            } catch (err) {
+                                                                console.error('Failed to copy:', err);
+                                                                copyBtn.innerHTML = 'Failed';
+                                                                setTimeout(() => {
+                                                                    copyBtn.innerHTML = 'Copy';
+                                                                }, 2000);
+                                                            }
+                                                        });
+                                    
+                                                        pre.appendChild(copyBtn);
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    }
+                                }

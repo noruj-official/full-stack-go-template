@@ -47,6 +47,7 @@ A production-ready, full-stack Go web application template with modern frontend 
 - **HTMX** for dynamic HTML updates without writing JavaScript
 - **Alpine.js** for lightweight reactivity
 - **Lucide Icons** for beautiful, consistent iconography
+- **ECharts** for interactive data visualization
 
 ### Developer Experience
 - **Docker support** with multi-stage builds
