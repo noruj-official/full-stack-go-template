@@ -29,21 +29,24 @@ services:
       - "3000:3000"
     environment:
       # Server
-      SERVER_HOST: "0.0.0.0"
-      SERVER_PORT: "3000"
+      SERVER_HOST: "${SERVER_HOST:-0.0.0.0}"
+      SERVER_PORT: "${SERVER_PORT:-3000}"
       # Database - connects to postgres container
-      DATABASE_URL: "postgres://postgres:postgres@postgres:5432/app_db?sslmode=disable"
+      DATABASE_URL: "${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/app_db?sslmode=disable}"
       # App
-      APP_ENV: "production"
-      APP_NAME: "Full Stack Go Template"
-      APP_URL: "http://localhost:3000"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_NAME: "${APP_NAME:-Full Stack Go Template}"
+      APP_URL: "${APP_URL:-http://localhost:3000}"
+      APP_LOGO: "${APP_LOGO:-/static/img/logo.svg}"
       # Auth - CHANGE THIS IN PRODUCTION!
       AUTH_SECRET: "${AUTH_SECRET:-change-me-in-production}"
       # Email (optional)
       RESEND_API_KEY: "${RESEND_API_KEY:-}"
       RESEND_FROM_EMAIL: "${RESEND_FROM_EMAIL:-onboarding@resend.dev}"
       # Storage
-      PROFILE_IMAGE_STORAGE: "database"
+      PROFILE_IMAGE_STORAGE: "${PROFILE_IMAGE_STORAGE:-database}"
+      S3_BUCKET: "${S3_BUCKET:-}"
+      S3_REGION: "${S3_REGION:-}"
     depends_on:
       postgres:
         condition: service_healthy
