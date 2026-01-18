@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/noruj-official/full-stack-go-template/internal/domain"
@@ -32,4 +35,18 @@ func (s *MediaService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Media
 
 func (s *MediaService) Delete(ctx context.Context, id uuid.UUID) error {
 	return s.repo.Delete(ctx, id)
+}
+
+// ProcessImageUpload reads the file into a byte slice and detects its content type
+func ProcessImageUpload(file multipart.File, header *multipart.FileHeader) ([]byte, string, int64, error) {
+	// Read file content
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return nil, "", 0, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	// Detect content type
+	contentType := http.DetectContentType(data)
+
+	return data, contentType, header.Size, nil
 }

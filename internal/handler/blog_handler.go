@@ -17,15 +17,15 @@ import (
 
 type BlogHandler struct {
 	*Handler
-	blogService      *service.BlogService
-	blogImageService *service.BlogImageService
+	blogService  *service.BlogService
+	mediaService *service.MediaService
 }
 
-func NewBlogHandler(base *Handler, blogService *service.BlogService, blogImageService *service.BlogImageService) *BlogHandler {
+func NewBlogHandler(base *Handler, blogService *service.BlogService, mediaService *service.MediaService) *BlogHandler {
 	return &BlogHandler{
-		Handler:          base,
-		blogService:      blogService,
-		blogImageService: blogImageService,
+		Handler:      base,
+		blogService:  blogService,
+		mediaService: mediaService,
 	}
 }
 
@@ -99,15 +99,21 @@ func (h *BlogHandler) GetCoverImage(w http.ResponseWriter, r *http.Request) {
 		slug = chi.URLParam(r, "slug")
 	}
 
-	imageData, imageType, err := h.blogImageService.GetCoverImageBySlug(r.Context(), slug)
-	if err != nil || imageData == nil {
+	b, err := h.blogService.GetBySlug(r.Context(), slug)
+	if err != nil || b.CoverMediaID == nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	w.Header().Set("Content-Type", imageType)
+	media, err := h.mediaService.GetByID(r.Context(), *b.CoverMediaID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", media.ContentType)
 	w.Header().Set("Cache-Control", "public, max-age=86400") // Cache for 1 day
-	w.Write(imageData)
+	w.Write(media.Data)
 }
 
 // Admin Routes
@@ -270,24 +276,6 @@ func (h *BlogHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		input.RemoveCoverImage = true
 	}
 
-	// Check if user selected an existing gallery image as cover
-	galleryImageID := r.FormValue("cover_image_gallery_id")
-	if galleryImageID != "" {
-		imageID, err := uuid.Parse(galleryImageID)
-		if err == nil {
-			fmt.Printf("Setting cover from gallery image: %s\n", galleryImageID)
-			// We need to get the media_id from the blog_image
-			// First, get the blog_image to find its media_id
-			blogImage, err := h.blogImageService.GetByID(r.Context(), imageID)
-			if err == nil && blogImage != nil {
-				fmt.Printf("Found blog image, media_id: %s\n", blogImage.MediaID)
-				input.CoverMediaID = &blogImage.MediaID
-			} else {
-				fmt.Printf("Error getting blog image: %v\n", err)
-			}
-		}
-	}
-
 	// Handle cover image upload if provided
 	file, header, err := r.FormFile("cover_image")
 	if err == nil {
@@ -363,180 +351,4 @@ func (h *BlogHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/a/blogs", http.StatusSeeOther)
-}
-
-// Gallery Image Endpoints
-
-func (h *BlogHandler) UploadGalleryImage(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	blogID, err := uuid.Parse(idStr)
-	if err != nil {
-		h.Error(w, r, http.StatusBadRequest, "Invalid blog ID")
-		return
-	}
-
-	// Verify blog exists
-	blog, err := h.blogService.GetByID(r.Context(), blogID)
-	if err != nil || blog == nil {
-		h.Error(w, r, http.StatusNotFound, "Blog not found")
-		return
-	}
-
-	err = r.ParseMultipartForm(10 << 20) // 10 MB max
-	if err != nil {
-		h.Error(w, r, http.StatusBadRequest, "Invalid form data")
-		return
-	}
-
-	file, header, err := r.FormFile("image")
-	if err != nil {
-		h.Error(w, r, http.StatusBadRequest, "No image file provided")
-		return
-	}
-	defer file.Close()
-
-	imageData, imageType, _, err := service.ProcessImageUpload(file, header)
-	if err != nil {
-		h.Error(w, r, http.StatusBadRequest, fmt.Sprintf("Invalid image: %v", err))
-		return
-	}
-
-	altText := r.FormValue("alt_text")
-	caption := r.FormValue("caption")
-	position, _ := strconv.Atoi(r.FormValue("position"))
-
-	input := domain.CreateBlogImageInput{
-		BlogID:      blogID,
-		ImageData:   imageData,
-		ContentType: imageType,
-		// ImageSize: imageSize, // calculated in service/repo? Input doesn't have ImageSize field anymore?
-		// Wait, CreateBlogImageInput in step 241 has: ImageData, ContentType, AltText... No ImageSize?
-		// Let me check step 241 output carefully.
-		// "ContentType string", "// Size calculated from data"
-		// "AltText", "Caption", "Position".
-		// So ImageSize is REMOVED from input.
-		AltText:  altText,
-		Caption:  caption,
-		Position: position,
-	}
-
-	img, err := h.blogImageService.Upload(r.Context(), input)
-	if err != nil {
-		h.Error(w, r, http.StatusInternalServerError, fmt.Sprintf("Failed to upload image: %v", err))
-		return
-	}
-
-	// Return JSON response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, `{"id":"%s","image_type":"%s","image_size":%d,"alt_text":"%s","caption":"%s","position":%d}`,
-		img.ID, imageType, len(imageData), img.AltText, img.Caption, img.Position)
-}
-
-func (h *BlogHandler) ListGalleryImages(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	blogID, err := uuid.Parse(idStr)
-	if err != nil {
-		h.Error(w, r, http.StatusBadRequest, "Invalid blog ID")
-		return
-	}
-
-	images, err := h.blogImageService.List(r.Context(), blogID)
-	if err != nil {
-		h.Error(w, r, http.StatusInternalServerError, "Failed to load images")
-		return
-	}
-
-	// Return JSON response
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Printf("[DEBUG] ListGalleryImages: Returning %d images for blog %s\n", len(images), blogID)
-	fmt.Fprint(w, "[")
-	for i, img := range images {
-		if i > 0 {
-			fmt.Fprint(w, ",")
-		}
-		// For list, we might not have media type/size if not joined?
-		// GetByIDWithoutData was used.
-		// MediaID is available.
-		// We can return media_id or constructed URL.
-		// The json response expected: id, image_type, image_size...
-		// If we don't have them, we might send empty or fetch?
-		// For listing, performance matters.
-		// Maybe just send ID and let frontend fetch image?
-		// "image_type" and "image_size" might be null or we need to fetch media metadata?
-		// For now, let's just return ID and basic info.
-		// Frontend uses src={`/gallery/${img.id}`} so it works.
-		// image_type/size are informative.
-		fmt.Fprintf(w, `{"id":"%s","alt_text":"%s","caption":"%s","position":%d}`,
-			img.ID, img.AltText, img.Caption, img.Position)
-	}
-	fmt.Fprint(w, "]")
-}
-
-func (h *BlogHandler) GetGalleryImage(w http.ResponseWriter, r *http.Request) {
-	imageIDStr := r.PathValue("imageId")
-	fmt.Printf("[DEBUG] GetGalleryImage: Request for %s\n", imageIDStr)
-	imageID, err := uuid.Parse(imageIDStr)
-	if err != nil {
-		fmt.Printf("[DEBUG] GetGalleryImage: Invalid UUID %v\n", err)
-		http.NotFound(w, r)
-		return
-	}
-
-	imageData, contentType, err := h.blogImageService.GetImageData(r.Context(), imageID)
-	if err != nil {
-		fmt.Printf("[DEBUG] GetGalleryImage: Failed to get data %v\n", err)
-		http.NotFound(w, r)
-		return
-	}
-
-	fmt.Printf("[DEBUG] GetGalleryImage: Serving %d bytes, type %s\n", len(imageData), contentType)
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=86400") // Cache for 1 day
-	w.Write(imageData)
-}
-
-func (h *BlogHandler) DeleteGalleryImage(w http.ResponseWriter, r *http.Request) {
-	imageIDStr := r.PathValue("imageId")
-	imageID, err := uuid.Parse(imageIDStr)
-	if err != nil {
-		h.Error(w, r, http.StatusBadRequest, "Invalid image ID")
-		return
-	}
-
-	if err := h.blogImageService.Delete(r.Context(), imageID); err != nil {
-		h.Error(w, r, http.StatusInternalServerError, "Failed to delete image")
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, `{"success":true}`)
-}
-
-// GetMediaImage serves an image directly by media ID
-func (h *BlogHandler) GetMediaImage(w http.ResponseWriter, r *http.Request) {
-	mediaIDStr := r.PathValue("mediaId")
-	mediaID, err := uuid.Parse(mediaIDStr)
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	// Use the blog image service's media service to get the media
-	// We need to access the media service, but it's not directly available
-	// Let's use the blog service instead
-	// Actually, we need to fetch from the media table directly
-	// For now, let me add a simple method
-
-	// Get media through blog image service
-	media, err := h.blogImageService.GetMediaByID(r.Context(), mediaID)
-	if err != nil {
-		fmt.Printf("[DEBUG] GetMediaImage: Failed to get media %v\n", err)
-		http.NotFound(w, r)
-		return
-	}
-
-	w.Header().Set("Content-Type", media.ContentType)
-	w.Header().Set("Cache-Control", "public, max-age=86400")
-	w.Write(media.Data)
 }

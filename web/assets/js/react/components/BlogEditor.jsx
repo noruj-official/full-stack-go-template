@@ -1,6 +1,4 @@
 import React, { useState, useCallback, useRef } from 'react'
-import GalleryManager from './GalleryManager'
-import ImagePicker from './ImagePicker'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -26,14 +24,14 @@ import {
     AlignLeft, AlignCenter, AlignRight,
     Table as TableIcon, Columns, Rows, Trash2,
     CheckSquare, Superscript as SuperscriptIcon, Subscript as SubscriptIcon,
-    Highlighter, Minus
+    Highlighter, Minus, Upload
 } from 'lucide-react'
 
 // Lowlight setup for syntax highlighting
 const lowlight = createLowlight(common)
 
-const MenuBar = ({ editor, blogId }) => {
-    const [showImagePicker, setShowImagePicker] = useState(false)
+const MenuBar = ({ editor }) => {
+    const fileInputRef = useRef(null)
 
     if (!editor) {
         return null
@@ -51,12 +49,39 @@ const MenuBar = ({ editor, blogId }) => {
         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     }, [editor])
 
-    const addImage = useCallback(() => {
-        const url = window.prompt('URL')
-        if (url) {
-            editor.chain().focus().setImage({ src: url }).run()
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        try {
+            const response = await fetch('/api/media/upload', {
+                method: 'POST',
+                body: formData,
+            })
+
+            if (!response.ok) {
+                throw new Error('Upload failed')
+            }
+
+            const data = await response.json()
+            if (data.url) {
+                editor.chain().focus().setImage({ src: data.url, alt: data.filename }).run()
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error)
+            alert('Failed to upload image')
+        } finally {
+            // Reset input
+            e.target.value = ''
         }
-    }, [editor])
+    }
+
+    const triggerImageUpload = () => {
+        fileInputRef.current?.click()
+    }
 
     const addYoutube = useCallback(() => {
         const url = window.prompt('Enter YouTube URL')
@@ -65,14 +90,16 @@ const MenuBar = ({ editor, blogId }) => {
         }
     }, [editor])
 
-    const insertImageFromGallery = useCallback((imageUrl) => {
-        if (imageUrl) {
-            editor.chain().focus().setImage({ src: imageUrl }).run()
-        }
-    }, [editor])
-
     return (
         <div className="bg-base-200/50 border-b border-base-300 p-2 flex flex-wrap gap-1">
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="hidden"
+                accept="image/*"
+            />
+
             {/* Formatting */}
             <button
                 type="button"
@@ -144,31 +171,12 @@ const MenuBar = ({ editor, blogId }) => {
             <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} disabled={!editor.isActive('link')} className="btn btn-ghost btn-sm btn-square" title="Unlink">
                 <Unlink className="w-4 h-4" />
             </button>
-            <button type="button" onClick={addImage} className="btn btn-ghost btn-sm btn-square" title="Image URL">
-                <ImageIcon className="w-4 h-4" />
+            <button type="button" onClick={triggerImageUpload} className="btn btn-ghost btn-sm btn-square" title="Upload Image">
+                <Upload className="w-4 h-4" />
             </button>
-            {blogId && (
-                <button
-                    type="button"
-                    onClick={() => setShowImagePicker(true)}
-                    className="btn btn-ghost btn-sm"
-                    title="Insert from Gallery"
-                >
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="text-xs ml-1">Gallery</span>
-                </button>
-            )}
             <button type="button" onClick={addYoutube} className="btn btn-ghost btn-sm btn-square" title="Youtube">
                 <YoutubeIcon className="w-4 h-4" />
             </button>
-
-            {showImagePicker && (
-                <ImagePicker
-                    blogId={blogId}
-                    onSelect={insertImageFromGallery}
-                    onClose={() => setShowImagePicker(false)}
-                />
-            )}
 
             <div className="divider divider-horizontal mx-0 w-px h-6 my-auto bg-base-300"></div>
 
@@ -284,8 +292,6 @@ const BlogEditor = ({ initialData, actionUrl }) => {
         initialData?.has_cover_image ? `/blogs/${initialData.slug}/cover` : null
     )
     const [removeCoverImageFlag, setRemoveCoverImageFlag] = useState(false)
-    const [showCoverImagePicker, setShowCoverImagePicker] = useState(false)
-    const [selectedGalleryImageId, setSelectedGalleryImageId] = useState(null)
     const fileInputRef = useRef(null)
 
     const editor = useEditor({
@@ -357,7 +363,6 @@ const BlogEditor = ({ initialData, actionUrl }) => {
 
     const handleCoverImageChange = (e) => {
         const file = e.target.files[0]
-        console.log("File selected:", file)
         if (file) {
             // Validate file type
             if (!file.type.startsWith('image/')) {
@@ -372,18 +377,10 @@ const BlogEditor = ({ initialData, actionUrl }) => {
             }
 
             setCoverImageFile(file)
-
             // Create preview
             const reader = new FileReader()
-            reader.onload = () => {
-                console.log("FileReader onload triggered")
-            }
             reader.onloadend = () => {
-                console.log("FileReader onloadend triggered, result length:", reader.result?.length)
                 setCoverImagePreview(reader.result)
-            }
-            reader.onerror = (e) => {
-                console.error("FileReader error:", e)
             }
             reader.readAsDataURL(file)
         }
@@ -396,14 +393,6 @@ const BlogEditor = ({ initialData, actionUrl }) => {
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
         }
-    }
-
-    const selectCoverFromGallery = (imageUrl) => {
-        // Extract image ID from URL (format: /gallery/{id})
-        const imageId = imageUrl.split('/').pop()
-        setCoverImagePreview(imageUrl)
-        setSelectedGalleryImageId(imageId)
-        setRemoveCoverImageFlag(false)
     }
 
     return (
@@ -448,43 +437,16 @@ const BlogEditor = ({ initialData, actionUrl }) => {
                                     onChange={handleCoverImageChange}
                                     className="file-input file-input-bordered w-full max-w-xs"
                                     ref={fileInputRef}
-                                    id="cover_image_input"
                                 />
                                 <p className="text-sm text-base-content/60 mt-2">Upload a cover image (JPEG, PNG, GIF, WebP - Max 5MB)</p>
                             </div>
-                            {initialData?.id && (
-                                <div className="text-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCoverImagePicker(true)}
-                                        className="btn btn-outline btn-sm"
-                                    >
-                                        <ImageIcon className="w-4 h-4 mr-1" />
-                                        Choose from Gallery
-                                    </button>
-                                </div>
-                            )}
                         </div>
 
                         {/* Hidden input to signal cover image removal */}
                         {removeCoverImageFlag && (
                             <input type="hidden" name="remove_cover_image" value="true" />
                         )}
-
-                        {/* Hidden input for selected gallery image ID */}
-                        {selectedGalleryImageId && (
-                            <input type="hidden" name="cover_image_gallery_id" value={selectedGalleryImageId} />
-                        )}
                     </div>
-
-                    {/* Cover Image Picker Modal */}
-                    {showCoverImagePicker && (
-                        <ImagePicker
-                            blogId={initialData?.id}
-                            onSelect={selectCoverFromGallery}
-                            onClose={() => setShowCoverImagePicker(false)}
-                        />
-                    )}
 
                     <div className="divider"></div>
 
@@ -564,7 +526,7 @@ const BlogEditor = ({ initialData, actionUrl }) => {
                     <div className="form-control">
                         <label className="label"><span className="label-text font-medium">Content</span></label>
                         <div className="border border-base-300 rounded-lg bg-base-100 overflow-hidden focus-within:ring-2 focus-within:ring-primary/20">
-                            <MenuBar editor={editor} blogId={initialData?.id} />
+                            <MenuBar editor={editor} />
                             <EditorContent editor={editor} className="min-h-[300px]" />
                         </div>
                         <input type="hidden" name="content" value={content} />
@@ -585,13 +547,6 @@ const BlogEditor = ({ initialData, actionUrl }) => {
                     </div>
                 </form>
             </div>
-
-            {/* Gallery Management Section */}
-            {initialData?.id && (
-                <div className="mt-8 bg-base-100 rounded-lg shadow-sm border border-base-200 p-6">
-                    <GalleryManager blogId={initialData.id} />
-                </div>
-            )}
         </div>
     )
 }

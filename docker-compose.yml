@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
       POSTGRES_DB: "${POSTGRES_DB:-app_db}"
     ports:
-      - "${POSTGRES_BIND:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_BIND:-127.0.0.1}:${POSTGRES_PUBLIC_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -32,7 +32,12 @@ services:
       SERVER_HOST: "${SERVER_HOST:-0.0.0.0}"
       SERVER_PORT: "${SERVER_PORT:-3000}"
       # Database - connects to postgres container
-      DATABASE_URL: "${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/app_db?sslmode=disable}"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "${POSTGRES_PORT:-5432}"
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: "${POSTGRES_DB:-app_db}"
+      POSTGRES_SSLMODE: "${POSTGRES_SSLMODE:-disable}"
       # App
       APP_ENV: "${APP_ENV:-production}"
       APP_NAME: "${APP_NAME:-Full Stack Go Template}"

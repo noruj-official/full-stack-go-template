@@ -3,6 +3,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -82,7 +83,14 @@ func Load() (*Config, error) {
 			IdleTimeout:  getEnv("SERVER_IDLE_TIMEOUT", "60s"),
 		},
 		Database: DatabaseConfig{
-			URL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/app_db?sslmode=disable"),
+			URL: fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+				getEnv("POSTGRES_USER", "postgres"),
+				getEnv("POSTGRES_PASSWORD", "postgres"),
+				getEnv("POSTGRES_HOST", "localhost"),
+				getEnv("POSTGRES_PORT", "5432"),
+				getEnv("POSTGRES_DB", "app_db"),
+				getEnv("POSTGRES_SSLMODE", "disable"),
+			),
 		},
 		App: AppConfig{
 			Env:  getEnv("APP_ENV", "development"),

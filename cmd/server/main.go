@@ -63,7 +63,6 @@ func run() error {
 	featureRepo := postgres.NewFeatureRepository(db)
 	oauthRepo := postgres.NewOAuthRepository(db, cfg.Auth.Secret)
 	blogRepo := postgres.NewBlogRepository(db)
-	blogImageRepo := postgres.NewBlogImageRepository(db)
 	mediaRepo := postgres.NewMediaRepository(db)
 
 	// Initialize services
@@ -75,7 +74,6 @@ func run() error {
 	auditService := service.NewAuditService(auditRepo)
 	mediaService := service.NewMediaService(mediaRepo)
 	blogService := service.NewBlogService(blogRepo, mediaService)
-	blogImageService := service.NewBlogImageService(blogImageRepo, mediaService)
 
 	// SyncFeatures feature flags
 	err = featureService.SyncFeatures(context.Background(), map[string]domain.FeatureConfig{
@@ -118,7 +116,8 @@ func run() error {
 	auditHandler.StartMonitoring(ctx)
 	featureHandler := handler.NewFeatureHandler(baseHandler, featureService, auditService)
 	adminOAuthHandler := handler.NewAdminOAuthHandler(baseHandler, oauthRepo, auditService, cfg.App.URL)
-	blogHandler := handler.NewBlogHandler(baseHandler, blogService, blogImageService)
+	blogHandler := handler.NewBlogHandler(baseHandler, blogService, mediaService)
+	mediaHandler := handler.NewMediaHandler(baseHandler, mediaService)
 
 	// Initialize auth middleware
 	authMiddleware := middleware.NewAuth(authService)
@@ -186,8 +185,9 @@ func run() error {
 	mux.HandleFunc("GET /blogs", blogHandler.List)
 	mux.HandleFunc("GET /blogs/{slug}", blogHandler.View)
 	mux.HandleFunc("GET /blogs/{slug}/cover", blogHandler.GetCoverImage)
-	mux.HandleFunc("GET /gallery/{imageId}", blogHandler.GetGalleryImage)
-	mux.HandleFunc("GET /media/{mediaId}", blogHandler.GetMediaImage)
+
+	// Media Routes
+	mux.Handle("GET /media/{filename}", http.HandlerFunc(mediaHandler.Serve))
 
 	// Rate limiter for auth routes (5 reqs/10s roughly, burst 5)
 	authLimiter := middleware.RateLimitMiddleware(0.5, 5)
@@ -238,6 +238,9 @@ func run() error {
 	mux.Handle("POST /u/settings/password", userOnly(http.HandlerFunc(settingsHandler.UpdatePassword)))
 	mux.Handle("POST /u/signout-all", userOnly(http.HandlerFunc(authHandler.SignOutAllDevices)))
 
+	// API routes for Media Upload (Authenticated)
+	mux.Handle("POST /api/media/upload", userOnly(http.HandlerFunc(mediaHandler.Upload)))
+
 	// API routes for retrieving user profile images (accessible to authenticated users)
 	mux.Handle("GET /api/users/{id}/image", userOnly(http.HandlerFunc(profileHandler.GetUserProfileImage)))
 
@@ -271,12 +274,6 @@ func run() error {
 	mux.Handle("POST /a/blogs/{id}/edit", adminOnly(http.HandlerFunc(blogHandler.Edit)))
 	mux.Handle("GET /a/blogs/{id}", adminOnly(http.HandlerFunc(blogHandler.GetBlogJSON)))
 	mux.Handle("DELETE /a/blogs/{id}", adminOnly(http.HandlerFunc(blogHandler.Delete)))
-
-	// Blog Gallery routes (admin only)
-	mux.Handle("POST /a/blogs/{id}/gallery", adminOnly(http.HandlerFunc(blogHandler.UploadGalleryImage)))
-	mux.Handle("GET /a/blogs/{id}/gallery", adminOnly(http.HandlerFunc(blogHandler.ListGalleryImages)))
-	mux.Handle("GET /a/blogs/{id}/gallery/{imageId}", adminOnly(http.HandlerFunc(blogHandler.GetGalleryImage)))
-	mux.Handle("DELETE /a/blogs/{id}/gallery/{imageId}", adminOnly(http.HandlerFunc(blogHandler.DeleteGalleryImage)))
 
 	// Super Admin routes (require super admin role)
 	superAdminOnly := middleware.RequireRole(domain.RoleSuperAdmin)
