@@ -3,7 +3,7 @@
 
 @plugin "daisyui" {
     themes: corporate, night, light, dark;
-    components: btn, menu, dropdown, badge, tooltip, card, alert, avatar, input, select, textarea, checkbox, table, loading, progress;
+    components: btn, menu, dropdown, badge, tooltip, card, alert, avatar, input, select, textarea, checkbox, table, loading, progress, skeleton, stats, divider;
 }
 
 @plugin "@tailwindcss/typography";
@@ -206,6 +206,43 @@
 
     .bg-blob-3 {
         animation: float 10s ease-in-out infinite 2s, pulse-glow 6s ease-in-out infinite 2s;
+    }
+
+    /* Shimmer animation for skeleton loaders */
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .skeleton-shimmer {
+        animation: shimmer 2s infinite linear;
+        background: linear-gradient(to right,
+                oklch(var(--b2)) 0%,
+                oklch(var(--b3)) 50%,
+                oklch(var(--b2)) 100%);
+        background-size: 1000px 100%;
+    }
+
+    /* Blog card enhancements */
+    .blog-card {
+        @apply transition-all duration-300 ease-out;
+    }
+
+    .blog-card:hover {
+        @apply shadow-xl -translate-y-1;
+    }
+
+    .blog-card-image {
+        @apply transition-transform duration-300 ease-out;
+    }
+
+    .blog-card:hover .blog-card-image {
+        @apply scale-105;
     }
 }
 

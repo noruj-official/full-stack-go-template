@@ -189,6 +189,9 @@ func run() error {
 	// Media Routes
 	mux.Handle("GET /media/{filename}", http.HandlerFunc(mediaHandler.Serve))
 
+	// Public profile images (for blog author avatars, etc.)
+	mux.HandleFunc("GET /api/users/{id}/image", profileHandler.GetUserProfileImage)
+
 	// Rate limiter for auth routes (5 reqs/10s roughly, burst 5)
 	authLimiter := middleware.RateLimitMiddleware(0.5, 5)
 
@@ -240,9 +243,6 @@ func run() error {
 
 	// API routes for Media Upload (Authenticated)
 	mux.Handle("POST /api/media/upload", userOnly(http.HandlerFunc(mediaHandler.Upload)))
-
-	// API routes for retrieving user profile images (accessible to authenticated users)
-	mux.Handle("GET /api/users/{id}/image", userOnly(http.HandlerFunc(profileHandler.GetUserProfileImage)))
 
 	// Admin routes (require admin role)
 	adminOnly := middleware.RequireRole(domain.RoleAdmin, domain.RoleSuperAdmin)

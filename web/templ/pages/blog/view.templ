@@ -8,100 +8,151 @@ import (
 
 templ View(title string, blog *domain.Blog, user *domain.User, theme string, themeEnabled bool, oauthEnabled bool) {
     @layouts.Base(getMetaTitle(blog), getMetaDescription(blog), user, true, theme, themeEnabled, oauthEnabled) {
-        <div class="px-4 sm:px-6 lg:px-8 py-10">
-            <article class="max-w-3xl mx-auto">
-                <!-- Cover Image -->
-                    if blog.CoverMediaID != nil {
-                        <div class="mb-8 rounded-lg overflow-hidden">
-                            <img src={ templ.SafeURL("/blogs/" + blog.Slug + "/cover") } alt={ blog.Title } class="w-full aspect-video object-cover"/>
-                        </div>
-                    }
-                
-                    <!-- Article Content -->
-                        <div class="prose prose-lg lg:prose-xl">
-                            <h1 class="mb-4">{ blog.Title }</h1>
-                                <div class="flex items-center text-sm text-base-content/60 mb-8 not-prose">
-                                    <span>{ blog.PublishedAt.Format("Jan 02, 2006") }</span>
-                                        if blog.Author != nil {
-                                            <span class="mx-2">•</span>
-                                                <span>{ blog.Author.Name }</span>
-                                                }
-                                            </div>
-                
-                                            <div id="blog-content" class="mb-10">
-                                                @templ.Raw(blog.Content)
-                                            </div>
-                                        </div>
+        <div class="min-h-screen">
+            <div class="px-4 sm:px-6 lg:px-8 py-12">
+                <article class="max-w-4xl mx-auto">
+                    <!-- Back Button -->
+                        <div class="mb-8 animate-fade-in">
+                            <a href="/blogs" class="btn btn-ghost gap-2 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                    Back to Blog
+                                </a>
+                            </div>
 
-                                        <div class="not-prose border-t border-base-content/10 pt-8 mt-12">
-                                            <a href="/blogs" class="btn btn-ghost gap-2">
-                                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                                                    Back to Blog
-                                                </a>
-                                            </div>
-                                        </article>
+                            <!-- Main Content Card -->
+                                <div class="card bg-base-100 shadow-2xl border border-base-200 overflow-hidden animate-slide-up">
+                                    <!-- Cover Image -->
+                                        if blog.CoverMediaID != nil {
+                                            <figure class="w-full aspect-video bg-base-200 overflow-hidden">
+                                                <img
+                                                src={ templ.SafeURL("/blogs/" + blog.Slug + "/cover") }
+                                                alt={ blog.Title }
+                                                class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                                />
+                                            </figure>
+                                        }
+						
+                                        <div class="card-body p-8 md:p-12">
+                                            <!-- Article Header -->
+                                                <div class="mb-8 border-b border-base-300 pb-8">
+                                                    <h1 class="text-4xl md:text-5xl font-extrabold text-base-content mb-6 leading-tight">
+                                                        { blog.Title }
+                                                    </h1>
+								
+                                                    <!-- Meta Information -->
+                                                        <div class="flex flex-wrap items-center gap-6 text-base-content/70">
+                                                            <!-- Published Date -->
+                                                                <div class="flex items-center gap-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                                        </svg>
+                                                                        <span class="text-base font-medium text-base-content">
+                                                                            { blog.PublishedAt.Format("January 02, 2006") }
+                                                                        </span>
+                                                                    </div>
+									
+                                                                    <!-- Author -->
+                                                                        if blog.Author != nil {
+                                                                            <div class="flex items-center gap-3">
+                                                                                if blog.Author.ProfileMediaID != nil {
+                                                                                    <div class="avatar">
+                                                                                        <div class="w-10 h-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                                                                            <img
+                                                                                            src={ templ.SafeURL("/api/users/" + blog.Author.ID.String() + "/image") }
+                                                                                            alt={ blog.Author.Name }
+                                                                                            />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                } else {
+                                                                                    <div class="avatar placeholder">
+                                                                                        <div class="bg-secondary text-secondary-content rounded-full w-10 h-10">
+                                                                                            <span class="text-lg font-bold">
+                                                                                                { string([]rune(blog.Author.Name)[0:1]) }
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                }
+                                                                                <div>
+                                                                                    <div class="text-base font-medium text-base-content">
+                                                                                        { blog.Author.Name }
+                                                                                    </div>
+                                                                                    <div class="text-xs text-base-content/50">Author</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+							
+                                                                    <!-- Article Content -->
+                                                                        <div id="blog-content" class="prose prose-lg max-w-none mb-12">
+                                                                            @templ.Raw(blog.Content)
+                                                                        </div>
+							
+                                                                        <!-- Footer Actions -->
+                                                                            <div class="border-t border-base-300 pt-8 flex flex-wrap gap-4 justify-between items-center">
+                                                                                <a href="/blogs" class="btn btn-outline gap-2">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                                                        </svg>
+                                                                                        Back to All Articles
+                                                                                    </a>
+								
+                                                                                    <!-- Share Buttons -->
+                                                                                        <div class="flex gap-2">
+                                                                                            <button
+                                                                                            class="btn btn-circle btn-ghost btn-sm tooltip tooltip-top"
+                                                                                            data-tip="Share on Twitter"
+                                                                                            onclick={ templ.ComponentScript{Call: `window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(document.title), '_blank', 'width=550,height=420')`} }
+                                                                                            >
+                                                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                                                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                                                                            </svg>
+                                                                                        </button>
+                                                                                        <button
+                                                                                        class="btn btn-circle btn-ghost btn-sm tooltip tooltip-top"
+                                                                                        data-tip="Copy Link"
+                                                                                        onclick={ templ.ComponentScript{Call: `navigator.clipboard.writeText(window.location.href).then(() => { this.dataset.tip = 'Copied!'; setTimeout(() => { this.dataset.tip = 'Copy Link'; }, 2000); })`} }
+                                                                                        >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                                                            </svg>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </article>
+                                                                </div>
+                                                            </div>
 
-                                        <!-- Syntax Highlighting -->
-                                            <script src="/assets/vendor/highlight.js"></script>
-                                                <script>hljs.highlightAll();</script>
-                                                    <script>
-                                                        // Add copy buttons to code blocks
-                                                        document.addEventListener('DOMContentLoaded', function() {
-                                                            const codeBlocks = document.querySelectorAll('pre code');
-                
-                                                            codeBlocks.forEach((codeBlock) => {
-                                                                const pre = codeBlock.parentElement;
-                    
-                                                                // Create copy button
-                                                                const copyBtn = document.createElement('button');
-                                                                copyBtn.className = 'copy-code-btn';
-                                                                copyBtn.innerHTML = 'Copy';
-                                                                copyBtn.setAttribute('aria-label', 'Copy code to clipboard');
-                    
-                                                                // Add click event
-                                                                copyBtn.addEventListener('click', async () => {
-                                                                    try {
-                                                                        const code = codeBlock.textContent;
-                                                                        await navigator.clipboard.writeText(code);
-                            
-                                                                        copyBtn.innerHTML = 'Copied!';
-                                                                        copyBtn.classList.add('copied');
-                            
-                                                                        setTimeout(() => {
-                                                                            copyBtn.innerHTML = 'Copy';
-                                                                            copyBtn.classList.remove('copied');
-                                                                        }, 2000);
-                                                                    } catch (err) {
-                                                                        console.error('Failed to copy:', err);
-                                                                        copyBtn.innerHTML = 'Failed';
-                                                                        setTimeout(() => {
-                                                                            copyBtn.innerHTML = 'Copy';
-                                                                        }, 2000);
-                                                                    }
+                                                            <!-- Syntax Highlighting -->
+                                                                <script src="/assets/vendor/highlight.js"></script>
                                                                     <script>hljs.highlightAll();</script>
                                                                         <script>
                                                                             // Add copy buttons to code blocks
                                                                             document.addEventListener('DOMContentLoaded', function() {
                                                                                 const codeBlocks = document.querySelectorAll('pre code');
-                
+
                                                                                 codeBlocks.forEach((codeBlock) => {
                                                                                     const pre = codeBlock.parentElement;
-                    
+	
                                                                                     // Create copy button
                                                                                     const copyBtn = document.createElement('button');
                                                                                     copyBtn.className = 'copy-code-btn';
                                                                                     copyBtn.innerHTML = 'Copy';
                                                                                     copyBtn.setAttribute('aria-label', 'Copy code to clipboard');
-                    
+	
                                                                                     // Add click event
                                                                                     copyBtn.addEventListener('click', async () => {
                                                                                         try {
                                                                                             const code = codeBlock.textContent;
                                                                                             await navigator.clipboard.writeText(code);
-                            
+			
                                                                                             copyBtn.innerHTML = 'Copied!';
                                                                                             copyBtn.classList.add('copied');
-                            
+			
                                                                                             setTimeout(() => {
                                                                                                 copyBtn.innerHTML = 'Copy';
                                                                                                 copyBtn.classList.remove('copied');
@@ -114,36 +165,35 @@ templ View(title string, blog *domain.Blog, user *domain.User, theme string, the
                                                                                             }, 2000);
                                                                                         }
                                                                                     });
-                    
+	
                                                                                     pre.appendChild(copyBtn);
                                                                                 });
                                                                             });
                                                                         </script>
-                                                                    </div>
+                                                                    }
                                                                 }
-                                                            }
 
-                                                            // Helper function to get meta title with fallback
-                                                            func getMetaTitle(blog *domain.Blog) string {
-                                                                if blog.MetaTitle != "" {
-                                                                    return blog.MetaTitle
+                                                                // Helper function to get meta title with fallback
+                                                                func getMetaTitle(blog *domain.Blog) string {
+                                                                    if blog.MetaTitle != "" {
+                                                                        return blog.MetaTitle
+                                                                    }
+                                                                    return blog.Title
                                                                 }
-                                                                return blog.Title
-                                                            }
 
-                                                            // Helper function to get meta description with fallback
-                                                            func getMetaDescription(blog *domain.Blog) string {
-                                                                if blog.MetaDescription != "" {
-                                                                    return blog.MetaDescription
+                                                                // Helper function to get meta description with fallback
+                                                                func getMetaDescription(blog *domain.Blog) string {
+                                                                    if blog.MetaDescription != "" {
+                                                                        return blog.MetaDescription
+                                                                    }
+                                                                    if blog.Excerpt != "" {
+                                                                        return blog.Excerpt
+                                                                    }
+                                                                    // Extract first 160 chars from content as fallback
+                                                                    content := strings.ReplaceAll(blog.Content, "<", " <")
+                                                                    content = strings.ReplaceAll(content, ">", "> ")
+                                                                    if len(content) > 160 {
+                                                                        return content[:157] + "..."
+                                                                    }
+                                                                    return content
                                                                 }
-                                                                if blog.Excerpt != "" {
-                                                                    return blog.Excerpt
-                                                                }
-                                                                // Extract first 160 chars from content as fallback
-                                                                content := strings.ReplaceAll(blog.Content, "<", " <")
-                                                                content = strings.ReplaceAll(content, ">", "> ")
-                                                                if len(content) > 160 {
-                                                                    return content[:157] + "..."
-                                                                }
-                                                                return content
-                                                            }
