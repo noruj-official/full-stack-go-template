@@ -125,8 +125,21 @@ func run() error {
 	mux := http.NewServeMux()
 
 	// Static files
+	// Debug: Check if vendor files exist
+	if _, err := os.Stat("web/assets/vendor/htmx.min.js"); os.IsNotExist(err) {
+		log.Println("WARNING: web/assets/vendor/htmx.min.js does not exist!")
+		// List web/assets/vendor content
+		files, _ := os.ReadDir("web/assets/vendor")
+		log.Printf("web/assets/vendor content: %d files", len(files))
+		for _, f := range files {
+			log.Printf(" - %s", f.Name())
+		}
+	} else {
+		log.Println("SUCCESS: web/assets/vendor/htmx.min.js found")
+	}
+
 	fileServer := http.FileServer(http.Dir("web/assets"))
-	mux.Handle("GET /assets/", http.StripPrefix("/assets/", fileServer))
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
 
 	// Public routes (no auth required)
 	mux.HandleFunc("GET /{$}", homeHandler.Index)
