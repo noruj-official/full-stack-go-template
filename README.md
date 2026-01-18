@@ -265,6 +265,18 @@ docker-compose logs -f app
 docker-compose down
 ```
 
+### Configuration Variables
+
+You can configure the deployment using these environment variables (in `.env` or deployment platform):
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `POSTGRES_USER` | Database username | `postgres` |
+| `POSTGRES_PASSWORD` | Database password | `postgres` |
+| `POSTGRES_DB` | Database name | `app_db` |
+| `POSTGRES_PORT` | **External** host port | `5432` |
+| `POSTGRES_BIND` | Host bind address (`0.0.0.0` for public) | `127.0.0.1` (Private) |
+
 ### Build Manually
 
 ```bash
